@@ -51,6 +51,22 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	 */
 	protected $extension;
 
+	/**
+	 * usually the extension directory matches the extension key,
+	 * but it should be possible to generate code into other directories too
+	 * @var string
+	 */
+	private $extensionDirectory;
+	public function getExtensionDirectory() {
+        return $this->extensionDirectory;
+    }
+
+
+   public function setExtensionDirectory($extensionDirectory) {
+        $this->extensionDirectory = $extensionDirectory;
+    }
+
+
 	public function __construct() {
 		$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
 		$this->objectManager = new Tx_Fluid_Compatibility_ObjectManager();
@@ -60,39 +76,41 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		$this->extension = $extension;
 
 		// Base directory already exists at this point
-		$extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
+		if(!$this->extensionDirectory){
+			$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
+		}
 		//t3lib_div::mkdir($extensionDirectory);
-
+echo "builiding extension".$this->extensionDirectory."\n";
 		// Generate ext_emconf.php, ext_tables.* and TCA definition
 		$fileContents = $this->generateExtEmconf($extension);
-		t3lib_div::writeFile($extensionDirectory . 'ext_emconf.php', $fileContents);
+		t3lib_div::writeFile($this->extensionDirectory . 'ext_emconf.php', $fileContents);
 
 		$fileContents = $this->generateExtTablesPhp($extension);
-		t3lib_div::writeFile($extensionDirectory . 'ext_tables.php', $fileContents);
+		t3lib_div::writeFile($this->extensionDirectory . 'ext_tables.php', $fileContents);
 		
 		$fileContents = $this->generateExtTablesSql($extension);
-		t3lib_div::writeFile($extensionDirectory . 'ext_tables.sql', $fileContents);
+		t3lib_div::writeFile($this->extensionDirectory . 'ext_tables.sql', $fileContents);
 
 		$fileContents = $this->generateExtLocalconf($extension);
-		t3lib_div::writeFile($extensionDirectory . 'ext_localconf.php', $fileContents);
+		t3lib_div::writeFile($this->extensionDirectory . 'ext_localconf.php', $fileContents);
 
-		t3lib_div::upload_copy_move(t3lib_extMgm::extPath('extbase_kickstarter') . 'Resources/Private/Icons/ext_icon.gif', $extensionDirectory . 'ext_icon.gif');
+		t3lib_div::upload_copy_move(t3lib_extMgm::extPath('extbase_kickstarter') . 'Resources/Private/Icons/ext_icon.gif', $this->extensionDirectory . 'ext_icon.gif');
 
 		// Generate TCA
-		t3lib_div::mkdir_deep($extensionDirectory, 'Configuration');
-		$tcaDirectory = $extensionDirectory . 'Configuration/';
+		t3lib_div::mkdir_deep($this->extensionDirectory, 'Configuration');
+		$tcaDirectory = $this->extensionDirectory . 'Configuration/';
 		$fileContents = $this->generateTCA($extension);
 		t3lib_div::writeFile($tcaDirectory . 'Tca.php', $fileContents);
 
 		// Generate TypoScript setup
-		t3lib_div::mkdir_deep($extensionDirectory, 'Configuration/TypoScript');
-		$typoscriptDirectory = $extensionDirectory . 'Configuration/TypoScript/';
+		t3lib_div::mkdir_deep($this->extensionDirectory, 'Configuration/TypoScript');
+		$typoscriptDirectory = $this->extensionDirectory . 'Configuration/TypoScript/';
 		$fileContents = $this->generateTyposcriptSetup($extension);
 		t3lib_div::writeFile($typoscriptDirectory . 'setup.txt', $fileContents);
 
 		// Generate Private Resources .htaccess
-		t3lib_div::mkdir_deep($extensionDirectory, 'Resources/Private');
-		$privateResourcesDirectory = $extensionDirectory . 'Resources/Private/';
+		t3lib_div::mkdir_deep($this->extensionDirectory, 'Resources/Private');
+		$privateResourcesDirectory = $this->extensionDirectory . 'Resources/Private/';
 		$fileContents = $this->generatePrivateResourcesHtaccess();
 		t3lib_div::writeFile($privateResourcesDirectory . '.htaccess', $fileContents);
 		
@@ -104,8 +122,8 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		$fileContents = $this->generateLocallangDB($extension);
 		t3lib_div::writeFile($languageDirectory . 'locallang_db.xml', $fileContents);
 		
-		t3lib_div::mkdir_deep($extensionDirectory, 'Resources/Public');
-		$publicResourcesDirectory = $extensionDirectory . 'Resources/Public/';
+		t3lib_div::mkdir_deep($this->extensionDirectory, 'Resources/Public');
+		$publicResourcesDirectory = $this->extensionDirectory . 'Resources/Public/';
 		t3lib_div::mkdir_deep($publicResourcesDirectory, 'Icons');
 		$iconsDirectory = $publicResourcesDirectory . 'Icons/';
 		t3lib_div::upload_copy_move(t3lib_extMgm::extPath('extbase_kickstarter') . 'Resources/Private/Icons/relation.gif', $iconsDirectory . 'relation.gif');
@@ -113,10 +131,10 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		if (count($this->extension->getDomainObjects())) {
 		
 			// Generate Domain Model
-			t3lib_div::mkdir_deep($extensionDirectory, 'Classes/Domain/Model');
-			$domainModelDirectory = $extensionDirectory . 'Classes/Domain/Model/';
-			t3lib_div::mkdir_deep($extensionDirectory, 'Classes/Domain/Repository');
-			$domainRepositoryDirectory = $extensionDirectory . 'Classes/Domain/Repository/';
+			t3lib_div::mkdir_deep($this->extensionDirectory, 'Classes/Domain/Model');
+			$domainModelDirectory = $this->extensionDirectory . 'Classes/Domain/Model/';
+			t3lib_div::mkdir_deep($this->extensionDirectory, 'Classes/Domain/Repository');
+			$domainRepositoryDirectory = $this->extensionDirectory . 'Classes/Domain/Repository/';
 			foreach ($this->extension->getDomainObjects() as $domainObject) {
 				$fileContents = $this->generateDomainObjectCode($domainObject, $extension);
 				t3lib_div::writeFile($domainModelDirectory . $domainObject->getName() . '.php', $fileContents);
@@ -139,8 +157,8 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 			}
 		
 			// Generate Action Controller
-			t3lib_div::mkdir_deep($extensionDirectory, 'Classes/Controller');
-			$controllerDirectory = $extensionDirectory . 'Classes/Controller/';
+			t3lib_div::mkdir_deep($this->extensionDirectory, 'Classes/Controller');
+			$controllerDirectory = $this->extensionDirectory . 'Classes/Controller/';
 			foreach ($this->extension->getDomainObjectsForWhichAControllerShouldBeBuilt() as $domainObject) {
 				$fileContents = $this->generateActionControllerCode($domainObject, $extension);
 				t3lib_div::writeFile($controllerDirectory . $domainObject->getName() . 'Controller.php', $fileContents);
@@ -160,11 +178,11 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 			}
 
 			// Generate Partial directory
-			t3lib_div::mkdir_deep($extensionDirectory, 'Resources/Private/Partials');
+			t3lib_div::mkdir_deep($this->extensionDirectory, 'Resources/Private/Partials');
 
 			// Generate Layouts directory
-			t3lib_div::mkdir_deep($extensionDirectory, 'Resources/Private/Layouts');
-			$layoutsDirectory = $extensionDirectory . 'Resources/Private/Layouts/';
+			t3lib_div::mkdir_deep($this->extensionDirectory, 'Resources/Private/Layouts');
+			$layoutsDirectory = $this->extensionDirectory . 'Resources/Private/Layouts/';
 			t3lib_div::writeFile($layoutsDirectory . 'default.html', $this->generateLayout($extension));
 		}
 		

@@ -32,6 +32,11 @@
  * @version $ID:$
  */
 class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
+	/**
+	 * renders the files
+	 * @param array $jsonArray
+	 * @return Tx_ExtbaseKickstarter_Domain_Model_Extension
+	 */
 	public function build(array $jsonArray) {
 		$extension = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Extension');
 		$globalProperties = $jsonArray['properties'];
