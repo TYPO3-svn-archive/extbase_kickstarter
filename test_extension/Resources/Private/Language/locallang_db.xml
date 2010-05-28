@@ -6,6 +6,9 @@
 	</meta>
 	<data type="array">
 		<languageKey index="default" type="array">
+			<label index="tx_testextension_domain_model_box">Box</label>
+			<label index="tx_testextension_domain_model_box.width">Width</label>
+			<label index="tx_testextension_domain_model_box.height">Height</label>
 		</languageKey>
 	</data>
 </T3locallang>
