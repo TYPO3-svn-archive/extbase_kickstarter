@@ -21,12 +21,9 @@
 *
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
-include_once "Text/Diff.php";
-include_once "Text/Diff/Engine/native.php";
-include_once "Text/Diff/ThreeWay.php";
-include_once "Text/Diff/Renderer.php";
-include_once "Text/Diff/Renderer/inline.php";
-include_once "Text/Diff3.php";
+
+require_once PATH_typo3conf . 'ext/extbase_kickstarter/lib/pear/' . "Text/Diff/Engine/native.php";
+require_once PATH_typo3conf . 'ext/extbase_kickstarter/lib/pear/' . "Text/Diff3.php";
 /**
  * Backend Module of the Extbase Kickstarter extension
  *
@@ -102,27 +99,25 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 				if (file_exists($extensionDirectory . '/kickstarter.json')) {
 					$extensionDirectory2 = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'_base/';
 					t3lib_div::rmdir($extensionDirectory2);
-                   	t3lib_div::mkdir($extensionDirectory2);
+					t3lib_div::mkdir($extensionDirectory2);
 					$extensionConfigurationFromJson2 = json_decode(file_get_contents($extensionDirectory . '/kickstarter.json'), true);
 					$extensionSchema2 = $this->objectSchemaBuilder->build($extensionConfigurationFromJson2);
 					$this->codeGenerator->setExtensionDirectory($extensionDirectory2);
-                   	$this->codeGenerator->build($extensionSchema2);
+					$this->codeGenerator->build($extensionSchema2);
 
 					$extensionDirectory3 = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'_generated/';
 					t3lib_div::rmdir($extensionDirectory3);
-                   	t3lib_div::mkdir($extensionDirectory3);
+					t3lib_div::mkdir($extensionDirectory3);
 					$extensionConfigurationFromJson3 = json_decode(file_get_contents($extensionDirectory . '/kickstarter.json'), true);
 					$this->codeGenerator->setExtensionDirectory($extensionDirectory3);
-                   	$this->codeGenerator->build($extensionSchema);
-
-
+					$this->codeGenerator->build($extensionSchema);
 
 					// define files to compare
 					$base = $extensionDirectory2.'Classes/Domain/Model/box.php';
-					$file2 = $extensionDirectory3.'Classes/Domain/Model/box.php';
-					$file3 = $extensionDirectory.'Classes/Domain/Model/box.php';
+					$file3 = $extensionDirectory3.'Classes/Domain/Model/box.php';
+					$file2 = $extensionDirectory.'Classes/Domain/Model/box.php';
 					
-					$merger = new Text_Diff_ThreeWay(file($base), file($file2),file($file3));
+					$merger = new Text_Diff3(file($base), file($file2),file($file3));
 					print_r($merger->mergedOutput());
 					//$diff3 = new Text_Diff3($base,$file2,$file3);
 					//print_r($diff3->mergedOutput());
