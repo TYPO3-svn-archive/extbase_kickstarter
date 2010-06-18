@@ -130,14 +130,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 						t3lib_div::mkdir_deep($outputDir, $domainModelDir);
 						t3lib_div::writeFile($mergePath, $output);
 					}
-					
-					//$diff3 = new Text_Diff3($base,$file2,$file3);
-					//print_r($diff3->mergedOutput());
-					// perform diff, print output
-					//$diff = &new Text_Diff(file($file1), file($file2));
-					
-					//$renderer = &new Text_Diff_Renderer_inline();
-					//echo $renderer->render($diff);
+
 					return json_encode(array('merged'));
 				}else{
 					t3lib_div::mkdir($extensionDirectory);

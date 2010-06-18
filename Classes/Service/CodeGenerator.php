@@ -80,7 +80,6 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 			$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
 		}
 		//t3lib_div::mkdir($extensionDirectory);
-echo "builiding extension".$this->extensionDirectory."\n";
 		// Generate ext_emconf.php, ext_tables.* and TCA definition
 		$fileContents = $this->generateExtEmconf($extension);
 		t3lib_div::writeFile($this->extensionDirectory . 'ext_emconf.php', $fileContents);
