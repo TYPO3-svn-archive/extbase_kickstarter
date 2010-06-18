@@ -97,28 +97,40 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 				
 				// if the files where already created in a previous save, start the three way diff and merging algorithm
 				if (file_exists($extensionDirectory . '/kickstarter.json')) {
-					$extensionDirectory2 = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'_base/';
-					t3lib_div::rmdir($extensionDirectory2);
-					t3lib_div::mkdir($extensionDirectory2);
+					$extDir2 = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'_base/';
+					t3lib_div::rmdir($extDir2);
+					t3lib_div::mkdir($extDir2);
 					$extensionConfigurationFromJson2 = json_decode(file_get_contents($extensionDirectory . '/kickstarter.json'), true);
 					$extensionSchema2 = $this->objectSchemaBuilder->build($extensionConfigurationFromJson2);
-					$this->codeGenerator->setExtensionDirectory($extensionDirectory2);
+					$this->codeGenerator->setExtensionDirectory($extDir2);
 					$this->codeGenerator->build($extensionSchema2);
 
-					$extensionDirectory3 = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'_generated/';
-					t3lib_div::rmdir($extensionDirectory3);
-					t3lib_div::mkdir($extensionDirectory3);
+					$extDir3 = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'_generated/';
+					t3lib_div::rmdir($extDir3);
+					t3lib_div::mkdir($extDir3);
 					$extensionConfigurationFromJson3 = json_decode(file_get_contents($extensionDirectory . '/kickstarter.json'), true);
-					$this->codeGenerator->setExtensionDirectory($extensionDirectory3);
+					$this->codeGenerator->setExtensionDirectory($extDir3);
 					$this->codeGenerator->build($extensionSchema);
 
-					// define files to compare
-					$base = $extensionDirectory2.'Classes/Domain/Model/box.php';
-					$file3 = $extensionDirectory3.'Classes/Domain/Model/box.php';
-					$file2 = $extensionDirectory.'Classes/Domain/Model/box.php';
+					$outputDir = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'_merged/';
+					t3lib_div::rmdir($outputDir);
+					t3lib_div::mkdir($outputDir);
+
+					$diff3 = new Tx_ExtbaseKickstarter_Utility_Diff3();
+					$domainModelDir = 'Classes/Domain/Model/';
+					foreach ($extensionSchema->getDomainObjects() as $domainObject) {
+
+						// define files to compare
+						$base = $extDir2.$domainModelDir.$domainObject->getName() . '.php';
+						$file3 = $extDir3.$domainModelDir.$domainObject->getName() . '.php';
+						$file2 = $extensionDirectory.$domainModelDir.$domainObject->getName() . '.php';
+						$mergePath = $outputDir.$domainModelDir.$domainObject->getName() . '.php';
+
+						$output = $diff3->merge($base,$file2,$file3);
+						t3lib_div::mkdir_deep($outputDir, $domainModelDir);
+						t3lib_div::writeFile($mergePath, $output);
+					}
 					
-					$merger = new Text_Diff3(file($base), file($file2),file($file3));
-					print_r($merger->mergedOutput());
 					//$diff3 = new Text_Diff3($base,$file2,$file3);
 					//print_r($diff3->mergedOutput());
 					// perform diff, print output
@@ -126,15 +138,15 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 					
 					//$renderer = &new Text_Diff_Renderer_inline();
 					//echo $renderer->render($diff);
-
+					return json_encode(array('merged'));
 				}else{
 					t3lib_div::mkdir($extensionDirectory);
 					$this->codeGenerator->build($extensionSchema);
 					t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', $request['params']['working']);
+					return json_encode(array('saved'));
 				}
 				
 				
-				return json_encode(array('saved'));
 			break;
 			case 'listWirings':
 				$result = $this->getWirings();
