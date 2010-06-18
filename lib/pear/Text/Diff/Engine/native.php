@@ -32,6 +32,7 @@ class Text_Diff_Engine_native {
 
     function diff($from_lines, $to_lines)
     {
+	echo "<h2>---</h2>";
         array_walk($from_lines, array('Text_Diff', 'trimNewlines'));
         array_walk($to_lines, array('Text_Diff', 'trimNewlines'));
 
@@ -119,7 +120,10 @@ class Text_Diff_Engine_native {
             while ($yi < $n_to && $this->ychanged[$yi]) {
                 $add[] = $to_lines[$yi++];
             }
-
+	   
+print_r($add);
+print_r($delete);
+echo "-";
             if ($delete && $add) {
                 $edits[] = &new Text_Diff_Op_change($delete, $add);
             } elseif ($delete) {

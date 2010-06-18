@@ -43,11 +43,22 @@ class Text_Diff3 extends Text_Diff {
         if (extension_loaded('xdiff')) {
             $engine = new Text_Diff_Engine_xdiff();
         } else {
-            $engine = new Text_Diff_Engine_native();
+            $engine = new Text_Diff_Engine_shell();
         }
 
-        $this->_edits = $this->_diff3($engine->diff($orig, $final1),
-                                      $engine->diff($orig, $final2));
+	$edits1 = $engine->diff($orig, $final1);
+	$edits2 = $engine->diff($orig, $final2);
+
+	echo "<hr/><h1>Edits1: aadding comment</h1>";
+	echo "<pre>";
+        print_r($edits1);
+	echo "</pre>";
+	echo "<hr/>";
+	echo "<pre><h1>Edits2: rewriting the setter</h1>";
+	print_r($edits2);
+	echo "</pre>";
+	$this->_edits = $this->_diff3($edits1,
+                                      $edits2);
     }
 
     /**
