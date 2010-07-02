@@ -68,9 +68,6 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 
 	}
 
-	public function domainmodellingAction() {
-	}
-
 	/**
 	 * Main entry point for the buttons in the frontend
 	 * @return unknown_type
