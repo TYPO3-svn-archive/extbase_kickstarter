@@ -1,8 +1,5 @@
 Ext.ns("T3.ExtbaseKickstarter");
 T3.ExtbaseKickstarter.DocumentHeader = Ext.extend(Ext.Panel, {
-	title: 'Doc header',
-	region: 'north',
-	html: 'I\'m a doc header',
 });
 Ext.reg('T3.ExtbaseKickstarter.DocumentHeader', T3.ExtbaseKickstarter.DocumentHeader);
 
@@ -22,7 +19,17 @@ Ext.onReady(function(){
 				margins: '0 0 0 5',
 				items: [
 					{
-						xtype: 'T3.ExtbaseKickstarter.DocumentHeader'
+						title: 'Doc header',
+						region: 'north',
+						items: [
+							{
+								xtype: 'button',
+								text: 'Add something',
+								handler: function() {
+									console.log('yeah');
+								}
+							}
+						]
 					},
 					{
 						title: 'Extension Tree',
@@ -37,7 +44,14 @@ Ext.onReady(function(){
 				margins: '0 0 0 0',
 				items: [
 					{
-						xtype: 'T3.ExtbaseKickstarter.DocumentHeader'
+						title: 'Doc header',
+						region: 'north',
+						/*items: [
+							{
+								title: 'test',
+								region: 'center'
+							}
+						]*/
 					},
 					{
 						region: 'south',
