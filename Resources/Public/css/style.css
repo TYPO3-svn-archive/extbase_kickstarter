@@ -1,0 +1,8 @@
+#east-div1, #east-div2, #center-div, #south-div {
+	font-family: verdana;
+	font-size: 11px;
+}
+#south-div {
+	font-size: 10px;
+	font-style: italic;
+}

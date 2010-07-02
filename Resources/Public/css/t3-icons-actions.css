@@ -1,0 +1,283 @@
+.t3-icon-actions {
+	background-image:url('../images/icons/t3-icon-actions.png') !important;
+}
+
+.t3-icon-actions.t3-icon-move-down {
+	background-position: 0 0px !important;
+}
+.t3-icon-actions.t3-icon-edit-add {
+	background-position: 0 -24px !important;
+}
+.t3-icon-actions.t3-icon-move-to-bottom {
+	background-position: 0 -48px !important;
+}
+.t3-icon-actions.t3-icon-document-move {
+	background-position: 0 -72px !important;
+}
+.t3-icon-actions.t3-icon-system-list-open {
+	background-position: 0 -96px !important;
+}
+.t3-icon-actions.t3-icon-document-export-t3d {
+	background-position: 0 -120px !important;
+}
+.t3-icon-actions.t3-icon-version-swap-workspace {
+	background-position: 0 -144px !important;
+}
+.t3-icon-actions.t3-icon-move-left {
+	background-position: 0 -168px !important;
+}
+.t3-icon-actions.t3-icon-view-go-forward {
+	background-position: 0 -192px !important;
+}
+.t3-icon-actions.t3-icon-view-paging-next {
+	background-position: 0 -216px !important;
+}
+.t3-icon-actions.t3-icon-system-cache-clear-impact-low {
+	background-position: 0 -240px !important;
+}
+.t3-icon-actions.t3-icon-document-close {
+	background-position: 0 -264px !important;
+}
+.t3-icon-actions.t3-icon-system-shortcut-new {
+	background-position: 0 -288px !important;
+}
+.t3-icon-actions.t3-icon-version-page-open {
+	background-position: 0 -312px !important;
+}
+.t3-icon-actions.t3-icon-edit-copy {
+	background-position: 0 -336px !important;
+}
+.t3-icon-actions.t3-icon-insert-record {
+	background-position: 0 -360px !important;
+}
+.t3-icon-actions.t3-icon-selection-delete {
+	background-position: 0 -384px !important;
+}
+.t3-icon-actions.t3-icon-system-extension-uninstall {
+	background-position: 0 -408px !important;
+}
+.t3-icon-actions.t3-icon-page-open {
+	background-position: 0 -432px !important;
+}
+.t3-icon-actions.t3-icon-view-go-back {
+	background-position: 0 -456px !important;
+}
+.t3-icon-actions.t3-icon-system-tree-search-open {
+	background-position: 0 -480px !important;
+}
+.t3-icon-actions.t3-icon-document-save-view {
+	background-position: 0 -504px !important;
+}
+.t3-icon-actions.t3-icon-system-extension-update {
+	background-position: 0 -528px !important;
+}
+.t3-icon-actions.t3-icon-system-backend-user-emulate {
+	background-position: 0 -552px !important;
+}
+.t3-icon-actions.t3-icon-system-cache-clear-impact-high {
+	background-position: 0 -576px !important;
+}
+.t3-icon-actions.t3-icon-view-paging-first-disabled {
+	background-position: 0 -600px !important;
+}
+.t3-icon-actions.t3-icon-document-save-new {
+	background-position: 0 -624px !important;
+}
+.t3-icon-actions.t3-icon-edit-unhide {
+	background-position: 0 -648px !important;
+}
+.t3-icon-actions.t3-icon-document-new {
+	background-position: 0 -672px !important;
+}
+.t3-icon-actions.t3-icon-page-move {
+	background-position: 0 -696px !important;
+}
+.t3-icon-actions.t3-icon-document-save-close {
+	background-position: 0 -720px !important;
+}
+.t3-icon-actions.t3-icon-document-import-t3d {
+	background-position: 0 -744px !important;
+}
+.t3-icon-actions.t3-icon-edit-localize-status-high {
+	background-position: 0 -768px !important;
+}
+.t3-icon-actions.t3-icon-move-move {
+	background-position: 0 -792px !important;
+}
+.t3-icon-actions.t3-icon-edit-upload {
+	background-position: 0 -816px !important;
+}
+.t3-icon-actions.t3-icon-document-info {
+	background-position: 0 -840px !important;
+}
+.t3-icon-actions.t3-icon-system-cache-clear {
+	background-position: 0 -864px !important;
+}
+.t3-icon-actions.t3-icon-edit-rename {
+	background-position: 0 -888px !important;
+}
+.t3-icon-actions.t3-icon-edit-cut {
+	background-position: 0 -912px !important;
+}
+.t3-icon-actions.t3-icon-view-paging-previous {
+	background-position: 0 -936px !important;
+}
+.t3-icon-actions.t3-icon-version-document-remove {
+	background-position: 0 -960px !important;
+}
+.t3-icon-actions.t3-icon-system-help-open {
+	background-position: 0 -984px !important;
+}
+.t3-icon-actions.t3-icon-view-paging-last-disabled {
+	background-position: 0 -1008px !important;
+}
+.t3-icon-actions.t3-icon-move-up {
+	background-position: 0 -1032px !important;
+}
+.t3-icon-actions.t3-icon-insert-reference {
+	background-position: 0 -1056px !important;
+}
+.t3-icon-actions.t3-icon-edit-undelete-edit {
+	background-position: 0 -1080px !important;
+}
+.t3-icon-actions.t3-icon-document-duplicates-select {
+	background-position: 0 -1104px !important;
+}
+.t3-icon-actions.t3-icon-system-extension-install {
+	background-position: 0 -1128px !important;
+}
+.t3-icon-actions.t3-icon-document-save {
+	background-position: 0 -1152px !important;
+}
+.t3-icon-actions.t3-icon-edit-restore {
+	background-position: 0 -1176px !important;
+}
+.t3-icon-actions.t3-icon-system-backend-user-switch {
+	background-position: 0 -1200px !important;
+}
+.t3-icon-actions.t3-icon-document-paste-after {
+	background-position: 0 -1224px !important;
+}
+.t3-icon-actions.t3-icon-system-typoscript-documentation {
+	background-position: 0 -1248px !important;
+}
+.t3-icon-actions.t3-icon-document-open-read-only {
+	background-position: 0 -1272px !important;
+}
+.t3-icon-actions.t3-icon-system-typoscript-documentation-open {
+	background-position: 0 -1296px !important;
+}
+.t3-icon-actions.t3-icon-edit-pick-date {
+	background-position: 0 -1320px !important;
+}
+.t3-icon-actions.t3-icon-view-paging-previous-disabled {
+	background-position: 0 -1344px !important;
+}
+.t3-icon-actions.t3-icon-edit-cut-release {
+	background-position: 0 -1368px !important;
+}
+.t3-icon-actions.t3-icon-system-extension-import {
+	background-position: 0 -1392px !important;
+}
+.t3-icon-actions.t3-icon-view-go-down {
+	background-position: 0 -1416px !important;
+}
+.t3-icon-actions.t3-icon-document-edit-access {
+	background-position: 0 -1440px !important;
+}
+.t3-icon-actions.t3-icon-edit-undo {
+	background-position: 0 -1464px !important;
+}
+.t3-icon-actions.t3-icon-document-open {
+	background-position: 0 -1488px !important;
+}
+.t3-icon-actions.t3-icon-view-list-expand {
+	background-position: 0 -1512px !important;
+}
+.t3-icon-actions.t3-icon-view-paging-first {
+	background-position: 0 -1536px !important;
+}
+.t3-icon-actions.t3-icon-document-localize {
+	background-position: 0 -1560px !important;
+}
+.t3-icon-actions.t3-icon-view-table-expand {
+	background-position: 0 -1584px !important;
+}
+.t3-icon-actions.t3-icon-system-refresh {
+	background-position: 0 -1608px !important;
+}
+.t3-icon-actions.t3-icon-system-extension-documentation {
+	background-position: 0 -1632px !important;
+}
+.t3-icon-actions.t3-icon-system-cache-clear-rte {
+	background-position: 0 -1656px !important;
+}
+.t3-icon-actions.t3-icon-page-new {
+	background-position: 0 -1680px !important;
+}
+.t3-icon-actions.t3-icon-view-paging-next-disabled {
+	background-position: 0 -1704px !important;
+}
+.t3-icon-actions.t3-icon-view-paging-last {
+	background-position: 0 -1728px !important;
+}
+.t3-icon-actions.t3-icon-document-paste-into {
+	background-position: 0 -1752px !important;
+}
+.t3-icon-actions.t3-icon-document-history-open {
+	background-position: 0 -1776px !important;
+}
+.t3-icon-actions.t3-icon-view-table-collapse {
+	background-position: 0 -1800px !important;
+}
+.t3-icon-actions.t3-icon-document-export-csv {
+	background-position: 0 -1824px !important;
+}
+.t3-icon-actions.t3-icon-document-select {
+	background-position: 0 -1848px !important;
+}
+.t3-icon-actions.t3-icon-version-swap-version {
+	background-position: 0 -1872px !important;
+}
+.t3-icon-actions.t3-icon-move-to-top {
+	background-position: 0 -1896px !important;
+}
+.t3-icon-actions.t3-icon-view-list-collapse {
+	background-position: 0 -1920px !important;
+}
+.t3-icon-actions.t3-icon-edit-copy-release {
+	background-position: 0 -1944px !important;
+}
+.t3-icon-actions.t3-icon-template-new {
+	background-position: 0 -1968px !important;
+}
+.t3-icon-actions.t3-icon-system-extension-download {
+	background-position: 0 -1992px !important;
+}
+.t3-icon-actions.t3-icon-system-cache-clear-impact-medium {
+	background-position: 0 -2016px !important;
+}
+.t3-icon-actions.t3-icon-view-go-up {
+	background-position: 0 -2040px !important;
+}
+.t3-icon-actions.t3-icon-edit-hide {
+	background-position: 0 -2064px !important;
+}
+.t3-icon-actions.t3-icon-document-view {
+	background-position: 0 -2088px !important;
+}
+.t3-icon-actions.t3-icon-edit-localize-status-low {
+	background-position: 0 -2112px !important;
+}
+.t3-icon-actions.t3-icon-system-options-view {
+	background-position: 0 -2136px !important;
+}
+.t3-icon-actions.t3-icon-edit-delete {
+	background-position: 0 -2160px !important;
+}
+.t3-icon-actions.t3-icon-move-right {
+	background-position: 0 -2184px !important;
+}
+.t3-icon-actions.t3-icon-window-open {
+	background-position: 0 -2208px !important;
+}

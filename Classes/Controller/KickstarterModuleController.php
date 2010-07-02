@@ -27,7 +27,6 @@
  *
  * @category    Controller
  * @package     TYPO3
- * @subpackage  tx_mvcextjssamples
  * @author      Ingmar Schlecht <ingmar@typo3.org>
  * @license     http://www.gnu.org/copyleft/gpl.html
  * @version     SVN: $Id$
@@ -48,11 +47,19 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	 */
 	protected $scBase;
 
-
+	/**
+	 * @var Tx_ExtbaseKickstarter_ObjectSchemaBuilder
+	 */
 	protected $objectSchemaBuilder;
 
+	/**
+	 * @var Tx_ExtbaseKickstarter_Service_CodeGenerator
+	 */
 	protected $codeGenerator;
 
+	/**
+	 *
+	 */
 	public function initializeAction() {
 		$this->objectSchemaBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ObjectSchemaBuilder');
 		$this->codeGenerator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_CodeGenerator');
@@ -124,21 +131,4 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 		return $result;
 	}
 
-	/**
-	 * Adds items to the ->MOD_MENU array. Used for the function menu selector.
-	 *
-	 * @return	void
-	 */
-	function menuConfig()	{
-		$this->scBase->MOD_MENU = Array (
-			'function' => Array (
-				'1' => 'Menu 1',
-				'2' => 'Menu 2',
-				'3' => 'Menu 3',
-			)
-		);
-		$this->scBase->menuConfig();
-	}
-
 }
-?>
