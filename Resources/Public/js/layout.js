@@ -4,22 +4,22 @@ Ext.onReady(function(){
 	var viewport = new Ext.Viewport({
 		layout: 'border',
 		items: [
-			{
-				region: 'north',
-				collapsible: false,
-				margins: '0 0 0 0',
-				tbar: mainToolbar
-			},
-			{
-				region: 'south',
-				split: true,
-				height: 100,
-				minSize: 100,
-				maxSize: 200,
-				collapsible: true,
-				title: 'Console',
-				margins: '0 0 0 0'
-			},
+//			{
+//				region: 'north',
+//				collapsible: false,
+//				margins: '0 0 0 0',
+//				tbar: mainToolbar
+//			},
+//			{
+//				region: 'south',
+//				split: true,
+//				height: 100,
+//				minSize: 100,
+//				maxSize: 200,
+//				collapsible: true,
+//				title: 'Console',
+//				margins: '0 0 0 0'
+//			},
 			{
 				region: 'east',
 				id: 'east-panel',

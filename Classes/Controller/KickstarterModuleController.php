@@ -71,7 +71,6 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	 * @return string The rendered view
 	 */
 	public function indexAction() {
-
 	}
 
 	/**
