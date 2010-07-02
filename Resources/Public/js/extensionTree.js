@@ -60,7 +60,7 @@ Ext.onReady(function(){
 	}];
 
 	var tree = new Ext.tree.TreePanel({
-		renderTo: 'extensionTree',
+		applyTo: 'extension-tree',
 		useArrows: true,
 		autoScroll: true,
 		animate: true,
