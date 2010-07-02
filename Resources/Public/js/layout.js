@@ -32,8 +32,6 @@ Ext.onReady(function(){
 		layout: 'border',
 		el: 'ExtbaseKickstarter',
 		defaults:	{
-			height:			100,
-			width:			100,
 			collapsible:	true,
 			collapseMode:	'mini',
 			split:			true
@@ -41,7 +39,6 @@ Ext.onReady(function(){
 		items: [
 			{
 				region: 'west',
-				split: true,
 				width: 200,
 				minSize: 175,
 				maxSize: 400,
@@ -49,7 +46,7 @@ Ext.onReady(function(){
 				margins: '0 0 0 5',
 				items: [
 					{
-						title: 'Doc header',
+	//					title: 'Doc header',
 						region: 'north',
 						items: [
 							{
@@ -62,9 +59,9 @@ Ext.onReady(function(){
 						]
 					},
 					{
-						title: 'Extension Tree',
+	//					title: 'Extension Tree',
 						region: 'south',
-						id: 'extension-tree',
+						id: 'extension-tree'
 					},
 				]
 			},
@@ -74,9 +71,9 @@ Ext.onReady(function(){
 				margins: '0 0 0 0',
 				items: [
 					{
-						title: 'Doc header',
-						region: 'north',
-						/*items: [
+//						title: 'Doc header',
+						region: 'north'
+						/*,items: [
 							{
 								title: 'test',
 								region: 'center'
