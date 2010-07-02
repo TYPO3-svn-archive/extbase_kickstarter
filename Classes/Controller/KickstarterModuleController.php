@@ -71,7 +71,16 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	 * @return string The rendered view
 	 */
 	public function indexAction() {
+		$this->additionalHeaderData[] = '<script type="text/javascript" src="/typo3conf/ext/extbase_kickstarter/Resources/Public/js/toolbar.js"></script>';
+		$this->additionalHeaderData[] = '<script type="text/javascript" src="/typo3conf/ext/extbase_kickstarter/Resources/Public/js/layout.js"></script>';
+		$this->additionalHeaderData[] = '<script type="text/javascript" src="/typo3conf/ext/extbase_kickstarter/Resources/Public/js/extensionTree.js"></script>';
 
+		$this->additionalHeaderData[] = '<link rel="stylesheet" type="text/javascript" href="/typo3conf/ext/extbase_kickstarter/Resources/Public/css/sprites.css"/>';
+		$this->additionalHeaderData[] = '<link rel="stylesheet" type="text/javascript" href="/typo3conf/ext/extbase_kickstarter/Resources/Public/css/style.css"/>';
+
+		foreach ($this->additionalHeaderData as $data) {
+			$this->response->addAdditionalHeaderData($data);
+		}
 
 	}
 
