@@ -47,6 +47,38 @@ Application = Ext.apply(new Ext.util.Observable, {
 		this.bootstrappers.push(bootstrap);
 	},
 
+	/**
+	 * If the console is deactivated, install a dummy function to prevent errors.
+	 * @private
+	 */
+	_registerDummyConsoleLogIfNeeded: function() {
+		if (typeof window.console == 'undefined') {
+			window.console = {
+				log: function() {}
+			};
+		}
+	},
+	
+	/**
+	 * Initialize the configuration object in .Configuration
+	 * @private
+	 */
+	_initializeConfiguration: function() {
+	},
+	
+	/**
+	 * Invoke the registered bootstrappers.
+	 * @private
+	 */
+	_invokeBootstrappers: function() {
+		Ext.each(
+			this.bootstrappers,
+			function(bootstrapper) {
+				bootstrapper.initialize();
+			}
+		);
+	},
+
 });
 
 Ext.onReady(Application.bootstrap, Application);
