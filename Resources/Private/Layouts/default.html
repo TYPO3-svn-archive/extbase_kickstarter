@@ -5,34 +5,32 @@
 </k:comment>
 <f:render section="header" />
 
-<f:be.container loadExtJsTheme="true" enableExtJsDebug="true" loadExtJs="true"
-				
-				>
-	<div class="typo3-fullDoc">
-		<div id="typo3-docheader">
-			<div id="typo3-docheader-row1">
-				<div class="buttonsleft">
-					<f:render section="iconButtons" />
-				</div>
-				<div class="buttonsright">
-					<f:be.buttons.shortcut />
-				</div>
-			</div>
-			<div id="typo3-docheader-row2">
-				<div class="docheader-row2-left">
-					<f:be.buttons.csh />
-				</div>
-				<div class="docheader-row2-right">
-				</div>
-			</div>
+<f:be.container loadExtJsTheme="true" enableExtJsDebug="true" loadExtJs="true">
+	<div id="north-div"></div>
+		<div id="south-div">
+			10:45:07 Extension saved<br/>
+			10:45:06 Plugins registered<br/>
+			10:45:05 Modules registered<br/>
+			10:45:05 Controllers generated<br/>
+			10:45:04 Model generated<br/>
+			10:45:01 Extension data validated
 		</div>
-		<div id="typo3-docbody">
-			<div id="typo3-inner-docbody">
-				<f:renderFlashMessages class="tx-extbase-flash-message" />
-				<div id="ExtbaseKickstarterApplication">
-
-				</div>
-			</div>
+		<div id="west-div">
+			<div id="extensionTree"></div>
 		</div>
-	</div>
+		<div id="east-div1">
+			General properties of the selected element in the extension tree. Let's say things like
+			name, type and description
+		</div>
+		<div id="east-div2">
+			Maybe some settings which should be easily available? Think about default action, aggregate root yes/no, and so on.
+		</div>
+		<div id="center-div">
+			Main window. This window can be used for the modelling, or configuration of the TCA for a specific object for example.<br/>
+			During the modelling we don't even have to unload this screen when we single-click an item in the tree. This could load the 
+			first information about the clicked element in the east window so some information about the object is available during modeling
+			or other functions which need the center window.<br/><br/>
+			But offcourse, those are just ideas :)<br/><br/>
+			note: this window should definately have a full-screen option during modeling :)
+		</div>
 </f:be.container>
