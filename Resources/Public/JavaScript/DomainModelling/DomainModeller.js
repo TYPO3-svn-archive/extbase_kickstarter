@@ -4,7 +4,6 @@ Tx.ExtbaseKickstarter.DomainModelling.DomainModeller = Ext.extend(Ext.Panel, {
 	// TODO: document event
 	initComponent: function() {
 		var config = {
-			html: 'Inner HTML',
 			title: 'Domain modelling'
 		};
 		Ext.apply(this, config);
