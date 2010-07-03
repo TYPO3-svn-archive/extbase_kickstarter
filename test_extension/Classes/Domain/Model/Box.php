@@ -37,6 +37,7 @@ class Tx_TestExtension_Domain_Model_Box extends Tx_Extbase_DomainObject_Abstract
 	
 	/**
 	 * width
+	 * @validate NotEmpty
 	 * @var integer
 	 */
 	protected $width;
@@ -75,7 +76,7 @@ class Tx_TestExtension_Domain_Model_Box extends Tx_Extbase_DomainObject_Abstract
 	 * @return void
 	 */
 	public function setHeight($height) {
-		$this->height = $height;
+		$this->height = $height+50;
 	}
 
 	/**
@@ -85,6 +86,10 @@ class Tx_TestExtension_Domain_Model_Box extends Tx_Extbase_DomainObject_Abstract
 	 */
 	public function getHeight() {
 		return $this->height;
+	}
+
+	public function myMethod() {
+		return "hello my own method!";
 	}
 	
 }
