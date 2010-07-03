@@ -3,30 +3,23 @@ Ext.ns("T3.ExtbaseKickstarter");
 //Ext.reg('T3.ExtbaseKickstarter.DocumentHeader', T3.ExtbaseKickstarter.DocumentHeader);
 
 T3.ExtbaseKickstarter.ViewPort = Ext.extend(Ext.Viewport, {
-	initComponent: function() {
-		Ext.Viewport.superclass.initComponent.call(this);
+initComponent: function() {
+	Ext.Viewport.superclass.initComponent.call(this);
 		this.el = Ext.get(this.el) || Ext.getBody();
 
-        if (this.el.dom === document.body) {
+		if (this.el.dom === document.body) {
+			this.el.dom.parentNode.className += ' x-viewport';
+		}
 
-	        this.el.dom.parentNode.className += ' x-viewport';
-
-        }
-
-        this.el.setHeight = Ext.emptyFn;
-
-        this.el.setWidth = Ext.emptyFn;
-        this.el.setSize = Ext.emptyFn;
-
-        this.el.dom.scroll = 'no';
-
-        this.allowDomMove = false;
-
-        this.autoWidth = true;
-        this.autoHeight = true;
-
-        Ext.EventManager.onWindowResize(this.fireResize, this);
-        this.renderTo = this.el;
+		this.el.setHeight = Ext.emptyFn;
+		this.el.setWidth = Ext.emptyFn;
+		this.el.setSize = Ext.emptyFn;
+		this.el.dom.scroll = 'no';
+		this.allowDomMove = false;
+		this.autoWidth = true;
+		this.autoHeight = true;
+		Ext.EventManager.onWindowResize(this.fireResize, this);
+		this.renderTo = this.el;
 	}
 });
 Ext.reg('T3.ExtbaseKickstarter.ViewPort', T3.ExtbaseKickstarter.ViewPort);
@@ -39,6 +32,19 @@ Ext.onReady(function(){
 	docbody.setWidth('100%').setHeight('100%');
 	docbody.setHeight(docbody.getHeight() - 7).setWidth(docbody.getWidth() - 6);
 
+	new Ext.Panel({
+		tbar: [{
+			text: 'Action Menu',
+			handler: function() {
+			}
+		}, {
+			text: 'Action Menu item 2',
+			handler: function() {
+			}
+		}],
+		renderTo: Ext.get('docheader-row2-left')
+	});
+
 
 	var viewPort = new T3.ExtbaseKickstarter.ViewPort({
 		layout: 'border',
@@ -49,20 +55,10 @@ Ext.onReady(function(){
 			margins:		'0 0 0 0'
 		},
 		items: [{
-			region:			'north',
-			xtype:			'panel',
-			tbar:			[{
-				text: 'Action Menu',
-				handler: function() {
-					console.log('Action menu');
-				}
-			}, {
-				text: 'Action Menu item 2',
-				handler: function() {
-					console.log('Action menu item 2');
-				}
-			}]
-		}, {
+//			region:			'north',
+//			xtype:			'panel',
+//
+//		}, {
 			region:			'west',
 			collapseMode:	'mini',
 			width:			280,
