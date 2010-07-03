@@ -7,13 +7,18 @@ class Tx_ExtbaseKickstarter_Utility_Diff3 {
 	 * @param <type> $file2 The second file with edits
 	 */
 	public function merge($fileBase,$file1,$file2){
+		//print_r($_SERVER); die();
 		if (stristr(PHP_OS, 'WIN')) {
-			$output = shell_exec("diff3.exe -m $file1 $fileBase $file2");
+			$path = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_FILENAME']),0,-2)) . '/typo3conf/ext/extbase_kickstarter/Resources/Private/Binaries/Windows/';
+			chdir($path);
+			$output = shell_exec('"' . $path . 'diff3.exe"' . ' -m "' . $file1 . '" "' . $fileBase . '" "' . $file2 . '" > out.txt');
+			$output = file_get_contents('out.txt');
+			unlink('out.txt');
 		}else {
 			$output = shell_exec("diff3 -m $file1 $fileBase $file2");
 		}
 		
-		
+
 		return $output;
 	}
 }
