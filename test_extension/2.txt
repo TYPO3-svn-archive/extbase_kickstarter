@@ -1,0 +1,12 @@
+<?
+class Test {
+
+  function a() {
+  }
+
+  function byKickstarter() {
+  }
+
+
+}
+?>
