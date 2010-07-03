@@ -8,10 +8,11 @@ class Tx_ExtbaseKickstarter_Utility_Diff3 {
 	 */
 	public function merge($fileBase,$file1,$file2){
 		//print_r($_SERVER); die();
-		if (stristr(PHP_OS, 'WIN')) {
+		if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 			$path = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_FILENAME']),0,-2)) . '/typo3conf/ext/extbase_kickstarter/Resources/Private/Binaries/Windows/';
 			chdir($path);
 			$output = shell_exec('"' . $path . 'diff3.exe"' . ' -m "' . $file1 . '" "' . $fileBase . '" "' . $file2 . '" > out.txt');
+			// writing temporary file, because otherwise newlines get lost
 			$output = file_get_contents('out.txt');
 			unlink('out.txt');
 		}else {

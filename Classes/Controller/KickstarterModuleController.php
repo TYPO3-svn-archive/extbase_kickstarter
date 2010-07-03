@@ -22,8 +22,7 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-require_once PATH_typo3conf . 'ext/extbase_kickstarter/lib/pear/' . "Text/Diff/Engine/native.php";
-require_once PATH_typo3conf . 'ext/extbase_kickstarter/lib/pear/' . "Text/Diff3.php";
+
 /**
  * Backend Module of the Extbase Kickstarter extension
  *
@@ -95,8 +94,9 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 
 				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
 				
-				// if the files where already created in a previous save, start the three way diff and merging algorithm
+				// if the files where already created in a previous save, start the three-way-diff and merging algorithm
 				if (file_exists($extensionDirectory . '/kickstarter.json')) {
+					// 1. generate files, based on the old model
 					$extDir2 = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'_base/';
 					t3lib_div::rmdir($extDir2);
 					t3lib_div::mkdir($extDir2);
@@ -105,6 +105,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 					$this->codeGenerator->setExtensionDirectory($extDir2);
 					$this->codeGenerator->build($extensionSchema2);
 
+					// 2. generate files, based on the edited model
 					$extDir3 = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'_generated/';
 					t3lib_div::rmdir($extDir3);
 					t3lib_div::mkdir($extDir3);
@@ -116,6 +117,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 					t3lib_div::rmdir($outputDir);
 					t3lib_div::mkdir($outputDir);
 
+					// 3. walk through all DomainObjects and merge them
 					$diff3 = new Tx_ExtbaseKickstarter_Utility_Diff3();
 					$domainModelDir = 'Classes/Domain/Model/';
 					foreach ($extensionSchema->getDomainObjects() as $domainObject) {
@@ -125,7 +127,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 						$file3 = $extDir3.$domainModelDir.$domainObject->getName() . '.php';
 						$file2 = $extensionDirectory.$domainModelDir.$domainObject->getName() . '.php';
 						$mergePath = $outputDir.$domainModelDir.$domainObject->getName() . '.php';
-
+//print_r(array($base,$file2,$file3,$mergePath));
 						$output = $diff3->merge($base,$file2,$file3);
 						t3lib_div::mkdir_deep($outputDir, $domainModelDir);
 						t3lib_div::writeFile($mergePath, $output);
