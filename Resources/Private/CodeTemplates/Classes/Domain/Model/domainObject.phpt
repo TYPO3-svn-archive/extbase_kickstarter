@@ -103,5 +103,8 @@ class {domainObject.className} extends {domainObject.baseClass} {
 		$this->{property.name}->detach(${property.name -> k:singularize()});
 	}
 	</f:if></f:for>
+
+	/* please add own methods beneith this line */
+	
 }
 ?>
