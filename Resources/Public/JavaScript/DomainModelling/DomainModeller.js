@@ -5,7 +5,7 @@ Tx.ExtbaseKickstarter.DomainModelling.DomainModeller = Ext.extend(Ext.Panel, {
 	initComponent: function() {
 		var config = {
 			html: 'Inner HTML',
-			title: 'Foo'
+			title: 'Domain modelling'
 		};
 		Ext.apply(this, config);
 		Tx.ExtbaseKickstarter.DomainModelling.DomainModeller.superclass.initComponent.call(this);
@@ -13,4 +13,3 @@ Tx.ExtbaseKickstarter.DomainModelling.DomainModeller = Ext.extend(Ext.Panel, {
 	}
 });
 Ext.reg('Tx.ExtbaseKickstarter.DomainModelling.DomainModeller', Tx.ExtbaseKickstarter.DomainModelling.DomainModeller);
-
