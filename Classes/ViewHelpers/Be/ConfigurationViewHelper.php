@@ -2,9 +2,7 @@
 
 class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fluid_ViewHelpers_Be_AbstractBackendViewHelper {
 	public function render() {
-		$doc = $this->getDocInstance();
-
-		$pageRenderer = $doc->getPageRenderer();
+		$pageRenderer = $this->getDocInstance()->getPageRenderer();
 		
 		// SECTION: JAVASCRIPT FILES
 		$pageRenderer->addJsFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/JavaScript/Application.js');
