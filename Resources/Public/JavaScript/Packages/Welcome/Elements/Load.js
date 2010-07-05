@@ -1,0 +1,1 @@
+Ext.ns("Tx.ExtbaseKickstarter.Packages.Welcome.Elements");
