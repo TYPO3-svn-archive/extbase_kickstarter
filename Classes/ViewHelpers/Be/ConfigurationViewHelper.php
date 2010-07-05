@@ -50,7 +50,17 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 			}
 
 			foreach ($extPackageConfig as $packageFolder => $packageConfig) {
-				$jsFiles = t3lib_div::getAllFilesAndFoldersInPath($jsFiles, $packagesBaseDirectory . $packageFolder, 'js');
+				if (is_file($packagesBaseDirectory . $packageFolder . '/Bootstrap.js')) {
+					$jsFiles[] = $packagesBaseDirectory . $packageFolder . '/Bootstrap.js';
+				}
+
+				$iterator = new RecursiveDirectoryIterator($packagesBaseDirectory . $packageFolder);
+
+				foreach (new RecursiveIteratorIterator($iterator) as $file) {
+					if ($file->isFile() && preg_match("/\.js$/i", $file->getPathName()) && !in_array($file->getPathName(), $jsFiles)) {
+						$jsFiles[] = $file->getPathName();
+					}
+				}
 			}
 		}
 

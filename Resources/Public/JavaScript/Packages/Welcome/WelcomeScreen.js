@@ -13,11 +13,9 @@ Tx.ExtbaseKickstarter.Packages.Welcome.WelcomeScreen = Ext.extend(Ext.Panel, {
 				width: '48%'
 			},
 			items: [{
-				items: [{
-					xtype: 'button',
-					title: 'adasd',
-					text: 'erwrwer'
-				}]
+				items: [
+				//	Tx.ExtbaseKickstarter.Packages.Welcome.Elements.Intro
+				]
 			}, {
 
 			}]
