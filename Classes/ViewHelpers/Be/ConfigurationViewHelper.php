@@ -8,7 +8,9 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 	private $pageRenderer;
 	
 	public function __construct() {
+		/* @var $this->pageRenderer t3lib_PageRenderer */
 		$this->pageRenderer = $this->getDocInstance()->getPageRenderer();
+		
 	}
 	
 	public function render() {
@@ -35,19 +37,26 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 	 * Add package files based on JSPackageConfiguration
 	 */
 	private function addJSPackageFiles() {
-		$packages = $this->getJSPackageConfiguration();
-		foreach($packages as $extKey => $extConfig) {
+		$jsFiles = array();
 
+		$packages = $this->getJSPackageConfiguration();
+		foreach($packages as $extKey => $extPackageConfig) {
+
+			// Find the package base directory
 			if (isset($extConfig['packagesBaseDirectory'])) {
 				$packagesBaseDirectory = t3lib_div::getFileAbsFileName($extConfig['packagesBaseDirectory']);
 			} else {
 				$packagesBaseDirectory = t3lib_div::getFileAbsFileName('EXT:' . $extKey . '/Resources/Public/JavaScript/Packages/');
 			}
 
-			$files = t3lib_div::getAllFilesAndFoldersInPath(array(), $packagesBaseDirectory, 'js');
-			foreach ($files as $key => $file) {
-				$this->pageRenderer->addJsFile(str_replace(t3lib_extMgm::extPath($extKey), t3lib_extMgm::extRelPath($extKey), $file));
+			foreach ($extPackageConfig as $packageFolder => $packageConfig) {
+				$jsFiles = t3lib_div::getAllFilesAndFoldersInPath($jsFiles, $packagesBaseDirectory . $packageFolder, 'js');
 			}
+		}
+
+		// Add the javascript files to the page
+		foreach ($jsFiles as $key => $file) {
+			$this->pageRenderer->addJsFile(str_replace(t3lib_extMgm::extPath($extKey), t3lib_extMgm::extRelPath($extKey), $file));
 		}
 	}
 	
