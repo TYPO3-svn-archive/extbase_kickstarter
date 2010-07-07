@@ -1,6 +1,6 @@
 Ext.ns("Tx.ExtbaseKickstarter.Packages.Welcome.Elements");
 
-Ext.extend (Tx.ExtbaseKickstarter.Packages.Welcome.Elements.Intro, Ext.Panel, {
+Tx.ExtbaseKickstarter.Packages.Welcome.Elements.Intro = Ext.extend (Ext.Panel, {
 	html: 'Foo'
 });
 
