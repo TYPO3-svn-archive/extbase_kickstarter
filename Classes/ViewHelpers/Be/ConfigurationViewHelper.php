@@ -14,6 +14,8 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 	}
 	
 	public function render() {
+		/** @todo This line should be disabled before publication of the extension */
+		$this->pageRenderer->disableCompressJavascript();
 		
 		// SECTION: JAVASCRIPT FILES
 		$this->pageRenderer->addJsFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/JavaScript/Application.js');
