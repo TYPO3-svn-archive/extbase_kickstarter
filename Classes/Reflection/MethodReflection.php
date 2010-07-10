@@ -1,0 +1,97 @@
+<?php
+/***************************************************************
+*  Copyright notice
+*
+*  (c) 2010 Nico de Haen
+*  All rights reserved
+*
+*  This script is part of the TYPO3 project. The TYPO3 project is
+*  free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  The GNU General Public License can be found at
+*  http://www.gnu.org/copyleft/gpl.html.
+*
+*  This script is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  This copyright notice MUST APPEAR in all copies of the script!
+***************************************************************/
+
+/**
+ * Extended version of the ReflectionMethod
+ *
+ * @package ExtbaseKickstarter
+ * @subpackage Reflectionn $
+ */
+class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Reflection_MethodReflection {
+
+	/**
+	 * @var Tx_ExtbaseKickstarter_Reflection_DocCommentParser: An instance of the doc comment parser
+	 */
+	protected $docCommentParser;
+	
+	protected $tags;
+	
+	/**
+	 * The constructor, initializes the reflection class
+	 *
+	 * @param  string $className Name of the method's class
+	 * @param  string $methodName Name of the method to reflect
+	 * @return void
+	 */
+	public function __construct($className, $methodName) {
+		parent::__construct($className, $methodName);
+	}
+	
+	/**
+	 * getter for methodBody
+	 * @return string
+	 */
+	public function getMethodBody(){
+		return $this->methodBody;
+	}
+	
+	/**
+	 * setter for methodBody
+	 * @param string method body
+	 * @return void
+	 */
+	public function setMethodBody($methodBody){
+		$this->methodBody = $methodBody;
+	}
+
+	/**
+	 * Returns the declaring class
+	 *
+	 * @return Tx_ExtbaseKickstarter_Reflection_ClassReflection The declaring class
+	 */
+	public function getDeclaringClass() {
+		return new Tx_ExtbaseKickstarter_Reflection_ClassReflection(parent::getDeclaringClass()->getName());
+	}
+	
+	public function getTags(){
+		return $this->getDocCommentParser()->getTagsValues();
+	}
+
+
+	/**
+	 * Returns an instance of the doc comment parser and
+	 * runs the parse() method.
+	 *
+	 * @return Tx_ExtbaseKickstarter_Reflection_DocCommentParser
+	 */
+	protected function getDocCommentParser() {
+		if (!is_object($this->docCommentParser)) {
+			$this->docCommentParser = new Tx_Extbase_Reflection_DocCommentParser;
+			$this->docCommentParser->parseDocComment($this->getDocComment());
+		}
+		return $this->docCommentParser;
+	}
+}
+
+?>
