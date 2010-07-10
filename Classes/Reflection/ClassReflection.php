@@ -211,7 +211,10 @@ class Tx_ExtbaseKickstarter_Reflection_ClassReflection extends Tx_Extbase_Reflec
 	 * @return Tx_Extbase_Reflection_ClassReflection Reflection of the parent class - if any
 	 */
 	public function getParentClass() {
-		$parentClass = parent::getParentClass();
+		//$parentClass = parent::getParentClass();
+		// workaround for bug #8800 in Tx_Extbase_Reflection_ClassReflection
+		$phpReflectionClass = new ReflectionClass($this->getName());
+		$parentClass = $phpReflectionClass->getParentClass();
 		if($parentClass){
 			return new Tx_ExtbaseKickstarter_Reflection_ClassReflection($parentClass->getName());
 		}
