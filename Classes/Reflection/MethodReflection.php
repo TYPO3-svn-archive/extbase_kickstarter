@@ -30,10 +30,6 @@
  */
 class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Reflection_MethodReflection {
 
-	/**
-	 * @var Tx_ExtbaseKickstarter_Reflection_DocCommentParser: An instance of the doc comment parser
-	 */
-	protected $docCommentParser;
 	
 	protected $tags;
 	
@@ -78,20 +74,6 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 		return $this->getDocCommentParser()->getTagsValues();
 	}
 
-
-	/**
-	 * Returns an instance of the doc comment parser and
-	 * runs the parse() method.
-	 *
-	 * @return Tx_ExtbaseKickstarter_Reflection_DocCommentParser
-	 */
-	protected function getDocCommentParser() {
-		if (!is_object($this->docCommentParser)) {
-			$this->docCommentParser = new Tx_Extbase_Reflection_DocCommentParser;
-			$this->docCommentParser->parseDocComment($this->getDocComment());
-		}
-		return $this->docCommentParser;
-	}
 }
 
 ?>

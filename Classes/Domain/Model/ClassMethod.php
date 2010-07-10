@@ -36,6 +36,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_ClassMethod extends Tx_ExtbaseKickstart
 	 */
 	protected $body;
 	
+	/**
+	 * 
+	 * @var array
+	 */
+	protected $parameters;
+	
 	
 	public function __construct($methodName,$methodReflection = NULL){
 		$this->name = $methodName;
@@ -45,8 +51,10 @@ class Tx_ExtbaseKickstarter_Domain_Model_ClassMethod extends Tx_ExtbaseKickstart
 				$getterMethodName = 'get'.t3lib_div::underscoredToUpperCamelCase($key);
 	    		// map properties of reflection class to this class
 				if(method_exists($methodReflection,$getterMethodName) && method_exists($this,$setterMethodName) ){
-	    			$this->$setterMethodName($methodReflection->$getterMethodName());
+	    			
+					$this->$setterMethodName($methodReflection->$getterMethodName());
 	    			//t3lib_div::print_array($getterMethodName);
+	    			
 	    		}
 			}
 		}
@@ -70,6 +78,27 @@ class Tx_ExtbaseKickstarter_Domain_Model_ClassMethod extends Tx_ExtbaseKickstart
 	 */
 	public function getBody() {
 		return $this->body;
+	}
+	
+	/**
+	 * getter for parameters
+	 * @return array parameters
+	 */
+	public function getParameters(){
+		return $this->parameters;
+	}
+	
+	/**
+	 * setter for parameters
+	 * @param array $parameters
+	 * @return void
+	 */
+	public function setParameters($parameters){
+		foreach($parameters as $parameter){
+			$methodParameter = new Tx_ExtbaseKickstarter_Domain_Model_MethodParameter($parameter->getName(),$parameter);
+			$this->parameters[] = $methodParameter;
+		}
+		
 	}
 	
 }

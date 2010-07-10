@@ -14,11 +14,12 @@
 	
 
  *
+ * @test testtag
  */
+require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/BasicClass.php');
+		
 
-
-
-final class Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass {
+final class Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass extends Tx_ExtbaseKickstarter_Tests_Examples_BasicClass{
 	
 	protected $name; private $propertiesInOneLine;
 	
@@ -43,6 +44,7 @@ final class Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass {
 	 * 
 	 * @param string $name
 	 * @return void
+	 * @lazy
 	 */
 	public function methodWithStrangePrecedingBlock(string $name){
 		/**
@@ -51,11 +53,22 @@ final class Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass {
 		 */
 		$this->name = $name;
 	}
-	
+	private $anotherProperty = 'test456_"';
+	static function method_2($param1,&$param2,$param3= 'default'){
+		/**
+		 * test test
+		 */
+		$test = 234;
+		return 5; // test test
+	}
+	const anotherCosntant = "r5r_8";
 	// single line comment
+var $testProperty4 = 123;
 }
 
-
+/**
+ *  dfg dfg dfg dfg
+ */
 require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/BasicClass.php');   include('typo3conf/ext/extbase_kickstarter/Tests/Examples/ComplexClass.php'); // test
 
  include_once('typo3conf/ext/extbase_kickstarter/Tests/Examples/ComplexClass.php'); // test
