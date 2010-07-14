@@ -4,7 +4,7 @@ Tx.ExtbaseKickstarter.UserInterface.Layout = Ext.extend(Ext.Viewport, {
 	// TODO: document event
 	initComponent: function() {
 		var config = {
-			layout: 'vbox',
+			layout: 'fit',
 			layoutConfig: {
 				align: 'stretch'
 			},
