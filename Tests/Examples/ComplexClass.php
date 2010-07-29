@@ -69,7 +69,7 @@ var $testProperty4 = 123;
 /**
  *  dfg dfg dfg dfg
  */
-require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/BasicClass.php');   include('typo3conf/ext/extbase_kickstarter/Tests/Examples/ComplexClass.php'); // test
+require_once(t3lib_extmgm:: extPath('extbase_kickstarter') . 'Tests/Examples/BasicClass.php');   include_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ComplexClass.php'); // test
 
- include_once('typo3conf/ext/extbase_kickstarter/Tests/Examples/ComplexClass.php'); // test
+ include_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ComplexClass.php'); // test
 ?>

@@ -28,7 +28,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_MethodParameter {
+class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 	
 
 	/**
@@ -67,7 +67,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_MethodParameter {
 	 * @param $propertyReflection (optional)
 	 * @return unknown_type
 	 */
-	public function __construct($parameterName,$parameterReflection = 3){
+	public function __construct($parameterName,$parameterReflection = NULL){
 		$this->name = $parameterName;
 		
 		if($parameterReflection && $parameterReflection instanceof Tx_Extbase_Reflection_ParameterReflection){

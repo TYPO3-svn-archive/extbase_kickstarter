@@ -23,12 +23,13 @@
 ***************************************************************/
 
 /**
- * abstract schema representing a class, method or property in the context of software development
+ * abstract schema representing a class, method or property in the context of 
+ * software development
  *
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractSchema {
+abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	
 	/**
 	 * name

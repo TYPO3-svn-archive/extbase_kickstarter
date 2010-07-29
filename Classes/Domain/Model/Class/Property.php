@@ -28,13 +28,24 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_ClassProperty extends Tx_ExtbaseKickstarter_Domain_Model_AbstractSchema{
+class Tx_ExtbaseKickstarter_Domain_Model_Class_Property extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema{
 		
 	
-	
-	public function __construct($propertyName,$propertyReflection = NULL){
+	/**
+	 * 
+	 * @param string $propertyName
+	 * @return void
+	 */
+	public function __construct($propertyName){
 		$this->name = $propertyName;
-		
+	}
+	
+	/**
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Reflection_PropertyReflection $propertyReflection
+	 * @return void
+	 */
+	public function mapToReflectionProperty($propertyReflection){
 		if($propertyReflection instanceof Tx_ExtbaseKickstarter_Reflection_PropertyReflection){
 			foreach($this as $key => $value) {
 				$setterMethodName = 'set'.t3lib_div::underscoredToUpperCamelCase($key);

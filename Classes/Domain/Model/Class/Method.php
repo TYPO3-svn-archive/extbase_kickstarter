@@ -28,7 +28,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_ClassMethod extends Tx_ExtbaseKickstarter_Domain_Model_AbstractSchema{
+class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema{
 	
 	/**
 	 * body
@@ -95,7 +95,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_ClassMethod extends Tx_ExtbaseKickstart
 	 */
 	public function setParameters($parameters){
 		foreach($parameters as $parameter){
-			$methodParameter = new Tx_ExtbaseKickstarter_Domain_Model_MethodParameter($parameter->getName(),$parameter);
+			$methodParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter($parameter->getName(),$parameter);
 			$this->parameters[] = $methodParameter;
 		}
 		

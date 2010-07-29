@@ -28,7 +28,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_ClassSchema extends Tx_ExtbaseKickstarter_Domain_Model_AbstractSchema{
+class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema{
 	
 	/**
 	 * constants
@@ -164,7 +164,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_ClassSchema extends Tx_ExtbaseKickstart
 	 * @return boolean 
 	 */
 	public function methodExists($methodName){
-		if(in_array($methodName,$this->methodNames)){
+		if(is_array($this->methodNames) && in_array($methodName,$this->methodNames)){
 			return true;
 		}
 		else return false;
@@ -321,7 +321,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_ClassSchema extends Tx_ExtbaseKickstart
 	 * @return boolean 
 	 */
 	public function propertyExists($propertyName){
-		if(in_array($propertyName,$this->propertyNames)){
+		if(is_array($this->propertyNames) && in_array($propertyName,$this->propertyNames)){
 			return true;
 		}
 		else return false;

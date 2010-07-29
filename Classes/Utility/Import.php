@@ -56,7 +56,7 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 			throw new Exception('Class not exists: '.$className);
 		} 
 		
-		$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_ClassSchema($className);
+		$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_Class_Schema($className);
 		
 		$classReflection = new Tx_ExtbaseKickstarter_Reflection_ClassReflection($className);
 		
@@ -179,7 +179,7 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 								
 								$precedingBlock = $this->concatLinesFromArray($lines,$lastMatchedLine);
 								
-								$currentClassMethod = new Tx_ExtbaseKickstarter_Domain_Model_ClassMethod($methodName,$currentMethodReflection);
+								$currentClassMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($methodName,$currentMethodReflection);
 								$currentClassMethod->setPrecedingBlock($precedingBlock);
 								$currentClassMethod->setTags($currentMethodReflection->getTags());
 								
@@ -227,7 +227,8 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 									$reflectionProperty = $classReflection->getProperty($propertyName);
 									if($reflectionProperty){
 										
-										$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_ClassProperty($propertyName,$reflectionProperty);
+										$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_Class_Property($propertyName);
+										$classProperty->mapToReflectionProperty($reflectionProperty);
 										
 										if($isFirstProperty){
 											// only the first property will get the preceding block assigned

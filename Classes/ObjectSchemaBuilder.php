@@ -38,17 +38,17 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 	 * @return Tx_ExtbaseKickstarter_Domain_Model_Extension
 	 */
 	public function build(array $jsonArray) {
-		$extension = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Extension');
+		$this->extension = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Extension');
 		$globalProperties = $jsonArray['properties'];
 		if (!is_array($globalProperties)) throw new Exception('Wrong 1');
 
 
 			// name
-		$extension->setName($globalProperties['name']);
+		$this->extension->setName($globalProperties['name']);
 			// description
-		$extension->setDescription($globalProperties['description']);
+		$this->extension->setDescription($globalProperties['description']);
 			// extensionKey
-		$extension->setExtensionKey($globalProperties['extensionKey']);
+		$this->extension->setExtensionKey($globalProperties['extensionKey']);
 		
 		foreach($globalProperties['persons'] as $personValues) {
 			$person=t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Person');
@@ -56,7 +56,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 			$person->setRole($personValues['role']);
 			$person->setEmail($personValues['email']);
 			$person->setCompany($personValues['company']);
-			$extension->addPerson($person);
+			$this->extension->addPerson($person);
 		}
 		
 			// state
@@ -78,14 +78,14 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 				$state = Tx_ExtbaseKickstarter_Domain_Model_Extension::STATE_TEST;
 				break;
 		}
-		$extension->setState($state);
+		$this->extension->setState($state);
 
 
 		// classes
 		if (is_array($jsonArray['modules'])) {
 			foreach ($jsonArray['modules'] as $singleModule) {
 				$domainObject = $this->buildDomainObject($singleModule['value']);
-				$extension->addDomainObject($domainObject);
+				$this->extension->addDomainObject($domainObject);
 			}
 		}
 
@@ -105,13 +105,13 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 				if (!class_exists($relationSchemaClassName)) throw new Exception('Relation of type ' . $relationSchemaClassName . ' not found');
 				$relation = new $relationSchemaClassName;
 				$relation->setName($relationJsonConfiguration['relationName']);
-				$relation->setForeignClass($extension->getDomainObjectByName($foreignClassName));
+				$relation->setForeignClass($this->extension->getDomainObjectByName($foreignClassName));
 
-				$extension->getDomainObjectByName($localClassName)->addProperty($relation);
+				$this->extension->getDomainObjectByName($localClassName)->addProperty($relation);
 			}
 		}
 
-		return $extension;
+		return $this->extension;
 	}
 
 	protected function buildDomainObject(array $jsonDomainObject) {
@@ -125,8 +125,19 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 		}
 
 		$domainObject->setAggregateRoot($jsonDomainObject['objectsettings']['aggregateRoot']);
-
+		
+		/**
+		$this->importTool = new Tx_ExtbaseKickstarter_Utility_Import();
+		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
+		if(file_exists( $this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php')){
+			include_once($this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php');
+			$classSchema = $this->importTool->importClassSchemaFromFile(Tx_ExtbaseKickstarter_Utility_Naming::getDomainObjectClassName( $this->extension->getExtensionKey(), $domainObject->getName() ));
+			
+		}
+		*/
+		
 		foreach ($jsonDomainObject['propertyGroup']['properties'] as $jsonProperty) {
+			t3lib_div::devLog(serialize($jsonProperty),'extbase_kickstarter');
 			$propertyType = $jsonProperty['propertyType'];
 			$propertyClassName = 'Tx_ExtbaseKickstarter_Domain_Model_Property_' . $propertyType . 'Property';
 			if (!class_exists($propertyClassName)) throw new Exception('Property of type ' . $propertyType . ' not found');
