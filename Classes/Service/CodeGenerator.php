@@ -57,6 +57,8 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	 * @var string
 	 */
 	private $extensionDirectory;
+
+
 	public function getExtensionDirectory() {
         return $this->extensionDirectory;
     }
@@ -74,7 +76,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 
 	public function build(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		$this->extension = $extension;
-
+		$importTool = new Tx_ExtbaseKickstarter_Utility_Import();
 		// Base directory already exists at this point
 		if(!$this->extensionDirectory){
 			$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
@@ -135,7 +137,16 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 			t3lib_div::mkdir_deep($this->extensionDirectory, 'Classes/Domain/Repository');
 			$domainRepositoryDirectory = $this->extensionDirectory . 'Classes/Domain/Repository/';
 			foreach ($this->extension->getDomainObjects() as $domainObject) {
-				$fileContents = $this->generateDomainObjectCode($domainObject, $extension);
+				$classPath = $domainModelDirectory.$domainObject->getName() . '.php';
+				// if the sources where already created in a previous save, parse the existing code with Nico's brilliant classparser
+				
+				if(file_exists($classPath)){
+					require_once $classPath;
+					$classSchema = $importTool->importClassSchemaFromFile($domainObject->getClassName());
+					
+				}
+
+				$fileContents = $this->generateDomainObjectCode($domainObject, $extension, $classSchema);
 				t3lib_div::writeFile($domainModelDirectory . $domainObject->getName() . '.php', $fileContents);
 				if ($domainObject->isAggregateRoot()) {
 					$iconFileName = 'aggregate_root.gif';
@@ -167,7 +178,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 			foreach ($this->extension->getDomainObjects() as $domainObject) {
 				// Do not generate anyting if $domainObject is not an Entity or has no actions defined
 				if (!$domainObject->getEntity() || (count($domainObject->getActions()) == 0)) continue;
-				
+
 				t3lib_div::mkdir_deep($privateResourcesDirectory, 'Templates/' . $domainObject->getName());
 				$domainTemplateDirectory = $privateResourcesDirectory . 'Templates/' . $domainObject->getName() . '/';
 				foreach($domainObject->getActions() as $action) {
@@ -195,11 +206,13 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		$variableContainer = $this->objectManager->create('Tx_Fluid_Core_ViewHelper_TemplateVariableContainer', $templateVariables);
 
 		$renderingContext = $this->objectManager->create('Tx_Fluid_Core_Rendering_RenderingContext');
-		$renderingContext->setTemplateVariableContainer($variableContainer);
+		/* @var $renderingContext Tx_Fluid_Core_Rendering_RenderingContext */
+		$renderingContext->injectTemplateVariableContainer($variableContainer);
+		
 		//$renderingContext->setControllerContext($this->controllerContext); 
 
 		$viewHelperVariableContainer = $this->objectManager->create('Tx_Fluid_Core_ViewHelper_ViewHelperVariableContainer');
-		$renderingContext->setViewHelperVariableContainer($viewHelperVariableContainer);
+		$renderingContext->injectViewHelperVariableContainer($viewHelperVariableContainer);
 
 		return $renderingContext;
 	}
@@ -218,8 +231,9 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		return $this->renderTemplate('Classes/Controller/actionControllerCrudActions.phpt', array('domainObject' => $domainObject));
 	}
 	
-	public function generateDomainObjectCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject, Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
-		return $this->renderTemplate('Classes/Domain/Model/domainObject.phpt', array('domainObject' => $domainObject, 'extension' => $extension));
+	public function generateDomainObjectCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject, Tx_ExtbaseKickstarter_Domain_Model_Extension $extension, Tx_ExtbaseKickstarter_Domain_Model_Class_Schema $classSchema = null) {
+		
+		return $this->renderTemplate('Classes/Domain/Model/domainObject.phpt', array('domainObject' => $domainObject, 'extension' => $extension, 'classSchema' => $classSchema));
 	}
 
 	public function generateDomainRepositoryCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {

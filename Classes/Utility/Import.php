@@ -47,7 +47,12 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 	
 	// TODO parse definitions of constants
 	public $defineRegex = "/define+\s*\(([a-zA-Z0-9_-,\\'\"\s]*)/";
-	
+
+	/**
+	 * builds a classSchema from a className, you have to require_once before importing the class
+	 * @param string $className
+	 * @return Tx_ExtbaseKickstarter_Domain_Model_Class_Schema 
+	 */
 	public function importClassSchemaFromFile($className){
 		
 		$this->starttime = microtime(true); // for profiling

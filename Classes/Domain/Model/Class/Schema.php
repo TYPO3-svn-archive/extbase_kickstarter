@@ -232,17 +232,19 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * 
 	 * @return array
 	 */
-	public function getGetter(){
+	public function getGetters(){
 		$allMethods = $this->getMethods();
 		$getterMethods = array();
 		foreach($allMethods as $method){
 			$methodName = $method->getName();
 			if(strpos($methodName,'get')===0){
-				if($this->hasProperty(substr($methodName,3))){
-					$getterMethods[] = new Tx_ExtbaseKickstarter_Domain_Model_ClassMethod($method);
+				$propertyName = strtolower(substr($methodName,3));
+				if($this->propertyExists($propertyName)){
+					$getterMethods[$propertyName] = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($method);
 				}
 			}
 		}
+		
 		return $getterMethods;
 	}
 	
@@ -250,14 +252,15 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * 
 	 * @return array
 	 */
-	public function getSetter(){
+	public function getSetters(){
 		$allMethods = $this->getMethods();
 		$setterMethods = array();
 		foreach($allMethods as $method){
 			$methodName = $method->getName();
 			if(strpos($methodName,'set')===0){
-				if($this->hasProperty(substr($methodName,3))){
-					$setterMethods[] = new Tx_ExtbaseKickstarter_Domain_Model_ClassMethod($method);
+				$propertyName = strtolower(substr($methodName,3));
+				if($this->propertyExists($propertyName)){
+					$setterMethods[$propertyName] = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($method);
 				}
 			}
 		}
@@ -266,8 +269,8 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	
 	/**
 	 * Getter for property
-	 *
-	 * @return string methods
+	 * @param $propertyName the name of the property
+	 * @return Tx_ExtbaseKickstarter_Reflection_PropertyReflection
 	 */
 	public function getProperty($propertyName) {
 		if($this->propertyExists($propertyName)){
@@ -275,7 +278,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 		}
 		else return NULL;
 	}
-	
+
 	/**
 	 * Setter for properties
 	 *
