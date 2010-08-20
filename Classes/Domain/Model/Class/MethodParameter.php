@@ -156,6 +156,9 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 	public function isPassedByReference($passedByReference){
 		$this->passedByReference = $passedByReference;
 	}
-		
+
+	public function getTypeHint(){
+		//todo: implement
+		return "-todo: implement getTypeHint-";
+	}
 }
-	

@@ -28,6 +28,8 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
+
+
 class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema{
 	
 	/**
@@ -56,7 +58,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	protected $methods;
 	
 	/**
-	 * methodNames
+	 * methodNames - deprecated -> use array_keys($this->methods) instead
 	 * @var array
 	 */
 	protected $methodNames;
@@ -164,7 +166,8 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * @return boolean 
 	 */
 	public function methodExists($methodName){
-		if(is_array($this->methodNames) && in_array($methodName,$this->methodNames)){
+		$methodNames = array_keys($this->methods);
+		if(is_array($this->methodNames) && in_array($methodName,$methodNames)){
 			return true;
 		}
 		else return false;
@@ -173,7 +176,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	/**
 	 * Setter for methods
 	 *
-	 * @param string $methods methods
+	 * @param array $methods methods
 	 * @return void
 	 */
 	public function setMethods($methods) {
@@ -193,7 +196,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	/**
 	 * Getter for methods
 	 *
-	 * @return string methods
+	 * @return array methods
 	 */
 	public function getMethods() {
 		return $this->methods;
@@ -219,7 +222,6 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 */
 	public function addMethod($classMethod) {
 		if(!$this->methodExists($classMethod->getName())){
-			$this->methodNames[] = $classMethod->getName();
 			$this->methods[$classMethod->getName()] = $classMethod;
 		}
 		
@@ -229,18 +231,17 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	
 	
 	/**
-	 * 
-	 * @return array
+	 * returnes all methods starting with "get"
+	 * @return array an array of method objects
 	 */
 	public function getGetters(){
-		$allMethods = $this->getMethods();
 		$getterMethods = array();
-		foreach($allMethods as $method){
+		foreach($this->getMethods() as $method){
 			$methodName = $method->getName();
 			if(strpos($methodName,'get')===0){
 				$propertyName = strtolower(substr($methodName,3));
 				if($this->propertyExists($propertyName)){
-					$getterMethods[$propertyName] = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($method);
+					$getterMethods[$propertyName] = $method;
 				}
 			}
 		}
@@ -249,18 +250,19 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	}
 	
 	/**
-	 * 
-	 * @return array
+	 * returnes all methods starting with "set"
+	 * @return array an array of method objects
 	 */
 	public function getSetters(){
-		$allMethods = $this->getMethods();
 		$setterMethods = array();
-		foreach($allMethods as $method){
+		foreach($this->getMethods() as $method){
 			$methodName = $method->getName();
 			if(strpos($methodName,'set')===0){
 				$propertyName = strtolower(substr($methodName,3));
 				if($this->propertyExists($propertyName)){
-					$setterMethods[$propertyName] = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($method);
+					$setter = new Tx_ExtbaseKickstarter_Domain_Model_Class_ProperyMethod($methodName);
+					$setter->setProperty($this->getProperty($propertyName));
+					$setterMethods[$propertyName] = $setter;
 				}
 			}
 		}

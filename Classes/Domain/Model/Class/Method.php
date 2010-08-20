@@ -44,7 +44,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	
 	
 	public function __construct($methodName,$methodReflection = NULL){
-		$this->name = $methodName;
+		$this->setName($methodName);
 		if($methodReflection instanceof Tx_ExtbaseKickstarter_Reflection_MethodReflection){
 			foreach($this as $key => $value) {
 				$setterMethodName = 'set'.t3lib_div::underscoredToUpperCamelCase($key);

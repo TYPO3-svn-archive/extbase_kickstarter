@@ -50,7 +50,10 @@ class Tx_ExtbaseKickstarter_ClassImportFromFile_testcase extends Tx_ExtbaseKicks
 	public function TestComplexClassImport(){
 		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ComplexClass.php');
 		$classSchema = $this->importClass('Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass');
-		
+		$getters = $classSchema->getGetters();
+		$this->assertEquals(1, count($getters));
+		$firstGetter = array_pop($getters);
+		$this->assertEquals('getName', $firstGetter->getName());
 		/**  here we could include some more tests
 		$p = $classSchema->getMethod('methodWithStrangePrecedingBlock')->getPrecedingBlock();
 		$a = $classSchema->getAppendedBlock();
