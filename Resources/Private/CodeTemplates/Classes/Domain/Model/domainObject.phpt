@@ -33,13 +33,12 @@
  */{namespace k=Tx_ExtbaseKickstarter_ViewHelpers}
 class {domainObject.className} extends {domainObject.baseClass} {
 	<f:for each="{domainObject.properties}" as="property">
-	<k:conditionalOutput array="{classSchema.properties}" key="{property.name}" methodName="getDocComment">
+	
 	/**
 	 * {property.description}
 	 * @var {property.typeForComment}<f:if condition="{property.validateAnnotation}">
 	 * {property.validateAnnotation}</f:if>
 	 */
-	</k:conditionalOutput>
 	protected ${property.fieldName};
 	</f:for>
 	<k:removeNewlines>
@@ -57,14 +56,13 @@ class {domainObject.className} extends {domainObject.baseClass} {
 	</f:if>
 	</k:removeNewlines>
 	<f:for each="{domainObject.properties}" as="property">
-	<k:conditionalOutput array="{classSchema.setters}" key="{property.name}" methodName="getDocComment">
+
 	/**
 	 * Setter for {property.name}
 	 *
 	 * @param {property.typeForComment} ${property.name} {property.description}
 	 * @return void
 	 */
-	</k:conditionalOutput>
 	public function set{property.name -> k:uppercaseFirst()}({property.typeHintWithTrailingWhiteSpace}${property.name}) {
 		$this->{property.name} = ${property.name};
 	}

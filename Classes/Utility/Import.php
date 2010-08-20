@@ -319,7 +319,7 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 	    	
 	    	$info['Parsetime:'] = $totaltime.' s';
 			
-	    	debug($classSchema->getInfo());
+	    	//debug($classSchema->getInfo());
 		}
 
 		return $classSchema;
