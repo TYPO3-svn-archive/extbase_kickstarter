@@ -87,18 +87,27 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	public function getParameters(){
 		return $this->parameters;
 	}
-	
+
+	/**
+	 * adder for parameters
+	 * @param array $parameters
+	 * @return void
+	 */
+	public function addParameters($parameters){
+		foreach($parameters as $parameter){
+			$methodParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter($parameter->getName(),$parameter);
+			$this->parameters[] = $methodParameter;
+		}
+
+	}
+
 	/**
 	 * setter for parameters
 	 * @param array $parameters
 	 * @return void
 	 */
 	public function setParameters($parameters){
-		foreach($parameters as $parameter){
-			$methodParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter($parameter->getName(),$parameter);
-			$this->parameters[] = $methodParameter;
-		}
-		
+		$this->parameters[] = $parameters;
 	}
 	
 }

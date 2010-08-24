@@ -57,6 +57,7 @@ class {domainObject.className} extends {domainObject.baseClass} {
 	</k:removeNewlines>
 
 	<k:render partial="Classes/Domain/Model/setters.phpt" arguments="{setters: classSchema.setters}" />
+	<k:render partial="Classes/Domain/Model/getters.phpt" arguments="{getters: classSchema.getters}" />
 
 	<f:for each="{domainObject.properties}" as="property">
 

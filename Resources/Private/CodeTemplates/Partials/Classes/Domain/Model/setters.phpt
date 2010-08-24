@@ -3,7 +3,7 @@
 	/**
 	 * Setter for {setter.property.name}
 	 *
-	 
+	 * @param {setter.parameters.0.typeForComment} ${setter.property.name} {setter.property.description}
 	 * @return void
 	 */
 	public function set{setter.property.name -> k:uppercaseFirst()}({setter.parameters.0.typeHint} ${setter.property.name}) {

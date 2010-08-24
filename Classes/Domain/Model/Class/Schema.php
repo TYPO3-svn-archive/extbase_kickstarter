@@ -45,7 +45,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	protected $properties;
 	
 	/**
-	 * propertieNames
+	 * propertieNames - deprecated -> use this->getPropertyNames() instead
 	 * @var array
 	 */
 	protected $propertieNames;
@@ -241,7 +241,9 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 			if(strpos($methodName,'get')===0){
 				$propertyName = strtolower(substr($methodName,3));
 				if($this->propertyExists($propertyName)){
-					$getterMethods[$propertyName] = $method;
+					$getter = new Tx_ExtbaseKickstarter_Domain_Model_Class_PropertyMethod($methodName);
+					$getter->setProperty($this->getProperty($propertyName));
+					$getterMethods[$propertyName] = $getter;
 				}
 			}
 		}
@@ -260,7 +262,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 			if(strpos($methodName,'set')===0){
 				$propertyName = strtolower(substr($methodName,3));
 				if($this->propertyExists($propertyName)){
-					$setter = new Tx_ExtbaseKickstarter_Domain_Model_Class_ProperyMethod($methodName);
+					$setter = new Tx_ExtbaseKickstarter_Domain_Model_Class_PropertyMethod($methodName);
 					$setter->setProperty($this->getProperty($propertyName));
 					$setterMethods[$propertyName] = $setter;
 				}
@@ -326,7 +328,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * @return boolean 
 	 */
 	public function propertyExists($propertyName){
-		if(is_array($this->propertyNames) && in_array($propertyName,$this->propertyNames)){
+		if(in_array($propertyName,$this->getPropertyNames())){
 			return true;
 		}
 		else return false;
@@ -340,12 +342,18 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 */
 	public function addProperty($classProperty) {
 		if(!$this->propertyExists($classProperty->getName())){
-			$this->propertyNames[] = $classProperty->getName();
 			$this->properties[$classProperty->getName()] = $classProperty;
 		}
 		else return false;
 	}
-	
+
+	/**
+	 * returns all property names
+	 * @return array
+	 */
+	public function getPropertyNames(){
+		return array_keys($this->properties);
+	}
 	/**
 	 * Setter for property
 	 *
@@ -353,7 +361,6 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * @return boolean success
 	 */
 	public function setProperty($classProperty) {
-		$this->propertyNames[] = $classProperty->getName();
 		$this->properties[$classProperty->getName()] = $classProperty;
 	}
 	

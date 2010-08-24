@@ -24,13 +24,12 @@
 
 /**
  * a method belonging to a property.
- * this could be a getter, setter, is, exists, add, remove method
+ * this could be a getter, setter, is, exists, add or remove method
  *
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_Class_ProperyMethod extends Tx_ExtbaseKickstarter_Domain_Model_Class_Method{
-	
+class Tx_ExtbaseKickstarter_Domain_Model_Class_PropertyMethod extends Tx_ExtbaseKickstarter_Domain_Model_Class_Method{
 	/**
 	 * the property, the method belongs to
 	 * @var Tx_ExtbaseKickstarter_Domain_Model_Property
