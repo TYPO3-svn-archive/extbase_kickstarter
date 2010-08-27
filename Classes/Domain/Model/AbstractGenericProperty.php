@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2009 Ingmar Schlecht
+*  (c) 2010 Nico de Haen, Ingmar Schlecht, Stephan Petzl
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,13 +23,13 @@
 ***************************************************************/
 
 /**
- * Base class for all properties in the object schema.
+ * property representing a "property" in the context of software development
  *
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty {
-	
+abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema{
+
 	/**
 	 * Reserved words by TYPO3 and MySQL
 	 * @var array
@@ -166,70 +166,40 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty {
 		'upgrade',
 		'while'
 	);
-	
-	/**
-	 * Name of the property
-	 * @var string
-	 */
-	protected $name;
-	
-	/**
-	 * Description of property
-	 * @var string
-	 */
-	protected $description;
-	
+
+
 	/**
 	 * Whether the property is required
 	 * @var boolean
 	 */
 	protected $required;
 
+
 	/**
 	 * The domain object this property belongs to.
 	 * @var Tx_ExtbaseKickstarter_Domain_Model_DomainObject
 	 */
-	protected $domainObject;
+	protected $class;
 
 	/**
 	 * DO NOT CALL DIRECTLY! This is being called by addProperty() automatically.
 	 *
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject the domain object this property belongs to
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_Schema $class the class this property belongs to
 	 */
-	public function setDomainObject(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {
-		$this->domainObject = $domainObject;
+	public function setClass(Tx_ExtbaseKickstarter_Domain_Model_Class_Schema $class) {
+		$this->class = $class;
 	}
 
 	/**
 	 * Get the domain object this property belongs to.
 	 *
-	 * @return Tx_ExtbaseKickstarter_Domain_Model_DomainObject
+	 * @return Tx_ExtbaseKickstarter_Domain_Model_Class_Schema
 	 */
-	public function getDomainObject() {
-		return $this->domainObject;
+	public function getClass() {
+		return $this->class;
 	}
-
-
 	/**
-	 * Get property name
-	 *
-	 * @return string
-	 */
-	public function getName() {
-		return $this->name;
-	}
-	
-	/**
-	 * Set property name
-	 * 
-	 * @param string $name Property name
-	 */
-	public function setName($name) {
-		$this->name = $name;
-	}
-
-	/**
-	 * Returns a field name used in the database. This is the property name converted 
+	 * Returns a field name used in the database. This is the property name converted
 	 * to lowercase underscore (mySpecialProperty -> my_special_property).
 	 *
 	 * @return string the field name in lowercase underscore
@@ -249,27 +219,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty {
 	 */
 	abstract public function getSqlDefinition();
 
-	/**
-	 * Get property description to be used in comments
-	 *
-	 * @return string Property description
-	 */
-	public function getDescription() {
-		if ($this->description){
-			return $this->description;
-		} else {
-			return $this->getName();
-		}
-	}
-	
-	/**
-	 * Set property description
-	 *
-	 * @param string $description Property description
-	 */
-	public function setDescription($description) {
-		$this->description = $description;
-	}
+
 
 	/**
 	 * Template Method which should return the type hinting information
@@ -301,7 +251,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty {
 
 	/**
 	 * TRUE if this property is required, FALSE otherwise.
-	 * 
+	 *
 	 * @return boolean
 	 */
 	public function getRequired() {
@@ -331,7 +281,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty {
 
 	/**
 	 * Get the data type of this property. This is the last part after Tx_ExtbaseKickstarter_Domain_Model_Property_*
-	 * 
+	 *
 	 * @return string the data type of this property
 	 */
 	public function getDataType() {
@@ -364,5 +314,35 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty {
 	public function getLabelNamespace() {
 		return $this->domainObject->getLabelNamespace() . '.' . $this->getFieldName();
 	}
+	/**
+	 *
+	 * @param string $propertyName
+	 * @return void
+	 */
+	public function __construct($propertyName){
+		$this->name = $propertyName;
+	}
+
+	/**
+	 *
+	 * @param Tx_ExtbaseKickstarter_Reflection_PropertyReflection $propertyReflection
+	 * @return void
+	 */
+	public function mapToReflectionProperty($propertyReflection){
+		if($propertyReflection instanceof Tx_ExtbaseKickstarter_Reflection_PropertyReflection){
+			foreach($this as $key => $value) {
+				$setterMethodName = 'set'.t3lib_div::underscoredToUpperCamelCase($key);
+				$getterMethodName = 'get'.t3lib_div::underscoredToUpperCamelCase($key);
+
+	    		// map properties of reflection class to this class
+				if(method_exists($propertyReflection,$getterMethodName) && method_exists($this,$setterMethodName) ){
+	    			$this->$setterMethodName($propertyReflection->$getterMethodName());
+	    			//t3lib_div::print_array($getterMethodName);
+	    		}
+			}
+		}
+	}
+
 }
+
 ?>

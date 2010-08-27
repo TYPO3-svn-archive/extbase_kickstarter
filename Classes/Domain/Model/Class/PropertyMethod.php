@@ -42,7 +42,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_PropertyMethod extends Tx_Extbase
 	/**
 	 * Sets the property to which this method belongs. e.g. the method "getBody" will belong to the property "body"
 	 *
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_Property $property
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty $property
 	 * @return void
 	 */
 	public function setProperty($property) {
@@ -52,7 +52,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_PropertyMethod extends Tx_Extbase
 	/**
 	 * Gets the property to which this method belongs. e.g. the method "getBody" will belong to the property "body"
 	 *
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_Property $property
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty $property
 	 * @return void
 	 */
 	public function getProperty($property) {

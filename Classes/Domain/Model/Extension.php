@@ -172,6 +172,11 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 		$this->domainObjects[$domainObject->getName()] = $domainObject;
 	}
 
+	/**
+	 *
+	 * @param string $domainObjectName
+	 * @return Tx_ExtbaseKickstarter_Domain_Model_DomainObject
+	 */
 	public function getDomainObjectByName($domainObjectName) {
 		if (isset($this->domainObjects[$domainObjectName])) {
 			return $this->domainObjects[$domainObjectName];

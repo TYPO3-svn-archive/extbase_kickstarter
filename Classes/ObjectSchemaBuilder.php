@@ -38,7 +38,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 	 * @return Tx_ExtbaseKickstarter_Domain_Model_Extension
 	 */
 	public function build(array $jsonArray) {
-		$this->extension = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Extension');
+		$this->extension = new Tx_ExtbaseKickstarter_Domain_Model_Extension();
 		$globalProperties = $jsonArray['properties'];
 		if (!is_array($globalProperties)) throw new Exception('Wrong 1');
 
@@ -115,7 +115,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 	}
 
 	protected function buildDomainObject(array $jsonDomainObject) {
-		$domainObject = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_DomainObject');
+		$domainObject = new Tx_ExtbaseKickstarter_Domain_Model_DomainObject();
 		$domainObject->setName($jsonDomainObject['name']);
 		$domainObject->setDescription($jsonDomainObject['objectsettings']['description']);
 		if ($jsonDomainObject['objectsettings']['type'] === 'Entity') {
@@ -126,32 +126,46 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 
 		$domainObject->setAggregateRoot($jsonDomainObject['objectsettings']['aggregateRoot']);
 		
-		/**
+		
 		$this->importTool = new Tx_ExtbaseKickstarter_Utility_Import();
 		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
 		if(file_exists( $this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php')){
 			include_once($this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php');
-			$classSchema = $this->importTool->importClassSchemaFromFile(Tx_ExtbaseKickstarter_Utility_Naming::getDomainObjectClassName( $this->extension->getExtensionKey(), $domainObject->getName() ));
-			
+			$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Model_' . $domainObject->getName();
+			$classSchema = $this->importTool->importClassSchemaFromFile($className);			
 		}
-		*/
-		
+
 		foreach ($jsonDomainObject['propertyGroup']['properties'] as $jsonProperty) {
 			t3lib_div::devLog(serialize($jsonProperty),'extbase_kickstarter');
 			$propertyType = $jsonProperty['propertyType'];
 			$propertyClassName = 'Tx_ExtbaseKickstarter_Domain_Model_Property_' . $propertyType . 'Property';
+			$propertyName = $jsonProperty['propertyName'];
 			if (!class_exists($propertyClassName)) throw new Exception('Property of type ' . $propertyType . ' not found');
 			$property = t3lib_div::makeInstance($propertyClassName);
-			$property->setName($jsonProperty['propertyName']);
+			/* @var $property Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty */
+			$property->setName($propertyName);
 			$property->setDescription($jsonProperty['propertyDescription']);
 
+			$getter = new Tx_ExtbaseKickstarter_Domain_Model_Class_PropertyMethod('get'.ucfirst($propertyName));
+			$getter->setProperty($property);
+			//TODO retrieve this from a template/viewhelper, and maybe move this line somewhere else (where should we set the default code?)
+			$getter->setBody('return $this->'.$propertyName.';');
+			// override body if there is an existing one, and maybe move these lines somewhere else (where should we set the default code?)
+			$existingBody = $existingSchema->getMethod($getter->getName())->getBody();
+			if($existingBody){
+				$getter->setBody($existingBody);
+			}
+			$domainObject->addMethod($getter);
+			
 			if (isset($jsonProperty['propertyIsRequired'])) {
 				$property->setRequired($jsonProperty['propertyIsRequired']);
 			}
 
 			$domainObject->addProperty($property);
 		}
-		
+		//TODO add methods to schema, which only occur in $existingSchema
+		//TODO think about: how can we remove methods out of the kickstarter?
+
 		foreach ($jsonDomainObject['actionGroup']['actions'] as $jsonAction) {
 			$action = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Action');
 			$action->setName($jsonAction);

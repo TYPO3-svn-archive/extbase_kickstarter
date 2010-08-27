@@ -31,7 +31,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_ZeroToManyRelation extends Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AnyToManyRelation {
+class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_ZeroToManyRelation extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty {
 
 	public function getTypeForComment() {
 		return 'Tx_Extbase_Persistence_ObjectStorage<' . $this->getForeignClass()->getClassName() . '>';

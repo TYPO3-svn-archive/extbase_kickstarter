@@ -231,8 +231,9 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 									// the property has to exist in the classReflection
 									$reflectionProperty = $classReflection->getProperty($propertyName);
 									if($reflectionProperty){
-										
-										$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_Class_Property($propertyName);
+
+										//TODO we need to create the right property here (for each type: e.g. BooleanProperty...), how could this be done?
+										$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty($propertyName);
 										$classProperty->mapToReflectionProperty($reflectionProperty);
 										
 										if($isFirstProperty){
@@ -324,8 +325,8 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 
 		return $classSchema;
 	}
-	
-	/**
+
+		/**
 	 * 
 	 * @param array $lines
 	 * @param int $start

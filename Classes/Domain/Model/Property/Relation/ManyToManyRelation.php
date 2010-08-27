@@ -31,7 +31,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_ManyToManyRelation extends Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AnyToManyRelation {
+class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_ManyToManyRelation extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty {
 
 	/**
 	 * Returns the type for an ObjectStorage and its contained type based on a mm-relation.

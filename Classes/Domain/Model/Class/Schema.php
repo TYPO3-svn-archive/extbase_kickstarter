@@ -186,10 +186,10 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	/**
 	 * Setter for a single method (allows to override an existing method)
 	 *
-	 * @param Tx_ExtensionEditor_Domain_Model_ClassMethod $method
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_Method $method
 	 * @return void
 	 */
-	public function setMethod(Tx_ExtensionEditor_Domain_Model_ClassMethod $classMethod) {
+	public function setMethod(Tx_ExtbaseKickstarter_Domain_Model_ClassMethod $classMethod) {
 		$this->methods[$classMethod->getName()] = $classMethod;
 	}
 
@@ -205,7 +205,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	/**
 	 * Getter for method
 	 *
-	 * @return string methods
+	 * @return Tx_ExtbaseKickstarter_Domain_Model_Class_Method
 	 */
 	public function getMethod($methodName) {
 		if($this->methodExists($methodName)){
@@ -217,7 +217,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	/**
 	 * Add a method
 	 *
-	 * @param Tx_ExtensionEditor_Domain_Model_ClassMethod $methods
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_Method $classMethod
 	 * @return void
 	 */
 	public function addMethod($classMethod) {
@@ -226,8 +226,6 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 		}
 		
 	}
-	
-	
 	
 	
 	/**
@@ -241,9 +239,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 			if(strpos($methodName,'get')===0){
 				$propertyName = strtolower(substr($methodName,3));
 				if($this->propertyExists($propertyName)){
-					$getter = new Tx_ExtbaseKickstarter_Domain_Model_Class_PropertyMethod($methodName);
-					$getter->setProperty($this->getProperty($propertyName));
-					$getterMethods[$propertyName] = $getter;
+					$getterMethods[$propertyName] = $method;
 				}
 			}
 		}
@@ -262,14 +258,14 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 			if(strpos($methodName,'set')===0){
 				$propertyName = strtolower(substr($methodName,3));
 				if($this->propertyExists($propertyName)){
-					$setter = new Tx_ExtbaseKickstarter_Domain_Model_Class_PropertyMethod($methodName);
-					$setter->setProperty($this->getProperty($propertyName));
-					$setterMethods[$propertyName] = $setter;
+					$setterMethods[$propertyName] = $method;
 				}
 			}
 		}
 		return $setterMethods;
 	}
+
+
 	
 	/**
 	 * Getter for property
@@ -337,11 +333,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	/**
 	 * add a property (returns true if successfull added)
 	 *
-	 * @param Tx_ExtbaseKickstarter_Reflection_PropertyReflection
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty
 	 * @return boolean success
 	 */
-	public function addProperty($classProperty) {
+	public function addProperty(Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty $classProperty) {
 		if(!$this->propertyExists($classProperty->getName())){
+			$classProperty->setClass($this);
 			$this->properties[$classProperty->getName()] = $classProperty;
 		}
 		else return false;

@@ -31,7 +31,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-abstract class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRelation extends Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty {
+abstract class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRelation extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty {
 
 	/**
 	 * The schema of the foreign class

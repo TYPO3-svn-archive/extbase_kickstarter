@@ -67,7 +67,12 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	 * @var string
 	 */
 	protected $isModified;	
-		
+
+	/**
+	 * Description of property
+	 * @var string
+	 */
+	protected $description;
 	
 	/**
 	 * Setter for name
@@ -115,6 +120,27 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	 */
 	public function setTags($tags) {
 		return $this->tags = $tags;
+	}
+	/**
+	 * Get property description to be used in comments
+	 *
+	 * @return string Property description
+	 */
+	public function getDescription() {
+		if ($this->description){
+			return $this->description;
+		} else {
+			return $this->getName();
+		}
+	}
+
+	/**
+	 * Set property description
+	 *
+	 * @param string $description Property description
+	 */
+	public function setDescription($description) {
+		$this->description = $description;
 	}
 	/**
 	 * Returns the values of the specified tag
@@ -212,7 +238,6 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	public function getIsModified() {
 		return $this->isModified;
 	}
-	
 
 }
 
