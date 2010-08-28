@@ -217,12 +217,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	/**
 	 * Add a method
 	 *
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_Method $classMethod
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_Method $m,ethod
 	 * @return void
 	 */
-	public function addMethod($classMethod) {
-		if(!$this->methodExists($classMethod->getName())){
-			$this->methods[$classMethod->getName()] = $classMethod;
+	public function addMethod($method) {
+		if(!$this->methodExists($method->getName())){
+			$this->methods[$method->getName()] = $method;
 		}
 		
 	}

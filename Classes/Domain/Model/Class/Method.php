@@ -41,6 +41,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	 * @var array
 	 */
 	protected $parameters;
+
 	
 	
 	public function __construct($methodName,$methodReflection = NULL){
@@ -89,6 +90,18 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	}
 
 	/**
+	 *
+	 * @param string $parameterName
+	 * @return Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter
+	 */
+	public function getParameter(string $parameterName){
+		if(isset($this->parameters[$parameterName])){
+			return $this->parameters[$parameterName];
+		}else{
+			return null;
+		}
+	}
+	/**
 	 * adder for parameters
 	 * @param array $parameters
 	 * @return void
@@ -96,9 +109,16 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	public function addParameters($parameters){
 		foreach($parameters as $parameter){
 			$methodParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter($parameter->getName(),$parameter);
-			$this->parameters[] = $methodParameter;
+			$this->parameters[$methodParameter->getName()] = $methodParameter;
 		}
 
+	}
+	/**
+	 * adds a parameter
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter $parameter
+	 */
+	public function addParameter(Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter $parameter){
+		$this->parameters[$parameter->getName()] = $parameter;
 	}
 
 	/**
