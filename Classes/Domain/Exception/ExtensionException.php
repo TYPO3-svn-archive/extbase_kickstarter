@@ -1,8 +1,9 @@
 <?php
+
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2009 Ingmar Schlecht
+*  (c) 2009 Rens Admiraal
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -23,25 +24,11 @@
 ***************************************************************/
 
 /**
- * Creates a request an dispatches it to the controller which was specified
- * by TS Setup, Flexform and returns the content to the v4 framework.
- *
- * This class is the main entry point for extbase extensions in the frontend.
+ * Schema for a whole extension
  *
  * @package ExtbaseKickstarter
  * @version $ID:$
+ * @license http://www.gnu.org/licenses/lgpl.html GNU Lesser General Public License, version 3 or later
  */
-class Tx_ExtbaseKickstarter_Domain_Model_Property_BooleanProperty extends Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty {
-	public function getTypeForComment() {
-		return 'boolean';
-	}
-
-	public function getTypeHint() {
-		return '';
-	}
-
-	public function getSqlDefinition() {
-		return $this->getFieldName() . " tinyint(1) unsigned DEFAULT '0' NOT NULL,";
-	}
+class Tx_ExtbaseKickstarter_Domain_Exception_ExtensionException extends Tx_ExtbaseKickstarter_Exception {
 }
-?>

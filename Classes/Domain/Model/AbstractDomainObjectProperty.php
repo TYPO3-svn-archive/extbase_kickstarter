@@ -28,7 +28,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema{
+abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty {
 
 	/**
 	 * Reserved words by TYPO3 and MySQL
@@ -166,7 +166,18 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty extend
 		'upgrade',
 		'while'
 	);
-
+	
+	/**
+	 * Name of the property
+	 * @var string
+	 */
+	protected $name;
+	
+	/**
+	 * Description of property
+	 * @var string
+	 */
+	protected $description;
 
 	/**
 	 * Whether the property is required
@@ -197,6 +208,46 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty extend
 	 */
 	public function getClass() {
 		return $this->class;
+	}
+	
+	/**
+	 * Get property name
+	 *
+	 * @return string
+	 */
+	public function getName() {
+		return $this->name;
+	}
+	
+	/**
+	 * Set property name
+	 * 
+	 * @param string $name Property name
+	 */
+	public function setName($name) {
+		$this->name = $name;
+	}
+
+	/**
+	 * Get property description to be used in comments
+	 *
+	 * @return string Property description
+	 */
+	public function getDescription() {
+		if ($this->description){
+			return $this->description;
+		} else {
+			return $this->getName();
+		}
+	}
+	
+	/**
+	 * Set property description
+	 *
+	 * @param string $description Property description
+	 */
+	public function setDescription($description) {
+		$this->description = $description;
 	}
 	/**
 	 * Returns a field name used in the database. This is the property name converted
@@ -237,7 +288,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty extend
 	 * @return string
 	 */
 	abstract public function getTypeHint();
-
+	
 	/**
 	 * Get PHP type hint with a single trailing whitespace appended if needed, or if no type hint is set, omit this trailing whitespace.
 	 *
@@ -324,25 +375,13 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty extend
 	}
 
 	/**
+	 * DO NOT CALL DIRECTLY! This is being called by addProperty() automatically.
 	 *
-	 * @param Tx_ExtbaseKickstarter_Reflection_PropertyReflection $propertyReflection
-	 * @return void
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject the domain object this property belongs to
 	 */
-	public function mapToReflectionProperty($propertyReflection){
-		if($propertyReflection instanceof Tx_ExtbaseKickstarter_Reflection_PropertyReflection){
-			foreach($this as $key => $value) {
-				$setterMethodName = 'set'.t3lib_div::underscoredToUpperCamelCase($key);
-				$getterMethodName = 'get'.t3lib_div::underscoredToUpperCamelCase($key);
-
-	    		// map properties of reflection class to this class
-				if(method_exists($propertyReflection,$getterMethodName) && method_exists($this,$setterMethodName) ){
-	    			$this->$setterMethodName($propertyReflection->$getterMethodName());
-	    			//t3lib_div::print_array($getterMethodName);
-	    		}
-			}
-		}
+	public function setDomainObject(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {
+		$this->domainObject = $domainObject;
 	}
-
 }
 
 ?>

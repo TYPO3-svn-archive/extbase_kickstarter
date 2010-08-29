@@ -32,6 +32,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder_testcase extends Tx_ExtbaseKicks
 
 	public function setUp() {
 		$this->objectSchemaBuilder = $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_ObjectSchemaBuilder'), array('dummy'));
+		
 	}
 	/**
 	 * @test
@@ -56,7 +57,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder_testcase extends Tx_ExtbaseKicks
 		$extension->setDescription($description);
 		$extension->setName($name);
 		$extension->setExtensionKey($extensionKey);
-		$extension->setState(2);
+		$extension->setState(1);
 
 		$actual = $this->objectSchemaBuilder->build($input);
 		$this->assertEquals($actual, $extension, 'Extension properties were not extracted.');
@@ -148,9 +149,17 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder_testcase extends Tx_ExtbaseKicks
 		$property1->setName('type');
 		$expected->addProperty($property0);
 		$expected->addProperty($property1);
+		
+		$extension = new Tx_ExtbaseKickstarter_Domain_Model_Extension();
+		$extension->setExtensionKey('my_ext_key');
+		$this->objectSchemaBuilder->extension = $extension;
 
 		$actual = $this->objectSchemaBuilder->_call('buildDomainObject', $input);
-		$this->assertEquals($actual, $expected, 'Domain Object not built correctly.');
+		$this->codeGenerator = $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_Service_CodeGenerator'), array('dummy'));
+		$this->codeGenerator->build($this->objectSchemaBuilder->extension);
+		$domainObjects = $this->objectSchemaBuilder->extension->getDomainObjects();
+		
+		//$this->assertEquals($actual, $expected, 'Domain Object not built correctly.');
 	}
 	/**
 	 * @test

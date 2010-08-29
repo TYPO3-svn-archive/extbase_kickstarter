@@ -86,6 +86,7 @@ class Tx_ExtbaseKickstarter_ClassImportFromFile_testcase extends Tx_ExtbaseKicks
 	 */
 	protected function importClass($className){
 		$importTool = new Tx_ExtbaseKickstarter_Utility_Import();
+		$importTool->debugMode = true;
 		$classSchema = $importTool->importClassSchemaFromFile($className);
 		$this->assertTrue($classSchema instanceof Tx_ExtbaseKickstarter_Domain_Model_Class_Schema);
 		$classReflection = new Tx_ExtbaseKickstarter_Reflection_ClassReflection($className);

@@ -59,7 +59,14 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	const STATE_STABLE = 2;
 	const STATE_EXPERIMENTAL = 3;
 	const STATE_TEST = 4;
-
+	
+	/**
+	 * 
+	 * an array keeping all md5 hashes of all files in the extension to detect modifications
+	 * 
+	 * @var array
+	 */
+	protected $md5Hashes = array();
 
 	/**
 	 * All domain objects
@@ -68,7 +75,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	protected $domainObjects = array();
 	
 	/**
-	 * The Perons working on the Extension
+	 * The Persons working on the Extension
 	 * @var array<Tx_ExtbaseKickstarter_Domain_Model_Person>
 	 */
 	protected $persons = array();
@@ -228,6 +235,41 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	public function getCssClassName() {
 		$key = 'tx_' . strtolower(Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->getExtensionKey())) . '_pi1';
 		return str_replace('_', '-', $key);
+	}
+	
+	public function isModified( $filePath){
+		return true;
+		if(is_file($filePath) && isset($this->md5Hashes[$filePath])){
+			if(md5_file($filePath) != $this->md5Hashes[$filePath]){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * setter for md5 hashes 
+	 * @return void
+	 */
+	public function setMD5Hashes($md5Hashes){
+		$this->md5Hashes = $md5Hashes;
+	}
+	
+	/**
+	 * getter for md5 hashes 
+	 * @return array $md5Hashes
+	 */
+	public function getMD5Hashes(){
+		return $this->md5Hashes;
+	}
+	
+	/**
+	 * calculates all md5 hashes 
+	 * @return 
+	 */
+	public function setMD5Hash($filePath){
+		$this->md5Hashes[$filePath] = md5_file($filePath);
+		
 	}
 }
 ?>

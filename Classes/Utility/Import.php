@@ -30,7 +30,9 @@
  */
 class Tx_ExtbaseKickstarter_Utility_Import {
 	  
-	public $debugMode = true;
+	public $debugMode = false;
+	
+	public $indentToken = "\t\t";
 	
 	public $methodRegex = "/\s*function\s*([a-zA-Z0-9_]*)/";
 
@@ -65,7 +67,11 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 		
 		$classReflection = new Tx_ExtbaseKickstarter_Reflection_ClassReflection($className);
 		
-		$propertiesToMap = array('FileName','Modifiers','Tags');
+		if($className == 'Tx_KickstartTest_Controller_BlogController'){
+			//die(json_encode($classReflection));
+		}
+		
+		$propertiesToMap = array('FileName','Modifiers','Tags','ParentClass');
 		
 		foreach($propertiesToMap as $propertyToMap){
 			// these are all "value objects" so there is no need to parse them
@@ -124,10 +130,6 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 		while(!feof($fileHandler)){
 			$line = fgets($fileHandler);
 			
-			//$token = token_get_all($line);
-			//$token['name'] = token_name($token[0]);
-			//t3lib_div::print_array($token);
-			//$line = str_replace('<?php','',$line);
 			$trimmedLine = trim($line);
 			
 			if($lineCount == $classReflection->getStartLine()){
@@ -181,13 +183,12 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 							// the method has to exist in the classReflection
 							$currentMethodReflection = $classReflection->getMethod($methodMatches[1][0]);
 							if($currentMethodReflection){
-								
+								$parameters = $currentMethodReflection->getParameters();
 								$precedingBlock = $this->concatLinesFromArray($lines,$lastMatchedLine);
 								
 								$currentClassMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($methodName,$currentMethodReflection);
 								$currentClassMethod->setPrecedingBlock($precedingBlock);
-								$currentClassMethod->setTags($currentMethodReflection->getTags());
-								
+								//$currentClassMethod->setTags($currentMethodReflection->getTags());
 								$currentMethodEndLine = $currentMethodReflection->getEndline();
 							}
 							else {
@@ -231,9 +232,8 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 									// the property has to exist in the classReflection
 									$reflectionProperty = $classReflection->getProperty($propertyName);
 									if($reflectionProperty){
-
-										//TODO we need to create the right property here (for each type: e.g. BooleanProperty...), how could this be done?
-										$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty($propertyName);
+										
+										$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_Class_Property($propertyName);
 										$classProperty->mapToReflectionProperty($reflectionProperty);
 										
 										if($isFirstProperty){
@@ -274,7 +274,6 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 				
 			} // end of not empty and not in method body
 			else if($isMethodBody && $lineCount == ($currentMethodEndLine -1)){
-				
 				$methodBodyStartLine = $currentMethodReflection->getStartLine();
 				$methodBody = $this->concatLinesFromArray($lines,$methodBodyStartLine);
 				$methodBody .= $line;
@@ -286,7 +285,6 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 				$isMethodBody = false;
 				$lastMatchedLine = $lineCount;
 				//TODO what if a method is defined in the same line as the preceding method ends? Should be checked with tokenizer?	
-				
 			}
 			
 			$lines[$lineCount] = $line;
@@ -335,12 +333,21 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 	 */
 	public function concatLinesFromArray($lines,$start,$end = NULL){
 		$result = '';
+		$lastLine = 'not empty';
 		foreach($lines as $lineNumber => $lineContent){
 			if($end && $lineNumber == $end){
 				return $result;
 			}
 			if($lineNumber > $start){
-				$result .= $lineContent;
+				// remove multiple empty lines 
+				if(empty($lineContent) && empty($lastLine)){
+					continue;
+				}
+				else {
+					$result .= $lineContent;
+					$lastLine = $lineContent;
+				}
+				
 			}
 		}
 		return $result;

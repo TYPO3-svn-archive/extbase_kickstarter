@@ -29,13 +29,20 @@
  * @version $ID:$
  */
 class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
-	
+
+    
 
 	/**
 	 * 
 	 * @var string
 	 */
 	protected $name;
+	
+	/**
+	 * 
+	 * @var string
+	 */
+	protected $varType;
 	
 	/**
 	 * 
@@ -104,6 +111,23 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 	public function getName(){
 		return $this->name;
 	}
+	
+	    /**
+     * Returns $varType.
+     *
+     */
+    public function getVarType() {
+        return $this->varType;
+    }
+    
+    /**
+     * Sets $varType.
+     *
+     * @param object $varType
+     */
+    public function setVarType($varType) {
+        $this->varType = $varType;
+    }
 	
 	/**
 	 * 

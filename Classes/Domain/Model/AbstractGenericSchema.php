@@ -32,6 +32,24 @@
 abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	
 	/**
+	 * 1  	 	ReflectionMethod::IS_STATIC
+	 * 2 		ReflectionMethod::IS_ABSTRACT
+	 * 4 		ReflectionMethod::IS_FINAL
+	 * 256 		ReflectionMethod::IS_PUBLIC
+	 * 512 		ReflectionMethod::IS_PROTECTED
+	 * 1024 	ReflectionMethod::IS_PRIVATE
+	 */
+	private $mapModifierNames = array(
+			'static' => ReflectionMethod::IS_STATIC,
+			'abstract' => ReflectionMethod::IS_ABSTRACT,
+			'final' => ReflectionMethod::IS_FINAL,
+			'public' => ReflectionMethod::IS_PUBLIC,
+			'protected' => ReflectionMethod::IS_PROTECTED,
+			'private' => ReflectionMethod::IS_PRIVATE
+	
+	); 
+	
+	/**
 	 * name
 	 * @var string
 	 */
@@ -112,6 +130,22 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	public function getTags() {
 		return $this->tags;
 	}
+	
+	/**
+	 * 
+	 * @return 
+	 */
+	public function getAnnotations(){
+		$annotations = array();
+		foreach($this->tags as $tagName => $tagValue){
+			if(is_array($tagValue)){
+				$tagValue = implode(' ',$tagValue);
+			}
+			$annotations[] = $tagName .' '. $tagValue;
+		}
+		
+		return $annotations;
+	}
 
 	/**
 	 * sets the array of tags 
@@ -119,19 +153,50 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	 * @return array Tags and values
 	 */
 	public function setTags($tags) {
-		return $this->tags = $tags;
+		$this->tags = $tags;
 	}
+	
+	/**
+	 * sets a tags 
+	 * 
+	 * @param string $tagName
+	 * @param mixed $tagValue
+	 * @return void
+	 */
+	public function setTag($tagName,$tagValue) {
+		$this->tags[$tagName] = $tagValue;
+	}	
+	
+	/**
+	 * unsets a tags 
+	 * 
+	 * @param string $tagName
+	 * @return void
+	 */
+	public function removeTag($tagName) {
+		unset($this->tags[$tagName]);
+	}	
+	
 	/**
 	 * Get property description to be used in comments
 	 *
 	 * @return string Property description
 	 */
 	public function getDescription() {
-		if ($this->description){
-			return $this->description;
-		} else {
-			return $this->getName();
+		$test = str_replace('/','',trim($this->description));
+		if(empty($this->description) || empty($test)){
+			return $this->name;
 		}
+		return $this->description;
+	}
+	
+	/**
+	 * Get property description lines as array
+	 *
+	 * @return string Property description
+	 */
+	public function getDescriptionLines() {
+		return  explode("\n",trim($this->getDescription()));
 	}
 
 	/**
@@ -142,6 +207,19 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	public function setDescription($description) {
 		$this->description = $description;
 	}
+	
+	/**
+	 * 
+	 *
+	 * @return boolean true if the description isn't empty
+	 */
+	public function hasDescription() {
+		if(empty($this->description)){
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Returns the values of the specified tag
 	 * @return array Values of the given tag
@@ -159,6 +237,23 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	public function setModifiers($modifiers) {
 		$this->modifiers = $modifiers;
 	}
+	
+	/**
+	 * adds a modifier
+	 *
+	 * @param string $modifiers
+	 * @return void
+	 */
+	public function addModifier($modifier) {
+		if(!is_numeric($modifier)){
+			$modifier = $this->mapModifierNames[$modifier];
+		}
+		if(!in_array($modifier,$this->modifiers)){
+			$this->modifiers[] = $modifier;
+		}
+		
+	}
+	
 
 	/**
 	 * Getter for modifiers
@@ -217,7 +312,9 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	 * @return string precedingBlock
 	 */
 	public function getPrecedingBlock() {
-		return $this->precedingBlock;
+		$cleanPrecedingBlock = str_replace($this->docComment,'',$this->precedingBlock);
+		$cleanPrecedingBlock = str_replace('<?php','',$cleanPrecedingBlock);
+		return $cleanPrecedingBlock;
 	}
 	
 	/**

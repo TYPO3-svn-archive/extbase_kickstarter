@@ -34,6 +34,11 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 	protected $tags;
 	
 	/**
+	 * @var string description as found in docComment
+	 */
+	protected $description;
+	
+	/**
 	 * The constructor, initializes the reflection class
 	 *
 	 * @param  string $className Name of the method's class
@@ -60,6 +65,13 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 	public function setMethodBody($methodBody){
 		$this->methodBody = $methodBody;
 	}
+	
+	public function getDescription(){
+		if(empty($this->description)){
+			$this->description = $this->getDocCommentParser()->getDescription();
+		}
+		return $this->description;
+	}
 
 	/**
 	 * Returns the declaring class
@@ -73,7 +85,7 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 	public function getTags(){
 		return $this->getDocCommentParser()->getTagsValues();
 	}
-
+	
 }
 
 ?>

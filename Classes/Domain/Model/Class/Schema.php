@@ -42,26 +42,21 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * properties
 	 * @var array
 	 */
-	protected $properties;
+	protected $properties = array();
 	
 	/**
 	 * propertieNames - deprecated -> use this->getPropertyNames() instead
 	 * @var array
 	 */
-	protected $propertieNames;
+	protected $propertieNames = array();
 
 	
 	/**
 	 * methods
 	 * @var array
 	 */
-	protected $methods;
+	protected $methods = array();
 	
-	/**
-	 * methodNames - deprecated -> use array_keys($this->methods) instead
-	 * @var array
-	 */
-	protected $methodNames;
 	
 	/**
 	 * interfaceNames
@@ -108,6 +103,11 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * @var Tx_ExtbaseKickstarter_Reflection_ClassReflection
 	 */
 	protected $classReflection = NULL;
+	
+	/**
+	 * @var object parentClass
+	 */
+	protected $parentClass = NULL;
 	
 	/**
 	 * constructor of this class
@@ -166,8 +166,11 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * @return boolean 
 	 */
 	public function methodExists($methodName){
+		if(!is_array($this->methods)){
+			return false;
+		}
 		$methodNames = array_keys($this->methods);
-		if(is_array($this->methodNames) && in_array($methodName,$methodNames)){
+		if(is_array($methodNames) && in_array($methodName,$methodNames)){
 			return true;
 		}
 		else return false;
@@ -189,7 +192,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_Method $method
 	 * @return void
 	 */
-	public function setMethod(Tx_ExtbaseKickstarter_Domain_Model_ClassMethod $classMethod) {
+	public function setMethod(Tx_ExtbaseKickstarter_Domain_Model_Class_Method $classMethod) {
 		$this->methods[$classMethod->getName()] = $classMethod;
 	}
 
@@ -217,12 +220,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	/**
 	 * Add a method
 	 *
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_Method $m,ethod
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_Method $classMethod
 	 * @return void
 	 */
-	public function addMethod($method) {
-		if(!$this->methodExists($method->getName())){
-			$this->methods[$method->getName()] = $method;
+	public function addMethod($classMethod) {
+		if(!$this->methodExists($classMethod->getName())){
+			$this->methods[$classMethod->getName()] = $classMethod;
 		}
 		
 	}
@@ -324,6 +327,10 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * @return boolean 
 	 */
 	public function propertyExists($propertyName){
+		$propertyNames = $this->getPropertyNames();
+		if(!is_array($this->methods)){
+			return false;
+		}
 		if(in_array($propertyName,$this->getPropertyNames())){
 			return true;
 		}
@@ -333,12 +340,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	/**
 	 * add a property (returns true if successfull added)
 	 *
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_Property
 	 * @return boolean success
 	 */
-	public function addProperty(Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty $classProperty) {
+	public function addProperty(Tx_ExtbaseKickstarter_Domain_Model_Class_Property $classProperty) {
 		if(!$this->propertyExists($classProperty->getName())){
-			$classProperty->setClass($this);
+			$this->propertyNames[] = $classProperty->getName();
 			$this->properties[$classProperty->getName()] = $classProperty;
 		}
 		else return false;
@@ -354,7 +361,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	/**
 	 * Setter for property
 	 *
-	 * @param Tx_ExtbaseKickstarter_Reflection_PropertyReflection
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_Property
 	 * @return boolean success
 	 */
 	public function setProperty($classProperty) {
@@ -470,7 +477,13 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 		$infoArray = array();
 		$infoArray['className'] = $this->getName();
 		$infoArray['fileName'] = $this->getFileName();
-		$infoArray['Methods'] = $this->getMethods();
+		
+		$methodArray  = array();
+		foreach( $this->getMethods() as $method){
+			$methodArray[$method->getName()] = array('parameter'=>$method->getParameters());
+			//'body'=>$method->getBody()
+		}
+		$infoArray['Methods'] = $methodArray;
 		//$infoArray['Inherited Methods'] = count($this->getInheritedMethods());
 		//$infoArray['Not inherited Methods'] = count($this->getNotInheritedMethods());
 		$infoArray['Properties'] = $this->getProperties();

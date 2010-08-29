@@ -1,13 +1,13 @@
 <?php
-if (!defined ('TYPO3_MODE')) 	die ('Access denied.');
+if (!defined ('TYPO3_MODE')) 	die ('Access denied.');{namespace k=Tx_ExtbaseKickstarter_ViewHelpers}
 
-$TCA['tx_testextension_domain_model_box'] = array(
-	'ctrl' => $TCA['tx_testextension_domain_model_box']['ctrl'],
+$TCA['{domainObject.databaseTableName}'] = array(
+	'ctrl' => $TCA['{domainObject.databaseTableName}']['ctrl'],
 	'interface' => array(
-		'showRecordFieldList' => 'width,height'
+		'showRecordFieldList' => '{domainObject.commaSeparatedFieldList}'
 	),
 	'types' => array(
-		'1' => array('showitem' => 'width,height')
+		'1' => array('showitem' => '{domainObject.commaSeparatedFieldList}')
 	),
 	'palettes' => array(
 		'1' => array('showitem' => '')
@@ -35,8 +35,8 @@ $TCA['tx_testextension_domain_model_box'] = array(
 				'items' => array(
 					array('', 0),
 				),
-				'foreign_table' => 'tx_testextension_domain_model_box',
-				'foreign_table_where' => 'AND tx_testextension_domain_model_box.uid=###REC_FIELD_l18n_parent### AND tx_testextension_domain_model_box.sys_language_uid IN (-1,0)',
+				'foreign_table' => '{domainObject.databaseTableName}',
+				'foreign_table_where' => 'AND {domainObject.databaseTableName}.uid=###REC_FIELD_l18n_parent### AND {domainObject.databaseTableName}.sys_language_uid IN (-1,0)',
 			)
 		),
 		'l18n_diffsource' => array(
@@ -57,26 +57,19 @@ $TCA['tx_testextension_domain_model_box'] = array(
 			'config'  => array(
 				'type' => 'check'
 			)
-		),
-		'width' => array(
-			'exclude' => 0,
-			'label'   => 'LLL:EXT:test_extension/Resources/Private/Language/locallang_db.xml:tx_testextension_domain_model_box.width',
+		),<f:for each="{domainObject.properties}" as="property">
+		'{property.fieldName}' => array(
+			'exclude' => <f:if condition="{property.excludeField}"><f:then>1</f:then><f:else>0</f:else></f:if>,
+			'label'   => 'LLL:EXT:{extension.extensionKey}/Resources/Private/Language/locallang_db.xml:{property.labelNamespace}',
 			'config'  => array(
-				'type' => 'input',
-				'size' => 4,
-				'eval' => 'int'
+				<k:indent indentation="4"><k:render partial="TCA/{property.dataType}.phpt" arguments="{property: property}" /></k:indent>
 			)
-		),
-		'height' => array(
-			'exclude' => 0,
-			'label'   => 'LLL:EXT:test_extension/Resources/Private/Language/locallang_db.xml:tx_testextension_domain_model_box.height',
-			'config'  => array(
-				'type' => 'input',
-				'size' => 4,
-				'eval' => 'int'
+		),</f:for><f:for each="{k:listForeignKeyRelations(extension: extension, domainObject: domainObject)}" as="relation">
+		'{relation.foreignKeyName}' => array(
+			'config' => array(
+				'type' => 'passthrough',
 			)
-		),
+		),</f:for>
 	),
 );
-
 ?>

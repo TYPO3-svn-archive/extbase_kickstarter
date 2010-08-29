@@ -28,8 +28,19 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_DomainObject extends Tx_ExtbaseKickstarter_Domain_Model_Class_Schema{
+class Tx_ExtbaseKickstarter_Domain_Model_DomainObject {
 
+	/**
+	 * Name of the domain object
+	 * @var string
+	 */
+	protected $name;
+
+	/**
+	 * Description of the domain object
+	 * @var string
+	 */
+	protected $description;
 
 	/**
 	 * If TRUE, this is an aggregate root.
@@ -51,7 +62,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_DomainObject extends Tx_ExtbaseKickstar
 
 	/**
 	 * List of properties the domain object has
-	 * @var array<Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty>
+	 * @var array<Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty>
 	 */
 	protected $properties = array();
 	
@@ -61,7 +72,22 @@ class Tx_ExtbaseKickstarter_Domain_Model_DomainObject extends Tx_ExtbaseKickstar
 	 */
 	protected $actions = array();
 	
-
+	
+	/**
+	 * Set name
+	 * @return string
+	 */
+	public function getName() {
+		return $this->name;
+	}
+	
+	/**
+	 * Set name
+	 * @param string $name Name
+	 */
+	public function setName($name) {
+		$this->name = $name;
+	}
 	
 	public function getClassName() {
 		return 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Model_' . $this->getName();
@@ -74,8 +100,27 @@ class Tx_ExtbaseKickstarter_Domain_Model_DomainObject extends Tx_ExtbaseKickstar
 	public function getDatabaseTableName() {
 		return 'tx_' . strtolower(Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey())) . '_domain_model_' . strtolower($this->getName());
 	}
-
-
+	
+	
+	/**
+	 * Get description
+	 * @return string
+	 */
+	public function getDescription() {
+		if($this->description){
+			return $this->description;
+		}else{
+			return $this->getName();
+		}
+	}
+	
+	/**
+	 * Set description
+	 * @param string $description Description
+	 */
+	public function setDescription($description) {
+		$this->description = $description;
+	}
 
 	/**
 	 * get aggregate root
@@ -121,7 +166,22 @@ class Tx_ExtbaseKickstarter_Domain_Model_DomainObject extends Tx_ExtbaseKickstar
 		$this->entity = (boolean)$entity;
 	}
 	
-	
+	/**
+	 * Adding a new property
+	 * @param  $property The new property to add
+	 */
+	public function addProperty($property) {
+		$property->setDomainObject($this);
+		$this->properties[] = $property;
+	}
+
+	/**
+	 * Get all properties
+	 * @return array<Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty>
+	 */
+	public function getProperties() {
+		return $this->properties;
+	}
 	
 	/**
 	 * Get all properties holding relations of type Property_Relation_ZeroToManyRelation

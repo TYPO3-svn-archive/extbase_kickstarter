@@ -3,6 +3,7 @@
 *  Copyright notice
 *
 *  (c) 2009 Ingmar Schlecht
+*	   2010 Nico de Haen, Stephan Petzl
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -39,6 +40,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 	 */
 	public function build(array $jsonArray) {
 		$this->extension = new Tx_ExtbaseKickstarter_Domain_Model_Extension();
+		
 		$globalProperties = $jsonArray['properties'];
 		if (!is_array($globalProperties)) throw new Exception('Wrong 1');
 
@@ -49,6 +51,8 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 		$this->extension->setDescription($globalProperties['description']);
 			// extensionKey
 		$this->extension->setExtensionKey($globalProperties['extensionKey']);
+		
+		$this->extension->setMD5Hashes($globalProperties['md5']);
 		
 		foreach($globalProperties['persons'] as $personValues) {
 			$person=t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Person');
@@ -79,7 +83,6 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 				break;
 		}
 		$this->extension->setState($state);
-
 
 		// classes
 		if (is_array($jsonArray['modules'])) {
@@ -113,9 +116,17 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 
 		return $this->extension;
 	}
-
+	
+	/**
+	 * builds a domainObject from json input, including classSchemas for Model, Controller, Repositories
+	 * each classSchema reflects exisiting classes 
+	 * 
+	 * @param array $jsonDomainObject
+	 * @return Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
+	 */
 	protected function buildDomainObject(array $jsonDomainObject) {
 		$domainObject = new Tx_ExtbaseKickstarter_Domain_Model_DomainObject();
+		$domainObject->setExtension($this->extension); // needed in $domainObject->getDomainRepositoryClassName method
 		$domainObject->setName($jsonDomainObject['name']);
 		$domainObject->setDescription($jsonDomainObject['objectsettings']['description']);
 		if ($jsonDomainObject['objectsettings']['type'] === 'Entity') {
@@ -123,57 +134,55 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 		} else {
 			$domainObject->setEntity(FALSE);
 		}
-
+		
+		
+		
 		$domainObject->setAggregateRoot($jsonDomainObject['objectsettings']['aggregateRoot']);
 		
 		
-		$this->importTool = new Tx_ExtbaseKickstarter_Utility_Import();
-		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
-		if(file_exists( $this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php')){
-			include_once($this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php');
-			$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Model_' . $domainObject->getName();
-			$classSchema = $this->importTool->importClassSchemaFromFile($className);			
-		}
-
 		foreach ($jsonDomainObject['propertyGroup']['properties'] as $jsonProperty) {
-			t3lib_div::devLog(serialize($jsonProperty),'extbase_kickstarter');
-			$propertyType = $jsonProperty['propertyType'];
-			$propertyClassName = 'Tx_ExtbaseKickstarter_Domain_Model_Property_' . $propertyType . 'Property';
 			$propertyName = $jsonProperty['propertyName'];
-			if (!class_exists($propertyClassName)) throw new Exception('Property of type ' . $propertyType . ' not found');
-			$property = t3lib_div::makeInstance($propertyClassName);
-			/* @var $property Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty */
-			$property->setName($propertyName);
-			$property->setDescription($jsonProperty['propertyDescription']);
 
-			$getter = new Tx_ExtbaseKickstarter_Domain_Model_Class_PropertyMethod('get'.ucfirst($propertyName));
-			$getter->setProperty($property);
-			//TODO retrieve this from a template/viewhelper, and maybe move this line somewhere else (where should we set the default code?)
-			$getter->setBody('return $this->'.$propertyName.';');
-			// override body if there is an existing one, and maybe move these lines somewhere else (where should we set the default code?)
-			$existingBody = $existingSchema->getMethod($getter->getName())->getBody();
-			if($existingBody){
-				$getter->setBody($existingBody);
-			}
-			$domainObject->addMethod($getter);
+			// build a domainProperty object from json 
+			$domainPropertyType = $jsonProperty['propertyType'];
+			$domainPropertyClassName = 'Tx_ExtbaseKickstarter_Domain_Model_Property_' . $domainPropertyType . 'Property';
 			
-			if (isset($jsonProperty['propertyIsRequired'])) {
-				$property->setRequired($jsonProperty['propertyIsRequired']);
+			if (!class_exists($domainPropertyClassName)) throw new Exception('Property of type ' . $domainPropertyType . ' not found');
+			
+			$domainProperty = t3lib_div::makeInstance($domainPropertyClassName);
+			
+							
+			/* @var $domainProperty Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty */
+			$domainProperty->setName($propertyName);
+			
+			if(empty($jsonProperty['propertyDescription'])){
+				$domainProperty->setDescription($propertyName);
 			}
-
-			$domainObject->addProperty($property);
+			else {
+				$domainProperty->setDescription($jsonProperty['propertyDescription']);
+			}
+			if (isset($jsonProperty['propertyIsRequired'])) {
+				$domainProperty->setRequired($jsonProperty['propertyIsRequired']);
+			}
+			
+			if (isset($jsonProperty['propertyIsExcludeField'])) {
+				$property->setExcludeField($jsonProperty['propertyIsExcludeField']);
+			}
+			
+			
+			$domainObject->addProperty($domainProperty);
+				
 		}
-		//TODO add methods to schema, which only occur in $existingSchema
-		//TODO think about: how can we remove methods out of the kickstarter?
-
+		
 		foreach ($jsonDomainObject['actionGroup']['actions'] as $jsonAction) {
 			$action = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Action');
 			$action->setName($jsonAction);
-			
 			$domainObject->addAction($action);
 		}
 		return $domainObject;
 	}
+	
+
 
 	/**
 	 * @return Tx_ExtbaseKickstarter_Domain_Model_DomainObject
@@ -192,7 +201,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 		$this->loadClass($domainObjectClassName); // needed if the extension is not installed yet.
 		$classSchema = $reflectionService->getClassSchema($domainObjectClassName);
 		if ($classSchema === null) {
-			throw new Exception("ClassSchema not found, as the target class could not be loaded.", 1271669067);
+			throw new Exception("ClassSchema not found, as the target class could not be loaded:.".$domainObjectClassName, 1271669067);
 		}
 		foreach ($classSchema->getProperties() as $propertyName => $propertyDescription) {
 			if (in_array($propertyName, array('uid', '_localizedUid', '_languageUid'))) continue;

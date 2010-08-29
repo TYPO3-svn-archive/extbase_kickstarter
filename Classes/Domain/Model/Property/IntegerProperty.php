@@ -31,7 +31,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_Property_IntegerProperty extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty {
+class Tx_ExtbaseKickstarter_Domain_Model_Property_IntegerProperty extends Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty {
 	public function getTypeForComment() {
 		return 'integer';
 	}

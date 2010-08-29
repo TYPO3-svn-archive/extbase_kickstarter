@@ -36,27 +36,29 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	 */
 	protected $body;
 	
+	public $defaultIndent = "\t\t";
+	
 	/**
 	 * 
 	 * @var array
 	 */
 	protected $parameters;
-
 	
 	
 	public function __construct($methodName,$methodReflection = NULL){
 		$this->setName($methodName);
 		if($methodReflection instanceof Tx_ExtbaseKickstarter_Reflection_MethodReflection){
+			$methodReflection->getTagsValues(); // just to initialize the docCommentParser
 			foreach($this as $key => $value) {
 				$setterMethodName = 'set'.t3lib_div::underscoredToUpperCamelCase($key);
 				$getterMethodName = 'get'.t3lib_div::underscoredToUpperCamelCase($key);
 	    		// map properties of reflection class to this class
 				if(method_exists($methodReflection,$getterMethodName) && method_exists($this,$setterMethodName) ){
-	    			
 					$this->$setterMethodName($methodReflection->$getterMethodName());
 	    			//t3lib_div::print_array($getterMethodName);
 	    			
 	    		}
+				
 			}
 		}
 		
@@ -69,7 +71,16 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	 * @return void
 	 */
 	public function setBody($body) {
-		$this->body = $body;
+		// keep or set the indent 
+		if(strpos($body,$this->defaultIndent)!==0){
+			$lines = explode("\n",$body);
+			$newLines = array();
+			foreach($lines as $line){
+				$newLines[] = $this->defaultIndent.$line;
+			}
+			$body = implode("\n",$newLines);
+		}
+		$this->body = rtrim($body);
 	}
 
 	/**
@@ -88,46 +99,53 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	public function getParameters(){
 		return $this->parameters;
 	}
-
+	
 	/**
-	 *
-	 * @param string $parameterName
-	 * @return Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter
+	 * getter for parameter names
+	 * @return array parameter names
 	 */
-	public function getParameter(string $parameterName){
-		if(isset($this->parameters[$parameterName])){
-			return $this->parameters[$parameterName];
-		}else{
-			return null;
+	public function getParameterNames(){
+		$parameterNames = array();
+		foreach($this->parameters as $parameter){
+			$parameterNames[] = $parameter->getName();
 		}
+		return $parameterNames;
 	}
+
 	/**
 	 * adder for parameters
 	 * @param array $parameters
 	 * @return void
 	 */
-	public function addParameters($parameters){
+	public function setParameters($parameters){
 		foreach($parameters as $parameter){
 			$methodParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter($parameter->getName(),$parameter);
-			$this->parameters[$methodParameter->getName()] = $methodParameter;
+			$this->parameters[] = $methodParameter;
 		}
 
 	}
-	/**
-	 * adds a parameter
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter $parameter
-	 */
-	public function addParameter(Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter $parameter){
-		$this->parameters[$parameter->getName()] = $parameter;
-	}
 
 	/**
-	 * setter for parameters
-	 * @param array $parameters
+	 * setter for a single parameter
+	 * @param array $parameter
 	 * @return void
 	 */
-	public function setParameters($parameters){
-		$this->parameters[] = $parameters;
+	public function setParameter($parameter){
+		$this->parameters[] = $parameter;
+	}
+	
+	
+	public function getAnnotations(){
+		$annotations = parent::getAnnotations();
+		if(count($this->parameters > 0) && !$this->isTaggedWith('param')){
+			foreach($this->parameters as $parameter){
+				$annotations[] = 'param '.strtolower($parameter->getVarType()).' $'.$parameter->getName();
+			}
+		}
+		if(!$this->isTaggedWith('return')){
+			$annotations[] = 'return';
+		}
+		return $annotations;
 	}
 	
 }

@@ -37,6 +37,11 @@ class Tx_ExtbaseKickstarter_Reflection_PropertyReflection extends Tx_Extbase_Ref
 	protected $lineNumber;
 	
 	/**
+	 * @var string description as found in docComment
+	 */
+	protected $description;
+	
+	/**
 	 * @var string
 	 */
 	protected $rawComment;
@@ -59,6 +64,24 @@ class Tx_ExtbaseKickstarter_Reflection_PropertyReflection extends Tx_Extbase_Ref
 		return $this->lineNumber = $lineNumber;
 	}
 	
+	/**
+	 * wrapper for Tx_Extbase_Reflection_PropertyReflection::getTagsValues()
+	 * @return array $tags
+	 */
+	public function getTags(){
+		return $this->getTagsValues();
+	}
+	
+	/**
+	 * getter for description
+	 * @return string description
+	 */
+	public function getDescription(){
+		if(empty($this->description)){
+			$this->description = $this->getDocCommentParser()->getDescription();
+		}
+		return $this->description;
+	}
 	
 }
 

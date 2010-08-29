@@ -91,13 +91,14 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 				$extensionConfigurationFromJson = json_decode($request['params']['working'], true);
 				//t3lib_div::devLog("msg1", 'tx_extbasekickstarter', 0, $extensionConfigurationFromJson);
 				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
-
+						
 				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
-				
 				t3lib_div::mkdir($extensionDirectory);
-				$this->codeGenerator->build($extensionSchema);
-				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', $request['params']['working']);
-				return json_encode(array('saved'));
+				$result = $this->codeGenerator->build($extensionSchema);
+				
+				$extensionConfigurationFromJson['md5'] = $extensionSchema->getMD5Hashes();
+				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', json_encode($extensionConfigurationFromJson));
+				return json_encode(array($result));
 				
 				
 			break;

@@ -1,12 +1,8 @@
-<?php
-
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2010 Stephan Petzl <stephan.petzl@ajado.com>, ajado
-*  			Christian Kartnig <office@hahnepeter.de>
-*  			Sebastian Kurfürst <sebastian@typo3.org>
-*  			
+*  (c) <f:format.date format="Y">now</f:format.date> <f:for each="{extension.persons}" as="person">{person.name} <f:if condition="{person.email}"><{person.email}></f:if><f:if condition="{person.company}">, {person.company}</f:if>
+*  			</f:for>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -27,70 +23,9 @@
 ***************************************************************/
 
 /**
- * Box
+ * {classSchema.description}
  *
  * @version $Id$
  * @copyright Copyright belongs to the respective authors
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class Tx_TestExtension_Domain_Model_Box extends Tx_Extbase_DomainObject_AbstractEntity {
-	
-	/**
-	 * width
-	 * @validate NotEmpty
-	 * @var integer
-	 */
-	protected $width;
-	
-	/**
-	 * height
-	 * @var integer
-	 */
-	protected $height;
-	
-	
-	
-	/**
-	 * Setter for width
-	 *
-	 * @param integer $width width
-	 * @return void
-	 */
-	public function setWidth($width) {
-		$this->width = $width;
-	}
-
-	/**
-	 * Getter for width
-	 *
-	 * @return integer width
-	 */
-	public function getWidth() {
-		return $this->width;
-	}
-	
-	/**
-	 * Setter for height
-	 *
-	 * @param integer $height height
-	 * @return void
-	 */
-	public function setHeight($height) {
-		$this->height = $height+50;
-	}
-
-	/**
-	 * Getter for height
-	 *
-	 * @return integer height
-	 */
-	public function getHeight() {
-		return $this->height;
-	}
-
-	public function myMethod() {
-		return "hello my own method!";
-	}
-	
-}
-?>
