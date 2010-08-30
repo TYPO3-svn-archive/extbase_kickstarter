@@ -23,10 +23,7 @@
 ***************************************************************/
 
 /**
- * Creates a request an dispatches it to the controller which was specified
- * by TS Setup, Flexform and returns the content to the v4 framework.
- *
- * This class is the main entry point for extbase extensions in the frontend.
+ * Creates (or updates) all the required files for an extension
  *
  * @package ExtbaseKickstarter
  * @version $ID:$
@@ -56,7 +53,13 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
 		$this->objectManager = new Tx_Fluid_Compatibility_ObjectManager();
 	}
-
+	
+	/**
+	 * The entry point to the class
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Extension $extension
+	 * @return string a result message "success" or an error message describing the error
+	 */
 	public function build(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		$this->extension = $extension;
 
@@ -225,7 +228,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 			}
 		}
 
-		return true;
+		return 'success';
 	}
 
 	/**
@@ -322,7 +325,13 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		return $this->renderTemplate('Configuration/TypoScript/setup.txt', array('extension' => $extension));
 	}
 	
+	//TODO the methods below need to reflect changing or deleting of elements in the kickstarter
+	// currently the json provides no information about that, so it can't be processed yet
+	
 	/**
+	 * This method generates the class schema object, which is passed to the template
+	 * it keeps all methods and properties including user modified method bodies and comments 
+	 * needed to create a domain object class file
 	 * 
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
 	 * @return 
@@ -450,6 +459,9 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	}
 	
 	/**
+	 * This method generates the class schema object, which is passed to the template
+	 * it keeps all methods and properties including user modified method bodies and comments 
+	 * needed to create a controller class file
 	 * 
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
 	 * @return 
@@ -516,7 +528,10 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		return $classSchema;
 	}
 	
-		/**
+	/**
+	 * This method generates the class schema object, which is passed to the template
+	 * it keeps all methods and properties including user modified method bodies and comments 
+	 * needed to create a repository class file
 	 * 
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
 	 * @return 

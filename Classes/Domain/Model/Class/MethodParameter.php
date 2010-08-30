@@ -31,7 +31,6 @@
 class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 
     
-
 	/**
 	 * 
 	 * @var string
@@ -43,6 +42,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 	 * @var string
 	 */
 	protected $varType;
+	
+	/**
+	 * @var mixed
+	 */
+	protected $typeHint;
+	
 	
 	/**
 	 * 
@@ -76,6 +81,8 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 	 */
 	public function __construct($parameterName,$parameterReflection = NULL){
 		$this->name = $parameterName;
+		//TODO the parameter hints (or casts?) are not yet evaluated since the reflection does not recognize the
+		// maybe we can get them by a reg expression from the import tool?
 		
 		if($parameterReflection && $parameterReflection instanceof Tx_Extbase_Reflection_ParameterReflection){
 			foreach($this as $key => $value) {
@@ -180,9 +187,24 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 	public function isPassedByReference($passedByReference){
 		$this->passedByReference = $passedByReference;
 	}
-
+	
+	/**
+	 * 
+	 * @return 
+	 */
 	public function getTypeHint(){
-		//todo: implement
-		return "-todo: implement getTypeHint-";
+		//TODO typeHint is not yet supported in php Reflection
+		// it is supposed to be in php 5.4...?? (see http://ilia.ws/archives/207-Type-Hinting-Conclusion.html)
+		return $this->typeHint;
 	}
+	
+	 /**
+     * Sets $typeHint.
+     *
+     * @param object $typeHint
+     * @see Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter::$typeHint
+     */
+    public function setTypeHint($typeHint) {
+        $this->typeHint = $typeHint;
+    }
 }

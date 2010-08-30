@@ -183,7 +183,7 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 							// the method has to exist in the classReflection
 							$currentMethodReflection = $classReflection->getMethod($methodMatches[1][0]);
 							if($currentMethodReflection){
-								$parameters = $currentMethodReflection->getParameters();
+								//$parameters = $currentMethodReflection->getParameters();
 								$precedingBlock = $this->concatLinesFromArray($lines,$lastMatchedLine);
 								
 								$currentClassMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($methodName,$currentMethodReflection);

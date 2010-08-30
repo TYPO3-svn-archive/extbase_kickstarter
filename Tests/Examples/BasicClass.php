@@ -2,23 +2,23 @@
 
 class Tx_ExtbaseKickstarter_Tests_Examples_BasicClass {
 	
-	protected $name;
+	protected $names;
 	
 	/**
 	 * 
-	 * @return string $name
+	 * @return array $names
 	 */
-	public function getName(){
-		return $this->name;
+	public function getNames(){
+		return $this->names;
 	}
 	
 	/**
 	 * 
-	 * @param string $name
+	 * @param array $name
 	 * @return void
 	 */
-	public function setName($name){
-		$this->name = $name;
+	public function setNames(array $names){
+		$this->names = $names;
 	}
 }
 ?>
