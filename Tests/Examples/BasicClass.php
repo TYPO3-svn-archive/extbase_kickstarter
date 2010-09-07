@@ -17,7 +17,7 @@ class Tx_ExtbaseKickstarter_Tests_Examples_BasicClass {
 	 * @param array $name
 	 * @return void
 	 */
-	public function setNames(array $names){
+	public function setNames(array $names, Tx_testclass $testClass, $noTypeHint, object $defaultVar = NULL){
 		$this->names = $names;
 	}
 }

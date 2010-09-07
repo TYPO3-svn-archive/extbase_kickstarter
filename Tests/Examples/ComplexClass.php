@@ -53,7 +53,7 @@ final class Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass extends Tx_Extbase
 		 */
 		$this->name = $name;
 	}
-	private $anotherProperty = 'test456_"';
+	private $another_Property = 'test456_"';
 	static function method_2($param1,&$param2,$param3= 'default'){
 		/**
 		 * test test
@@ -61,7 +61,7 @@ final class Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass extends Tx_Extbase
 		$test = 234;
 		return 5; // test test
 	}
-	const anotherCosntant = "r5r_8";
+	const another_Constant = "r5r_8";
 	// single line comment
 var $testProperty4 = 123;
 }

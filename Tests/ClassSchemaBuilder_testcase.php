@@ -68,7 +68,19 @@ class Tx_ExtbaseKickstarter_ClassImportFromFile_testcase extends Tx_ExtbaseKicks
 		$this->importClass('Tx_ExtbaseKickstarter_Controller_KickstarterModuleController');
 	}
 	
-	
+	/**
+	 * Import a complex class from a file 
+	 * @test
+	 */
+	public function TestAnotherComplexClassImport(){
+		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/AnotherComplexClass.php');
+		$classSchema = $this->importClass('Tx_ExtbaseKickstarter_Tests_Examples_AnotherComplexClass');
+		
+		/**  here we could include some more tests
+		$p = $classSchema->getMethod('methodWithStrangePrecedingBlock')->getPrecedingBlock();
+		$a = $classSchema->getAppendedBlock();
+		*/
+	}
 	
 	/**
 	 * Import a big class from a file  
