@@ -102,7 +102,6 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 				
 				if(method_exists($parameterReflection,$getBooleanMethodName)){
 	    			$this->$key = $parameterReflection->$getBooleanMethodName();
-	    			
 	    		}
 	    		
 			}
@@ -176,16 +175,16 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 	 * 
 	 * @return boolean
 	 */
-	public function isOptional($optional){
-		$this->optional = $optional;
+	public function isOptional(){
+		return $this->optional;
 	}
 	
 	/**
 	 * 
 	 * @return boolean
 	 */
-	public function isPassedByReference($passedByReference){
-		$this->passedByReference = $passedByReference;
+	public function isPassedByReference(){
+		return $this->passedByReference;
 	}
 	
 	/**
@@ -193,8 +192,6 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 	 * @return 
 	 */
 	public function getTypeHint(){
-		//TODO typeHint is not yet supported in php Reflection
-		// it is supposed to be in php 5.4...?? (see http://ilia.ws/archives/207-Type-Hinting-Conclusion.html)
 		return $this->typeHint;
 	}
 	

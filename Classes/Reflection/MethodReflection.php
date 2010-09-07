@@ -50,6 +50,62 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 	}
 	
 	/**
+	 * Replacement for the original getParameters() method which makes sure
+	 * that Tx_Extbase_Reflection_ParameterReflection objects are returned instead of the
+	 * orginal ReflectionParameter instances.
+	 *
+	 * @return array of Tx_ExtbaseKickstarter_Reflection_ParameterReflection Parameter reflection objects of the parameters of this method
+	 */
+	public function getParameters() {
+		$extendedParameters = array();
+		foreach (parent::getParameters() as $parameter) {
+			$typeHint = $this->getTypeHintFromReflectionParameter($parameter);
+			$extendedParameters[] = new Tx_ExtbaseKickstarter_Reflection_ParameterReflection(array($this->getDeclaringClass()->getName(), $this->getName()), $parameter->getName(),$typeHint);
+			
+		}
+		return $extendedParameters;
+	}
+	
+	
+	/**
+	 * Workaround for missing support of typeHints in parameters
+	 * the typeHint is parsed from a the casted string representation of the
+	 * reflectionParameter 
+	 * The string has the format 'Parameter #index [ <required/optional> typeHint $parameterName ]'
+	 * where index is the sort number and typeHint is optional  
+	 * The parts in the brackets are splitted and counted
+	 * 
+	 * @param $reflectionParameter
+	 * @return string typeHint
+	 */
+	protected function getTypeHintFromReflectionParameter($reflectionParameter){
+		$paramAsString = (string) $reflectionParameter;
+		t3lib_div::devLog('paramAsString: '.$paramAsString,'extbase_kickstarter');
+		$paramRegex = '/^Parameter\s\#[0-9]\s\[\s<(required|optional)>\s*.*\$.*]$/';
+		if(!preg_match($paramRegex, $paramAsString)){
+			// since the approach to cast the reflection parameter as a string is not part of the official PHP API
+			// this might not work anymore in future versions
+			t3lib_div::devLog('ReflectionParameter casted as string has no the expected format: '.$paramAsString,'extbase_kickstarter');
+			return '';
+		}
+		$typeHintRegex = '/>\s*([a-zA-Z_&\s]*)\s*\$/';
+		$matches = array();
+		if(preg_match($typeHintRegex, $paramAsString, $matches)){
+			if(!empty($matches[1])){
+				$typeHint = $matches[1];
+				if($reflectionParameter->isPassedByReference()){
+					// remove the & from typeHint
+					$typeHint = str_replace('&','',$typeHint);
+				}
+				$typeHint = trim($typeHint);
+				t3lib_div::devLog('typeHint: '.$typeHint,'extbase_kickstarter');
+				return $typeHint;
+			}
+		}
+		return '';
+	}
+	
+	/**
 	 * getter for methodBody
 	 * @return string
 	 */

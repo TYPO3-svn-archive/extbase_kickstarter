@@ -114,7 +114,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 
 	/**
 	 * adder for parameters
-	 * @param array $parameters
+	 * @param array $parameters of type Tx_ExtbaseKickstarter_Reflection_ParameterReflection
 	 * @return void
 	 */
 	public function setParameters($parameters){
