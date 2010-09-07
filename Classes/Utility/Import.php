@@ -36,11 +36,11 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 	
 	public $methodRegex = "/\s*function\s*([a-zA-Z0-9_]*)/";
 
-	public $propertyRegex = "/\s*\\$([a-zA-Z0-9]*)/";
+	public $propertyRegex = "/\s*\\$([a-zA-Z0-9_]*)/";
 	
 	//TODO this regex still needs some improvement
 	// the second round brackets should find all kind of strings, i.e. " 'test' " and ' "test" '
-	public $constantRegex = "/\s*const\s*([a-zA-Z0-9]*)\s*\=\s*\'*\"*([^;\"']*)'*\"*;/";
+	public $constantRegex = "/\s*const\s*([a-zA-Z0-9_]*)\s*\=\s*\'*\"*([^;\"']*)'*\"*;/";
 	
 	// TODO parse definitions of namespaces
 	public $namespaceRegex = "/^namespace|^use|^declare/";
@@ -190,6 +190,7 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 								$currentClassMethod->setPrecedingBlock($precedingBlock);
 								//$currentClassMethod->setTags($currentMethodReflection->getTags());
 								$currentMethodEndLine = $currentMethodReflection->getEndline();
+								
 							}
 							else {
 								throw new Tx_ExtbaseKickstarter_Exception_ParseError(
@@ -273,10 +274,13 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 				} // end of not in comment
 				
 			} // end of not empty and not in method body
-			else if($isMethodBody && $lineCount == ($currentMethodEndLine -1)){
+			else if($isMethodBody && ($lineCount == ($currentMethodEndLine -1) || $currentMethodEndLine == $currentMethodReflection->getStartLine())){
 				$methodBodyStartLine = $currentMethodReflection->getStartLine();
-				$methodBody = $this->concatLinesFromArray($lines,$methodBodyStartLine);
-				$methodBody .= $line;
+				if($currentMethodEndLine != $currentMethodReflection->getStartLine()){
+					$methodBody = $this->concatLinesFromArray($lines,$methodBodyStartLine);
+					$methodBody .= $line;
+				}
+				else $methodBody = '';
 				
 				$currentClassMethod->setBody($methodBody);
 				$classSchema->addMethod($currentClassMethod);
