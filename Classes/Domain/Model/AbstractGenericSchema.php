@@ -297,6 +297,18 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
 	}
 	
 	/**
+	 * is there a docComment
+	 *
+	 * @return boolean 
+	 */
+	public function hasDocComment() {
+		if(!empty($this->docComment)){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * Setter for precedingBlock
 	 *
 	 * @param string $precedingBlock precedingBlock

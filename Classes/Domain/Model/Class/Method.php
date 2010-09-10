@@ -120,7 +120,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	public function setParameters($parameters){
 		foreach($parameters as $parameter){
 			$methodParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter($parameter->getName(),$parameter);
-			$this->parameters[] = $methodParameter;
+			$this->parameters[$methodParameter->getPosition()] = $methodParameter;
 		}
 
 	}
@@ -131,11 +131,52 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	 * @return void
 	 */
 	public function setParameter($parameter){
-		$this->parameters[] = $parameter;
+		if(!in_array($parameter->getName(),$this->getParameterNames())){
+			$this->parameters[$parameter->getPosition()] = $parameter;
+		}
+		
 	}
 	
+	/**
+	 * removes a parameter
+	 * @param $parameterName
+	 * @param $parameterSortingIndex
+	 * @return boolean true (if successfull removed)
+	 */
+	public function removeParameter($parameterName, $parameterPosition){
+		//TODO: Not yet tested
+		if(isset($this->parameter[$parameterPosition]) && $this->parameter[$parameterPosition]->getName() == $parameterName){
+			unset($this->parameter[$parameterPosition]);
+			return true;
+		}
+		else return false;
+	}
 	
-	public function getAnnotations(){
+	/**
+	 * 
+	 * @param $parameterName
+	 * @param $parameterSortingIndex
+	 * @return boolean true (if successfull removed)
+	 */
+	public function renameParameter($oldName, $newName, $parameterSortingIndex){
+		//TODO: Not yet tested
+		if(isset($this->parameter[$parameterPosition])){
+			$parameter = $this->parameter[$parameterPosition];
+			if($parameter->getName() == $oldName){
+				$parameter->setName($newName);
+				$this->parameter[$parameterPosition] = $parameter;
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	* 
+	* TODO: THe sorting of tags/annotations should be controlled	
+	*   
+	*/
+	public function getAnnotations(){ 
 		$annotations = parent::getAnnotations();
 		if(count($this->parameters > 0) && !$this->isTaggedWith('param')){
 			foreach($this->parameters as $parameter){

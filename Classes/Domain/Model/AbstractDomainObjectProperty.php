@@ -382,6 +382,14 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty {
 	public function setDomainObject(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {
 		$this->domainObject = $domainObject;
 	}
+	
+	/**
+	 * 
+	 * @return Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
+	 */
+	public function getDomainObject() {
+		return $this->domainObject;
+	}
 }
 
 ?>

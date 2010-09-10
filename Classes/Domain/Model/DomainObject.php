@@ -198,6 +198,20 @@ class Tx_ExtbaseKickstarter_Domain_Model_DomainObject {
 	}	
 	
 	/**
+	 * Get all properties holding relations of type Property_Relation_AnyToManyRelation
+	 * @return array<Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_anyToManyRelation>
+	 */
+	public function getAnyToManyRelationProperties() {
+		$relationProperties = array();
+		foreach ($this->properties as $property) {
+			if (is_subclass_of($property, 'Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AnyToManyRelation')) {
+				$relationProperties[] = $property;
+			}
+		}
+		return $relationProperties;
+	}	
+	
+	/**
 	 * Adding a new action
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_Action $action The new action to add
 	 */

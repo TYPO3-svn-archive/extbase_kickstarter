@@ -125,7 +125,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 * @return void
 	 */
 	public function setConstant($constantName,$constantValue) {
-		$this->constants[$constantName] = $constantValue;
+		$this->constants[$constantName] = array('name' => $constantName,'value' => $constantValue);
 	}
 	
 	/**
@@ -154,12 +154,23 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 */
 	public function getConstant($constantName) {
 		if(isset($this->constants[$constantName])){
-			return $this->constants[$constantName];
+			return $this->constants[$constantName]['value'];
 		}
 		else return NULL;
 	}
 	
-	
+	/**
+	 * removes a constant 
+	 * @param string $constantName
+	 * @return boolean true (if successfull removed)
+	 */
+	public function removeConstant($constantName){
+		if(isset($this->constants[$constantName])){
+			unset($this->constants[$constantName]);
+			return true;
+		}
+		return false;
+	}
 	
 	/**
 	 * 
@@ -228,6 +239,37 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 			$this->methods[$classMethod->getName()] = $classMethod;
 		}
 		
+	}
+	
+	/**
+	 * removes a method 
+	 * @param string $methodName
+	 * @return boolean true (if successfull removed)
+	 */
+	public function removeMethod($methodName){
+		//TODO: not yet tested
+		if($this->methodExists($methodName)){
+			unset($this->methods[$methodName]);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * rename a method
+	 * @param string $oldName
+	 * @param string $newName
+	 * @return boolean success
+	 */
+	public function renameMethod($oldName, $newName){
+		if($this->methodExists($oldmethodName)){
+			$method = $this->methods[$oldName];
+			$method->setName($newName);
+			$this->methods[$newName] = $method;
+			$this->removeMethod($oldName);
+			return true;
+		}
+		else return false;
 	}
 	
 	
@@ -299,6 +341,37 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Schema extends Tx_ExtbaseKickstar
 	 */
 	public function getProperties() {
 		return $this->properties;
+	}
+	
+	/**
+	 * removes a property 
+	 * @param string $propertyName
+	 * @return boolean true (if successfull removed)
+	 */
+	public function removeProperty($propertyName){
+		//TODO: not yet tested
+		if($this->propertyExists($propertyName)){
+			unset($this->propertys[$propertyName]);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * rename a property
+	 * @param string $oldName
+	 * @param string $newName
+	 * @return boolean success
+	 */
+	public function renameProperty($oldName, $newName){
+		if($this->propertyExists($oldPropertyName)){
+			$property = $this->properties[$oldName];
+			$property->setName($newName);
+			$this->properties[$newName] = $property;
+			$this->removeProperty($oldName);
+			return true;
+		}
+		else return false;
 	}
 	
 	/**
