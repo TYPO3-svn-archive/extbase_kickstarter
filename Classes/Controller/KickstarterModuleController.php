@@ -61,6 +61,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 		$instance = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_CodeGenerator');
 		/* @var $instance Tx_ExtbaseKickstarter_Service_CodeGenerator */
 		$this->codeGenerator = $instance;
+		
 	}
 
 	/**
@@ -85,13 +86,15 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	public function generateCodeAction() {
 		$jsonString = file_get_contents('php://input');
 		$request = json_decode($jsonString, true);
+		
 		switch ($request['method']) {
 
 			case 'saveWiring':
+				
 				$extensionConfigurationFromJson = json_decode($request['params']['working'], true);
 				//t3lib_div::devLog("msg1", 'tx_extbasekickstarter', 0, $extensionConfigurationFromJson);
 				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
-						
+				
 				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
 				t3lib_div::mkdir($extensionDirectory);
 				$result = $this->codeGenerator->build($extensionSchema);

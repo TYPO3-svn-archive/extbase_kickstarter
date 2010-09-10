@@ -215,7 +215,7 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 									$constantName = $constantMatches[1][$i];
 									// the constant has to exist in the classReflection
 									$reflectionConstantValue = $classReflection->getConstant($constantName);
-									//var_dump($reflectionConstant);
+									
 									$classSchema->setConstant($constantName,$reflectionConstantValue);
 								}
 								catch(ReflectionException $e){

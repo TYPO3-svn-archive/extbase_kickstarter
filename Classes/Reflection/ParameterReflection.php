@@ -2,7 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2009 Christopher Hlubek <hlubek@networkteam.com>
+*  (c) 2010 Nico de Haen <mail@ndh-websolutions.de>
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -25,9 +25,8 @@
 /**
  * Extended version of the ReflectionParameter
  *
- * @package Extbase
+ * @package ExtbaseKickstarter
  * @subpackage Reflection
- * @version $Id: ParameterReflection.php 1052 2009-08-05 21:51:32Z sebastian $
  */
 class Tx_ExtbaseKickstarter_Reflection_ParameterReflection extends Tx_Extbase_Reflection_ParameterReflection {
 	
