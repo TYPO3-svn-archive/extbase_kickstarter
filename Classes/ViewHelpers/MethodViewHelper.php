@@ -19,6 +19,12 @@ class Tx_ExtbaseKickstarter_ViewHelpers_MethodViewHelper extends Tx_Fluid_Core_V
 		return $content;
 	}
 	
+	/**
+	 * This methods renders the parameters of a method, including typeHints and default values.
+	 * 
+	 * @param $methodSchemaObject
+	 * @return unknown_type
+	 */
 	private function renderMethodParameter($methodSchemaObject){
 		$content = '';
 		$parameters = array();
@@ -29,15 +35,18 @@ class Tx_ExtbaseKickstarter_ViewHelpers_MethodViewHelper extends Tx_Fluid_Core_V
 			
 			if($parameter->isOptional()){
 				$defaultValue = $parameter->getDefaultValue();
+				// optional parameters have a default value
 				if(!empty($typeHint)){
 					// typeHints of optional parameter have the format "typeHint or defaultValue"
 					$typeHintParts = explode(' ',$typeHint);
 					$typeHint = $typeHintParts[0];
 				}
 				
+				// the default value has to be json_encoded to render its string representation
 				if(is_array($defaultValue)){
 					if(!empty($defaultValue)){
 						$defaultValue = json_encode($defaultValue);
+						// now we render php notation from JSON notation
 						if(strpos($defaultValue,'}')>-1){
 							$defaultValue = str_replace('{','array(',$defaultValue);
 							$defaultValue = str_replace('}',')',$defaultValue);
@@ -56,7 +65,9 @@ class Tx_ExtbaseKickstarter_ViewHelpers_MethodViewHelper extends Tx_Fluid_Core_V
 				}
 				$parameterName .= ' = '.$defaultValue;
 			}
+			
 			$parameterName = '$'.$parameterName;
+			
 			if($parameter->isPassedByReference()){
 				$parameterName = '&'.$parameterName;
 			}

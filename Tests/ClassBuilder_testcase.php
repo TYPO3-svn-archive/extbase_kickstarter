@@ -27,8 +27,8 @@
 
 require_once('BaseTestCase.php');
 
-class Tx_ExtbaseKickstarter_ClassSchemaBuilder_testcase extends Tx_ExtbaseKickstarter_BaseTestCase {
-	//TODO: writing of classes should be tested
+class Tx_ExtbaseKickstarter_ClassBuilder_testcase extends Tx_ExtbaseKickstarter_BaseTestCase {
+	//TODO: merging of classes after renaming/deleting properties should be tested
 }
 
 ?>

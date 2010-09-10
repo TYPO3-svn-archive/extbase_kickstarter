@@ -23,12 +23,12 @@
 ***************************************************************/
 
 /**
- * Builds the required classes for extbase extensions
+ * Builds the required class objects for extbase extensions
  *
  * @package ExtbaseKickstarter
  */
 
-class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
+class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	
 	/**
 	 * 
@@ -60,7 +60,7 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
 	 * @return 
 	 */
-	public function generateModelClassSchema($domainObject, $oldDomainObject= NULL){
+	public function generateModelClassObject($domainObject, $oldDomainObject= NULL){
 		
 		$domainObjectClassFile = $this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php';
 		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Model_' . $domainObject->getName();
@@ -69,34 +69,34 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 			t3lib_div::devLog('Class '.$className.' was modified', 'extbase_kickstarter');
 			include_once($domainObjectClassFile);
 			try {
-				$classSchema = $this->importTool->importClassSchemaFromFile($className);
+				$classObject = $this->importTool->importClassObjectFromFile($className);
 			}
 			catch(Exception $e){
 				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
 			}			
 		}
 		else {
-			$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_Class_Schema($className);
-			$classSchema->setFileName($domainObjectClassFile);
+			$classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
+			$classObject->setFileName($domainObjectClassFile);
 			if($domainObject->isEntity()){
-				$classSchema->setParentClass('Tx_Extbase_DomainObject_AbstractEntity');
+				$classObject->setParentClass('Tx_Extbase_DomainObject_AbstractEntity');
 			}
 			else {
-				$classSchema->setParentClass('Tx_Extbase_DomainObject_AbstractValueObject');
+				$classObject->setParentClass('Tx_Extbase_DomainObject_AbstractValueObject');
 			}
 		}
 		
-		if(!$classSchema->hasDescription()){
-			$classSchema->setDescription($domainObject->getDescription());
+		if(!$classObject->hasDescription()){
+			$classObject->setDescription($domainObject->getDescription());
 		}
 		
-		if(!$classSchema->methodExists('__constructor')){
+		if(!$classObject->methodExists('__constructor')){
 			$constructorMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method('__constructor');
 			$constructorMethod->setDescription('The constructor of this '.$domainObject->getName());
 			$constructorMethod->setBody("//Do not remove this line: It would break the functionality\n\$this->initStorageObjects();");
 			$constructorMethod->addModifier('public');
 			$constructorMethod->setTag('return','void');
-			$classSchema->addMethod($constructorMethod);
+			$classObject->addMethod($constructorMethod);
 		}
 		$anyToManyRelationProperties = $domainObject->getAnyToManyRelationProperties();
 		if(count($anyToManyRelationProperties) > 0){
@@ -109,16 +109,16 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 			$initStorageObjectsMethod->setBody($methodBody);
 			$initStorageObjectsMethod->addModifier('protected');
 			$initStorageObjectsMethod->setTag('return','void');
-			$classSchema->setMethod($initStorageObjectsMethod);
+			$classObject->setMethod($initStorageObjectsMethod);
 		}
 		//TODO the following part still needs some enhancement: 
 		//what should be obligatory in existing properties and methods
 		foreach ($domainObject->getProperties() as $domainProperty) {
 			$propertyName = $domainProperty->getName();
 					
-			// add the property to class schema (or update an existing class schema property)
-			if($classSchema->propertyExists($propertyName)){
-				$classProperty = $classSchema->getProperty($propertyName);
+			// add the property to class Object (or update an existing class Object property)
+			if($classObject->propertyExists($propertyName)){
+				$classProperty = $classObject->getProperty($propertyName);
 				$classPropertyTags = $classProperty->getTags();
 			}
 			else {
@@ -129,15 +129,15 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 			
 			$classProperty->setAssociatedDomainObjectProperty($domainProperty);
 			
-			$classSchema->setProperty($classProperty);
+			$classObject->setProperty($classProperty);
 			
 			if (is_subclass_of($domainProperty, 'Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AnyToManyRelation')) {
 				//TODO relation properties need add/remove methods	
 				// add (or update) a getter method
 				$addMethodName = 'add'.ucfirst($this->inflector->singularize($propertyName));
 				
-				if($classSchema->methodExists($addMethodName)){
-					$addMethod = $classSchema->getMethod($addMethodName);
+				if($classObject->methodExists($addMethodName)){
+					$addMethod = $classObject->getMethod($addMethodName);
 				}
 				else {
 					$addMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($addMethodName);
@@ -159,12 +159,12 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 				if(!$addMethod->hasDescription()){
 					$addMethod->setDescription('Adds a '.ucfirst($domainProperty->getForeignClass()->getName()));
 				}
-				$classSchema->setMethod($addMethod);
+				$classObject->setMethod($addMethod);
 				
 				$removeMethodName = 'remove'.ucfirst($this->inflector->singularize($propertyName));
 				
-				if($classSchema->methodExists($removeMethodName)){
-					$removeMethod = $classSchema->getMethod($removeMethodName);
+				if($classObject->methodExists($removeMethodName)){
+					$removeMethod = $classObject->getMethod($removeMethodName);
 				}
 				else {
 					$removeMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($removeMethodName);
@@ -184,15 +184,15 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 				if(!$removeMethod->hasDescription()){
 					$removeMethod->setDescription('Removes a '.ucfirst($domainProperty->getForeignClass()->getName()));
 				}
-				$classSchema->setMethod($removeMethod);
+				$classObject->setMethod($removeMethod);
 				
 			}
 			else {
 				// add (or update) a getter method
 				$getterMethodName = 'get'.ucfirst($propertyName);
 				
-				if($classSchema->methodExists($getterMethodName)){
-					$getterMethod = $classSchema->getMethod($getterMethodName);
+				if($classObject->methodExists($getterMethodName)){
+					$getterMethod = $classObject->getMethod($getterMethodName);
 					$getterMethodTags = $getterMethod->getTags();
 				}
 				else {
@@ -205,13 +205,13 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 				if(!$getterMethod->hasDescription()){
 					$getterMethod->setDescription('Returns the '.$propertyName);
 				}
-				$classSchema->setMethod($getterMethod);
+				$classObject->setMethod($getterMethod);
 				
 				// add (or update) a setter method
 				$setterMethodName = 'set'.ucfirst($propertyName);
 				
-				if($classSchema->methodExists($setterMethodName)){
-					$setterMethod = $classSchema->getMethod($setterMethodName);
+				if($classObject->methodExists($setterMethodName)){
+					$setterMethod = $classObject->getMethod($setterMethodName);
 					$setterMethodTags = $setterMethod->getTags();
 				}
 				else {
@@ -232,7 +232,7 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 					$setterMethod->setParameter($setterParameter);
 				}
 	
-				$classSchema->setMethod($setterMethod);	
+				$classObject->setMethod($setterMethod);	
 			}
 			
 			
@@ -240,18 +240,18 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 			
 		}
 		
-		return $classSchema;
+		return $classObject;
 	}
 	
 	/**
-	 * This method generates the class schema object, which is passed to the template
+	 * This method generates the class object, which is passed to the template
 	 * it keeps all methods and properties including user modified method bodies and comments 
 	 * needed to create a controller class file
 	 * 
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
 	 * @return 
 	 */
-	public function generateControllerClassSchema($domainObject){
+	public function generateControllerClassObject($domainObject){
 		$controllerClassFile = $this->extensionDirectory . 'Classes/Controller/' . $domainObject->getName() . 'Controller.php';
 		
 		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Controller_' . $domainObject->getName().'Controller';
@@ -262,37 +262,37 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 			}
 			
 			try {
-				$classSchema = $this->importTool->importClassSchemaFromFile($className);
+				$classObject = $this->importTool->importClassObjectFromFile($className);
 			}
 			catch(Exception $e){
 				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
 			}				
 		}
 		else {
-			$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_Class_Schema($className);
-			$classSchema->setFileName($controllerClassFile);
-			$classSchema->setParentClass('Tx_Extbase_MVC_Controller_ActionController');
-			$classSchema->setDescription('Controller for '.$domainObject->getName());
+			$classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
+			$classObject->setFileName($controllerClassFile);
+			$classObject->setParentClass('Tx_Extbase_MVC_Controller_ActionController');
+			$classObject->setDescription('Controller for '.$domainObject->getName());
 		}
 		
 		if($domainObject->isAggregateRoot()){
 			$propertyName = t3lib_div::lcfirst($domainObject->getName()).'Repository';
 			//$domainObject->getDomainRepositoryClassName();
-			// now add the property to class schema (or update an existing class schema property)
-			if(!$classSchema->propertyExists($propertyName)){
+			// now add the property to class Object (or update an existing class Object property)
+			if(!$classObject->propertyExists($propertyName)){
 				$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_Class_Property($propertyName);
 				$classProperty->setTag('var',$domainObject->getDomainRepositoryClassName());
 				$classProperty->addModifier('protected');
-				$classSchema->setProperty($classProperty);
+				$classObject->setProperty($classProperty);
 			}
 			$initializeMethodName = 'initializeAction';
-			if(!$classSchema->methodExists($initializeMethodName)){
+			if(!$classObject->methodExists($initializeMethodName)){
 				$initializeMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($initializeMethodName);
 				$initializeMethod->setDescription('Initializes the current action');
 				$initializeMethod->setBody('$this->'.t3lib_div::lcfirst($domainObject->getName()).'Repository = t3lib_div::makeInstance('.$domainObject->getDomainRepositoryClassName().');');
 				$initializeMethod->setTag('return','void');
 				$initializeMethod->addModifier('public');
-				$classSchema->addMethod($initializeMethod);
+				$classObject->addMethod($initializeMethod);
 			}
 		}
 		
@@ -304,20 +304,20 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 			$actionMethod->setTag('return','string The rendered ' . $action->getName() .' action');
 			$actionMethod->addModifier('public');
 			
-			$classSchema->addMethod($actionMethod);
+			$classObject->addMethod($actionMethod);
 		}
-		return $classSchema;
+		return $classObject;
 	}
 	
 	/**
-	 * This method generates the class schema object, which is passed to the template
+	 * This method generates the class object, which is passed to the template
 	 * it keeps all methods and properties including user modified method bodies and comments 
 	 * needed to create a repository class file
 	 * 
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
 	 * @return 
 	 */
-	public function generateRepositoryClassSchema($domainObject){
+	public function generateRepositoryClassObject($domainObject){
 		$repositoryClassFile = $this->extensionDirectory . 'Classes/Domain/Repository/' . $domainObject->getName() . 'Repository.php';
 		
 		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Repository_' . $domainObject->getName().'Repository';
@@ -325,21 +325,21 @@ class Tx_ExtbaseKickstarter_ClassSchemaBuilder  implements t3lib_Singleton {
 		if(file_exists( $repositoryClassFile) &&  $this->extension->isModified($repositoryClassFile)){
 			include_once($repositoryClassFile);
 			try {
-				$classSchema = $this->importTool->importClassSchemaFromFile($className);
+				$classObject = $this->importTool->importClassObjectFromFile($className);
 			}
 			catch(Exception $e){
 				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
 			}		
 		}
 		else {
-			$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_Class_Schema($className);
-			$classSchema->setFileName($repositoryClassFile);
-			$classSchema->setParentClass('Tx_Extbase_Persistence_Repository');
-			$classSchema->setDescription('Repository for '.$domainObject->getName());
+			$classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
+			$classObject->setFileName($repositoryClassFile);
+			$classObject->setParentClass('Tx_Extbase_Persistence_Repository');
+			$classObject->setDescription('Repository for '.$domainObject->getName());
 		}
 		
 		
-		return $classSchema;
+		return $classObject;
 	}
 	
 }

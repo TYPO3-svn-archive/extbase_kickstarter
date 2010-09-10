@@ -50,16 +50,16 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	
 	/**
 	 * 
-	 * @var Tx_ExtbaseKickstarter_ClassSchemaBuilder
+	 * @var Tx_ExtbaseKickstarter_ClassBuilder
 	 */
-	protected $classSchemaBuilder;
+	protected $classBuilder;
 	
 
 	public function __construct() {
 		$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
 		$this->objectManager = new Tx_Fluid_Compatibility_ObjectManager();
 		$this->inflector = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_Inflector');
-		$this->classSchemaBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ClassSchemaBuilder');
+		$this->classBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ClassBuilder');
 	}
 	
 	/**
@@ -70,7 +70,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	 */
 	public function build(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		$this->extension = $extension;
-		$this->classSchemaBuilder->injectExtension($extension);
+		$this->classBuilder->injectExtension($extension);
 
 		// Validate the extension
 		$extensionValidator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Validator_ExtensionValidator');
@@ -267,7 +267,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 
 
 	public function generateActionControllerCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject, Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
-		$controllerClassSchema = $this->classSchemaBuilder->generateControllerClassSchema($domainObject);
+		$controllerClassSchema = $this->classBuilder->generateControllerClassObject($domainObject);
 		if(!$controllerClassSchema->hasDocComment()){
 			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
 			$controllerClassSchema->setDocComment($classDocComment);
@@ -280,7 +280,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	}
 	
 	public function generateDomainObjectCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject, Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
-		$modelClassSchema = $this->classSchemaBuilder->generateModelClassSchema($domainObject);
+		$modelClassSchema = $this->classBuilder->generateModelClassObject($domainObject);
 		if(!$modelClassSchema->hasDocComment()){
 			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
 			$modelClassSchema->setDocComment($classDocComment);
@@ -289,7 +289,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	}
 
 	public function generateDomainRepositoryCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {
-		$repositoryClassSchema = $this->classSchemaBuilder->generateRepositoryClassSchema($domainObject);
+		$repositoryClassSchema = $this->classBuilder->generateRepositoryClassObject($domainObject);
 		if(!$repositoryClassSchema->hasDocComment()){
 			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
 			$repositoryClassSchema->setDocComment($classDocComment);

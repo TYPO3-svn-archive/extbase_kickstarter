@@ -55,7 +55,7 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 	 * @param string $className
 	 * @return Tx_ExtbaseKickstarter_Domain_Model_Class_Schema 
 	 */
-	public function importClassSchemaFromFile($className){
+	public function importClassObjectFromFile($className){
 		
 		$this->starttime = microtime(true); // for profiling
 		
@@ -63,7 +63,7 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 			throw new Exception('Class not exists: '.$className);
 		} 
 		
-		$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_Class_Schema($className);
+		$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
 		
 		$classReflection = new Tx_ExtbaseKickstarter_Reflection_ClassReflection($className);
 		

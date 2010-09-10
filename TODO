@@ -1,3 +1,5 @@
+Property of type SelectList produces error
+
 1. Implement updating of existing classes:
 	1.1 Change from entity to value objects
 	1.2 Change from non aggregate root to aggregate root

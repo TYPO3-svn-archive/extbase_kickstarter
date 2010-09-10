@@ -32,10 +32,23 @@
  */
 class Tx_ExtbaseKickstarter_Domain_Validator_ExtensionValidator extends Tx_Extbase_Validation_Validator_AbstractValidator {
 
+	/**
+	 * Error Codes:
+	 * 0 - 99: Errors concerning the Extension configuration
+	 * 100 - 199: Errors concerning the Domain Objects directly
+	 * 200 - 299: Errors concerning the Properties
+	 */
 	const	ERROR_EXTKEY_LENGTH			= 0,
 		ERROR_EXTKEY_ILLEGAL_CHARACTERS	= 1,
 		ERROR_EXTKEY_ILLEGAL_PREFIX		= 2,
-		ERROR_EXTKEY_ILLEGAL_FIRST_CHARACTER	= 3;
+		ERROR_EXTKEY_ILLEGAL_FIRST_CHARACTER	= 3,
+		ERROR_DOMAINOBJECT_ILLEGAL_CHARACTER = 100,
+		ERROR_DOMAINOBJECT_NO_NAME = 101,
+		ERROR_DOMAINOBJECT_LOWER_FIRST_CHARACTER = 102,
+		ERROR_PROPERTY_NO_NAME = 200,
+		ERROR_PROPERTY_DUPLICATE = 201,
+		ERROR_PROPERTY_ILLEGAL_CHARACTER = 202,
+		ERROR_PROPERTY_UPPER_FIRST_CHARACTER = 203;
 
 	/**
 	 * Validate the given extension
@@ -50,10 +63,95 @@ class Tx_ExtbaseKickstarter_Domain_Validator_ExtensionValidator extends Tx_Extba
 		} catch (Tx_Extbase_Exception $e) {
 			throw($e);
 		}
+		
+		try {
+			self::validateDomainObjects($extension);
+		} catch (Tx_Extbase_Exception $e) {
+			throw($e);
+		}
 
 		return true;
 	}
 
+	/**
+	 * @author Sebastian Michaelsen <sebastian.gebhard@gmail.com>
+	 * @param	Tx_ExtbaseKickstarter_Domain_Model_Extension
+	 * @return 	bool
+	 * @throws Tx_ExtbaseKickstarter_Domain_Exception_ExtensionException
+	 */
+	private static function validateDomainObjects($extension) {
+		foreach($extension->getDomainObjects() as $domainObject) {
+			
+				// Check if domainObject name is given
+			if(!$domainObject->getName()) {
+				throw new Tx_ExtbaseKickstarter_Domain_Exception_ExtensionException('A Domain Object has no name', self::ERROR_DOMAINOBJECT_NO_NAME);
+			}
+			
+			/**
+		 	 * Character test
+			 * Allowed characters are: a-z (lowercase), A-Z (uppercase) and 0-9
+			 */
+			if (!preg_match("/^[a-zA-Z0-9]*$/", $domainObject->getName())) {
+				throw new Tx_ExtbaseKickstarter_Domain_Exception_ExtensionException('Illegal domain object name "' . $domainObject->getName() . '". Please use UpperCamelCase, no spaces or underscores.', self::ERROR_DOMAINOBJECT_ILLEGAL_CHARACTER);
+			}
+			
+			$objectName = $domainObject->getName();
+			$firstChar = $objectName{0};
+			if(strtolower($firstChar) == $firstChar) {
+				throw new Tx_ExtbaseKickstarter_Domain_Exception_ExtensionException('Illegal first character of domain object name "' . $domainObject->getName() . '". Please use UpperCamelCase.', self::ERROR_DOMAINOBJECT_LOWER_FIRST_CHARACTER);
+			}
+			
+			try {
+				self::validateProperties($domainObject);
+			} catch (Tx_Extbase_Exception $e) {
+				throw($e);
+			}
+		}
+	}
+	
+	/**
+	 * @author Sebastian Michaelsen <sebastian.gebhard@gmail.com>
+	 * @param	Tx_ExtbaseKickstarter_Domain_Model_DomainObject
+	 * @return 	bool
+	 * @throws Tx_ExtbaseKickstarter_Domain_Exception_ExtensionException
+	 */
+	private static function validateProperties($domainObject) {
+		$propertyNames = array();
+		foreach($domainObject->getProperties() as $property) {
+			
+				// Check if property name is given
+			if(!$property->getName()) {
+				throw new Tx_ExtbaseKickstarter_Domain_Exception_ExtensionException('A property of ' . $domainObject->getName() . ' has no name', self::ERROR_PROPERTY_NO_NAME);
+			}
+			
+			/**
+		 	 * Character test
+			 * Allowed characters are: a-z (lowercase), A-Z (uppercase) and 0-9
+			 */
+			if (!preg_match("/^[a-zA-Z0-9]*$/", $property->getName())) {
+				throw new Tx_ExtbaseKickstarter_Domain_Exception_ExtensionException(
+					'Illegal property name "' . $property->getName() . '" of ' . $domainObject->getName() . '. Please use lowerCamelCase, no spaces or underscores.',
+					self::ERROR_PROPERTY_ILLEGAL_CHARACTER
+				);
+			}
+			
+			$propertyName = $property->getName();
+			$firstChar = $propertyName{0};
+			if(strtoupper($firstChar) == $firstChar) {
+				throw new Tx_ExtbaseKickstarter_Domain_Exception_ExtensionException(
+					'Illegal first character of property name "' . $property->getName() . '" of domain object "' . $domainObject->getName() . '". Please use lowerCamelCase.',
+					self::ERROR_PROPERTY_UPPER_FIRST_CHARACTER
+				);
+			}
+			
+				// Check for duplicate property names
+			if(in_array($property->getName(), $propertyNames)) {
+				throw new Tx_ExtbaseKickstarter_Domain_Exception_ExtensionException('Property "' . $property->getName() . '" of ' . $domainObject->getName() . ' exists twice.', self::ERROR_PROPERTY_DUPLICATE);
+			}
+			$propertyNames[] = $property->getName();
+		}
+	}
+	
 	/**
 	 * @author Rens Admiraal
 	 * @param string $key

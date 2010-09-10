@@ -29,7 +29,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema {
+abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractClass {
 	
 	/**
 	 * 1  	 	ReflectionMethod::IS_STATIC

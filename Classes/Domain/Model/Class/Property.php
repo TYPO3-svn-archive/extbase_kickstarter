@@ -28,7 +28,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_Class_Property extends Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericSchema{
+class Tx_ExtbaseKickstarter_Domain_Model_Class_Property extends Tx_ExtbaseKickstarter_Domain_Model_AbstractClass{
 
     
     		
