@@ -3,7 +3,6 @@
 *  Copyright notice
 *
 *  (c) 2009 Ingmar Schlecht
-*	   2010 Nico de Haen, Stephan Petzl
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -33,26 +32,24 @@
  * @version $ID:$
  */
 class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
+	
 	/**
-	 * renders the files
+	 * 
 	 * @param array $jsonArray
-	 * @return Tx_ExtbaseKickstarter_Domain_Model_Extension
+	 * @return $extension
 	 */
 	public function build(array $jsonArray) {
-		$this->extension = new Tx_ExtbaseKickstarter_Domain_Model_Extension();
-		
+		$extension = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Extension');
 		$globalProperties = $jsonArray['properties'];
 		if (!is_array($globalProperties)) throw new Exception('Wrong 1');
 
 
 			// name
-		$this->extension->setName($globalProperties['name']);
+		$extension->setName($globalProperties['name']);
 			// description
-		$this->extension->setDescription($globalProperties['description']);
+		$extension->setDescription($globalProperties['description']);
 			// extensionKey
-		$this->extension->setExtensionKey($globalProperties['extensionKey']);
-		
-		$this->extension->setMD5Hashes($globalProperties['md5']);
+		$extension->setExtensionKey($globalProperties['extensionKey']);
 		
 		foreach($globalProperties['persons'] as $personValues) {
 			$person=t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Person');
@@ -60,7 +57,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 			$person->setRole($personValues['role']);
 			$person->setEmail($personValues['email']);
 			$person->setCompany($personValues['company']);
-			$this->extension->addPerson($person);
+			$extension->addPerson($person);
 		}
 		
 			// state
@@ -82,13 +79,14 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 				$state = Tx_ExtbaseKickstarter_Domain_Model_Extension::STATE_TEST;
 				break;
 		}
-		$this->extension->setState($state);
+		$extension->setState($state);
+
 
 		// classes
 		if (is_array($jsonArray['modules'])) {
 			foreach ($jsonArray['modules'] as $singleModule) {
 				$domainObject = $this->buildDomainObject($singleModule['value']);
-				$this->extension->addDomainObject($domainObject);
+				$extension->addDomainObject($domainObject);
 			}
 		}
 
@@ -108,25 +106,17 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 				if (!class_exists($relationSchemaClassName)) throw new Exception('Relation of type ' . $relationSchemaClassName . ' not found');
 				$relation = new $relationSchemaClassName;
 				$relation->setName($relationJsonConfiguration['relationName']);
-				$relation->setForeignClass($this->extension->getDomainObjectByName($foreignClassName));
+				$relation->setForeignClass($extension->getDomainObjectByName($foreignClassName));
 
-				$this->extension->getDomainObjectByName($localClassName)->addProperty($relation);
+				$extension->getDomainObjectByName($localClassName)->addProperty($relation);
 			}
 		}
 
-		return $this->extension;
+		return $extension;
 	}
-	
-	/**
-	 * builds a domainObject from json input, including classSchemas for Model, Controller, Repositories
-	 * each classSchema reflects exisiting classes 
-	 * 
-	 * @param array $jsonDomainObject
-	 * @return Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
-	 */
+
 	protected function buildDomainObject(array $jsonDomainObject) {
-		$domainObject = new Tx_ExtbaseKickstarter_Domain_Model_DomainObject();
-		$domainObject->setExtension($this->extension); // needed in $domainObject->getDomainRepositoryClassName method
+		$domainObject = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_DomainObject');
 		$domainObject->setName($jsonDomainObject['name']);
 		$domainObject->setDescription($jsonDomainObject['objectsettings']['description']);
 		if ($jsonDomainObject['objectsettings']['type'] === 'Entity') {
@@ -134,55 +124,35 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 		} else {
 			$domainObject->setEntity(FALSE);
 		}
-		
-		
-		
-		$domainObject->setAggregateRoot($jsonDomainObject['objectsettings']['aggregateRoot']);
-		
-		
-		foreach ($jsonDomainObject['propertyGroup']['properties'] as $jsonProperty) {
-			$propertyName = $jsonProperty['propertyName'];
 
-			// build a domainProperty object from json 
-			$domainPropertyType = $jsonProperty['propertyType'];
-			$domainPropertyClassName = 'Tx_ExtbaseKickstarter_Domain_Model_Property_' . $domainPropertyType . 'Property';
-			
-			if (!class_exists($domainPropertyClassName)) throw new Exception('Property of type ' . $domainPropertyType . ' not found');
-			
-			$domainProperty = t3lib_div::makeInstance($domainPropertyClassName);
-			
-							
-			/* @var $domainProperty Tx_ExtbaseKickstarter_Domain_Model_AbstractGenericProperty */
-			$domainProperty->setName($propertyName);
-			
-			if(empty($jsonProperty['propertyDescription'])){
-				$domainProperty->setDescription($propertyName);
-			}
-			else {
-				$domainProperty->setDescription($jsonProperty['propertyDescription']);
-			}
+		$domainObject->setAggregateRoot($jsonDomainObject['objectsettings']['aggregateRoot']);
+
+		foreach ($jsonDomainObject['propertyGroup']['properties'] as $jsonProperty) {
+			$propertyType = $jsonProperty['propertyType'];
+			$propertyClassName = 'Tx_ExtbaseKickstarter_Domain_Model_Property_' . $propertyType . 'Property';
+			if (!class_exists($propertyClassName)) throw new Exception('Property of type ' . $propertyType . ' not found');
+			$property = t3lib_div::makeInstance($propertyClassName);
+			$property->setName($jsonProperty['propertyName']);
+			$property->setDescription($jsonProperty['propertyDescription']);
+
 			if (isset($jsonProperty['propertyIsRequired'])) {
-				$domainProperty->setRequired($jsonProperty['propertyIsRequired']);
+				$property->setRequired($jsonProperty['propertyIsRequired']);
 			}
-			
 			if (isset($jsonProperty['propertyIsExcludeField'])) {
 				$property->setExcludeField($jsonProperty['propertyIsExcludeField']);
 			}
-			
-			
-			$domainObject->addProperty($domainProperty);
-				
+
+			$domainObject->addProperty($property);
 		}
 		
 		foreach ($jsonDomainObject['actionGroup']['actions'] as $jsonAction) {
 			$action = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Action');
 			$action->setName($jsonAction);
+			
 			$domainObject->addAction($action);
 		}
 		return $domainObject;
 	}
-	
-
 
 	/**
 	 * @return Tx_ExtbaseKickstarter_Domain_Model_DomainObject
@@ -201,7 +171,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 		$this->loadClass($domainObjectClassName); // needed if the extension is not installed yet.
 		$classSchema = $reflectionService->getClassSchema($domainObjectClassName);
 		if ($classSchema === null) {
-			throw new Exception("ClassSchema not found, as the target class could not be loaded:.".$domainObjectClassName, 1271669067);
+			throw new Exception("ClassSchema not found, as the target class could not be loaded.", 1271669067);
 		}
 		foreach ($classSchema->getProperties() as $propertyName => $propertyDescription) {
 			if (in_array($propertyName, array('uid', '_localizedUid', '_languageUid'))) continue;
