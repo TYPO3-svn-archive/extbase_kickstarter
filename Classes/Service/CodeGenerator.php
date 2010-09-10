@@ -48,10 +48,18 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	 */
 	protected $extension;
 	
+	/**
+	 * 
+	 * @var Tx_ExtbaseKickstarter_ClassSchemaBuilder
+	 */
+	protected $classSchemaBuilder;
+	
 
 	public function __construct() {
 		$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
 		$this->objectManager = new Tx_Fluid_Compatibility_ObjectManager();
+		$this->inflector = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_Inflector');
+		$this->classSchemaBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ClassSchemaBuilder');
 	}
 	
 	/**
@@ -62,6 +70,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	 */
 	public function build(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		$this->extension = $extension;
+		$this->classSchemaBuilder->injectExtension($extension);
 
 		// Validate the extension
 		$extensionValidator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Validator_ExtensionValidator');
@@ -71,7 +80,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 			return $e->getMessage();
 		}
 		
-		$this->importTool = new Tx_ExtbaseKickstarter_Utility_Import();
+		
 		// Base directory already exists at this point
 		$extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
 		//t3lib_div::mkdir($extensionDirectory);
@@ -258,7 +267,11 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 
 
 	public function generateActionControllerCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject, Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
-		$controllerClassSchema = $this->generateControllerClassSchema($domainObject);
+		$controllerClassSchema = $this->classSchemaBuilder->generateControllerClassSchema($domainObject);
+		if(!$controllerClassSchema->hasDocComment()){
+			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
+			$controllerClassSchema->setDocComment($classDocComment);
+		}
 		return $this->renderTemplate('Classes/Controller/actionController.phpt', array('domainObject' => $domainObject, 'extension' => $extension,'classSchema'=>$controllerClassSchema));
 	}
 
@@ -267,12 +280,20 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	}
 	
 	public function generateDomainObjectCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject, Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
-		$modelClassSchema = $this->generateModelClassSchema($domainObject);
+		$modelClassSchema = $this->classSchemaBuilder->generateModelClassSchema($domainObject);
+		if(!$modelClassSchema->hasDocComment()){
+			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
+			$modelClassSchema->setDocComment($classDocComment);
+		}
 		return $this->renderTemplate('Classes/Domain/Model/domainObject.phpt', array('domainObject' => $domainObject, 'extension' => $extension,'classSchema'=>$modelClassSchema));
 	}
 
 	public function generateDomainRepositoryCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {
-		$repositoryClassSchema = $this->generateRepositoryClassSchema($domainObject);
+		$repositoryClassSchema = $this->classSchemaBuilder->generateRepositoryClassSchema($domainObject);
+		if(!$repositoryClassSchema->hasDocComment()){
+			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
+			$repositoryClassSchema->setDocComment($classDocComment);
+		}
 		return $this->renderTemplate('Classes/Domain/Repository/domainRepository.phpt', array('domainObject' => $domainObject,'classSchema' => $repositoryClassSchema));
 	}
 	
@@ -325,244 +346,6 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		return $this->renderTemplate('Configuration/TypoScript/setup.txt', array('extension' => $extension));
 	}
 	
-	//TODO the methods below need to reflect changing or deleting of elements in the kickstarter
-	// currently the json provides no information about that, so it can't be processed yet
-	
-	/**
-	 * This method generates the class schema object, which is passed to the template
-	 * it keeps all methods and properties including user modified method bodies and comments 
-	 * needed to create a domain object class file
-	 * 
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
-	 * @return 
-	 */
-	protected function generateModelClassSchema($domainObject){
-		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
-		$domainObjectClassFile = $this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php';
-		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Model_' . $domainObject->getName();
-	
-		if(file_exists( $domainObjectClassFile) &&  $this->extension->isModified($domainObjectClassFile)){
-			t3lib_div::devLog('Class '.$className.' was modified', 'extbase_kickstarter');
-			include_once($domainObjectClassFile);
-			try {
-				$classSchema = $this->importTool->importClassSchemaFromFile($className);
-			}
-			catch(Exception $e){
-				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
-			}			
-		}
-		else {
-			$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_Class_Schema($className);
-			$classSchema->setFileName($domainObjectClassFile);
-			if($domainObject->isEntity()){
-				$classSchema->setParentClass('Tx_Extbase_DomainObject_AbstractEntity');
-			}
-			else {
-				$classSchema->setParentClass('Tx_Extbase_DomainObject_AbstractValueObject');
-			}
-		}
-		$classDocComment = $classSchema->getDocComment();
-		if(empty($classDocComment)){
-			$classDocComment = $this->renderTemplate('Partials/Classes/Domain/Model/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
-			$classSchema->setDocComment($classDocComment);
-		}
-		if(!$classSchema->hasDescription()){
-			$classSchema->setDescription($domainObject->getDescription());
-		}
-		//TODO the following part still needs some enhancement: 
-		//what should be obligatory in existing properties and methods
-		foreach ($domainObject->getProperties() as $domainProperty) {
-			$propertyName = $domainProperty->getName();
-					
-			// add the property to class schema (or update an existing class schema property)
-			if($classSchema->propertyExists($propertyName)){
-				$classProperty = $classSchema->getProperty($propertyName);
-				$classPropertyTags = $classProperty->getTags();
-			}
-			else {
-				$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_Class_Property($propertyName);
-				$classProperty->setTag('var',strtolower($domainProperty->getTypeForComment()));
-				$classProperty->addModifier('private');
-			}
-			
-			$classProperty->setAssociatedDomainObjectProperty($domainProperty);
-			
-			$classSchema->setProperty($classProperty);
-			
-			//TODO relation properties need add/remove methods
-			
-			// add (or update) a getter method
-			$getterMethodName = 'get'.ucfirst($propertyName);
-			
-			if($classSchema->methodExists($getterMethodName)){
-				$getterMethod = $classSchema->getMethod($getterMethodName);
-				$getterMethodTags = $getterMethod->getTags();
-			}
-			else {
-				$getterMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($getterMethodName);
-				// default method body
-				$getterMethod->setBody('return $this->'.$propertyName.';');
-				$getterMethod->setTag('return',strtolower($domainProperty->getTypeForComment()).' $'.$propertyName);
-				$getterMethod->addModifier('public');
-			}
-			if(!$getterMethod->hasDescription()){
-				$getterMethod->setDescription('Returns the '.$propertyName);
-			}
-			$classSchema->setMethod($getterMethod);
-			
-			// add (or update) a setter method
-			$setterMethodName = 'set'.ucfirst($propertyName);
-			
-			if($classSchema->methodExists($setterMethodName)){
-				$setterMethod = $classSchema->getMethod($setterMethodName);
-				$setterMethodTags = $setterMethod->getTags();
-			}
-			else {
-				$setterMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($setterMethodName);
-				// default method body
-				$setterMethod->setBody('$this->'.$propertyName.' = $'.$propertyName.';');
-				$setterMethod->setTag('param',strtolower($domainProperty->getTypeForComment()).' $'.$propertyName);
-				$setterMethod->setTag('return','void');
-				$setterMethod->addModifier('public');
-			}
-			if(!$setterMethod->hasDescription()){
-				$setterMethod->setDescription('Sets the '.$propertyName);
-			}
-			$setterParameters = $setterMethod->getParameterNames();
-			if(!in_array($propertyName,$setterParameters)){
-				$setterParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter($propertyName);
-				$setterParameter->setVarType($domainProperty->getTypeForComment());
-				$setterMethod->setParameter($setterParameter);
-			}
 
-			$classSchema->setMethod($setterMethod);
-		
-			
-		}
-		if(!$classSchema->methodExists('__constructor')){
-			$constructorMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method('__constructor');
-			$constructorMethod->setDescription('The constructor of this '.$domainObject->getName());
-			$constructorMethod->setBody('$this->initSplObjects();');
-			$constructorMethod->addModifier('public');
-			$classSchema->addMethod($constructorMethod);
-		}
-		
-		if(!$classSchema->methodExists('initSplObjects')){
-			$initSplObjectsMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method('initSplObjects');
-			$initSplObjectsMethod->setDescription('Initializes all Tx_Extbase_Persistence_ObjectStorage instances.');
-			//TODO set dynamic method body
-			$initSplObjectsMethod->setBody('');
-			$initSplObjectsMethod->addModifier('protected');
-			$classSchema->addMethod($initSplObjectsMethod);
-		}
-		return $classSchema;
-	}
-	
-	/**
-	 * This method generates the class schema object, which is passed to the template
-	 * it keeps all methods and properties including user modified method bodies and comments 
-	 * needed to create a controller class file
-	 * 
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
-	 * @return 
-	 */
-	protected function generateControllerClassSchema($domainObject){
-		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
-		$controllerClassFile = $this->extensionDirectory . 'Classes/Controller/' . $domainObject->getName() . 'Controller.php';
-		
-		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Controller_' . $domainObject->getName().'Controller';
-	
-		if(file_exists( $controllerClassFile) &&  $this->extension->isModified($controllerClassFile)){
-			if(!class_exists($className)){
-				include_once($controllerClassFile);
-			}
-			
-			try {
-				$classSchema = $this->importTool->importClassSchemaFromFile($className);
-			}
-			catch(Exception $e){
-				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
-			}				
-		}
-		else {
-			$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_Class_Schema($className);
-			$classSchema->setFileName($controllerClassFile);
-			$classSchema->setParentClass('Tx_Extbase_MVC_Controller_ActionController');
-			$classSchema->setDescription('Controller for '.$domainObject->getName());
-		}
-		if(empty($classDocComment)){
-			$classDocComment = $this->renderTemplate('Partials/Classes/Domain/Model/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
-			$classSchema->setDocComment($classDocComment);
-		}
-		if($domainObject->isAggregateRoot()){
-			$propertyName = t3lib_div::lcfirst($domainObject->getName()).'Repository';
-			//$domainObject->getDomainRepositoryClassName();
-			// now add the property to class schema (or update an existing class schema property)
-			if(!$classSchema->propertyExists($propertyName)){
-				$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_Class_Property($propertyName);
-				$classProperty->setTag('var',$domainObject->getDomainRepositoryClassName());
-				$classProperty->addModifier('protected');
-				$classSchema->setProperty($classProperty);
-			}
-			$initializeMethodName = 'initializeAction';
-			if(!$classSchema->methodExists($initializeMethodName)){
-				$initializeMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($initializeMethodName);
-				$initializeMethod->setDescription('Initializes the current action');
-				$initializeMethod->setBody('$this->'.t3lib_div::lcfirst($domainObject->getName()).'Repository = t3lib_div::makeInstance('.$domainObject->getDomainRepositoryClassName().');');
-				$initializeMethod->setTag('return','void');
-				$initializeMethod->addModifier('public');
-				$classSchema->addMethod($initializeMethod);
-			}
-		}
-		
-		foreach($domainObject->getActions() as $action){
-			$actionMethodName = $action->getName().'Action';
-			$actionMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($actionMethodName);
-			$actionMethod->setDescription('action '.$action->getName());
-			$actionMethod->setBody('');
-			$actionMethod->setTag('return','string The rendered ' . $action->getName() .' action');
-			$actionMethod->addModifier('public');
-			
-			$classSchema->addMethod($actionMethod);
-		}
-		return $classSchema;
-	}
-	
-	/**
-	 * This method generates the class schema object, which is passed to the template
-	 * it keeps all methods and properties including user modified method bodies and comments 
-	 * needed to create a repository class file
-	 * 
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
-	 * @return 
-	 */
-	protected function generateRepositoryClassSchema($domainObject){
-		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
-		$repositoryClassFile = $this->extensionDirectory . 'Classes/Domain/Repository/' . $domainObject->getName() . 'Repository.php';
-		
-		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Repository_' . $domainObject->getName().'Repository';
-	
-		if(file_exists( $repositoryClassFile) &&  $this->extension->isModified($repositoryClassFile)){
-			include_once($repositoryClassFile);
-			try {
-				$classSchema = $this->importTool->importClassSchemaFromFile($className);
-			}
-			catch(Exception $e){
-				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
-			}		
-		}
-		else {
-			$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_Class_Schema($className);
-			$classSchema->setFileName($repositoryClassFile);
-			$classSchema->setParentClass('Tx_Extbase_Persistence_Repository');
-			$classSchema->setDescription('Repository for '.$domainObject->getName());
-		}
-		if(empty($classDocComment)){
-			$classDocComment = $this->renderTemplate('Partials/Classes/Domain/Model/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
-			$classSchema->setDocComment($classDocComment);
-		}
-		
-		return $classSchema;
-	}
 }
 ?>
