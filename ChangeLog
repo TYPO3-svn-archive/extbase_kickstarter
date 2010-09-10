@@ -1,3 +1,46 @@
-2009-08-16 Ingmar Schlecht  <ingmar@typo3.org>
+Status 10.9.2010 (Nico de Haen)
 
-	* initial code generated with kickstarter
+1. We have an an import tool that can parse a PHP class and 
+	build a "ClassSchema" object that keeps all information 
+	about the class, including properties, constants, methods 
+	and comments. It is possible to create a class file based 
+	on such a ClassSchema without loss of any source code.
+
+2. The CodeGenerator generates the class files by passing a 
+	ClassSchema object to the view which generates the class 
+	based on a  fluid class template. This ClassSchema can be 
+	generated based on the JSON coming from the kickstarter, 
+	or on a ClassSchema imported by the import tool or a combination 
+	of both
+
+3. Currently it is only possible to ADD methods or properties with 
+	the kickstarter or by modification of the source code, but it 
+	is not possible to REMOVE properties or RENAME properties or classes, 
+	since the Kickstarter does not provide informations of the identity 
+	of a (renamed or deleted) property.
+
+4. The roundtrip functionality is only implemented for the class files, 
+	not yet for the tca, tables.sql localconf.php files etc.
+
+Important modifications compared to the trunk:
+1. Extension keeps MD5 values of all files to detect manual modifications
+
+2. AbstractProperty class is renamed to AbstractDomainProperty to avoid confusion 
+	because we also have a ClassProperty class now.
+
+3. The templates for the class files changed completly. They keep only very few information now. 
+
+4. The import of existing class files is performed in the CodeGenerator 
+	generateDomain...Code methods by a call $this->classSchemaBuilder->generateModelClassSchema($domainObject);
+
+3. New Files: 
+	Classes/Domain/Model/AbstractGenericSchema: 
+		The base for all objects related to PHP Class objects. (Methods, Properties, Classes etc.)
+	Classes/Domain/Model/Class/Schema.php, Method.php, Property.php, MethodParameter.php: 
+		classes representing parts of the classSchema
+	Classes/ClassSchemaBuilder.php:
+		The Class providing methods to build the Model, Controller and Repository classes
+	Utility/Import.php:
+		The import tool, that parses a php class file (mostly with reg expressions and the php reflection) and returns a ClassSchema
+	Reflection/ClassReflection.php, MethodReflection.php, ParameterReflection.php, PropertyReflection.php:
+		Extends the extbaseReflection classes with various additional methods

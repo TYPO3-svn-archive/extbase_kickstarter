@@ -1,0 +1,15 @@
+1. Implement updating of existing classes:
+	1.1 Change from entity to value objects
+	1.2 Change from non aggregate root to aggregate root
+	1.3 Renaming of domain objects, actions etc.
+	1.4 Renaming of properties, changes in property types
+
+2. Write tests for CodeGenerator, ClassSchemaBuilder etc.
+
+3. Implement updating of other files (TCA, tables.sql, locallang etc.) keeping modifications 
+
+4. Implement some sorting control (for methods, properties, tags)
+
+5. Implement a configuration possibility (To define defaults for various situations)
+
+6. Implement some functionality to preserve comments in a class file (non docComments) 
