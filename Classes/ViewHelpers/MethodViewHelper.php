@@ -1,19 +1,46 @@
 <?php
+/***************************************************************
+*  Copyright notice
+*
+*  (c) 2010 Nico de Haen
+*  All rights reserved
+*
+*  This script is part of the TYPO3 project. The TYPO3 project is
+*  free software; you can redistribute it and/or modify
+*  it under the terms of the GNU General Public License as published by
+*  the Free Software Foundation; either version 2 of the License, or
+*  (at your option) any later version.
+*
+*  The GNU General Public License can be found at
+*  http://www.gnu.org/copyleft/gpl.html.
+*
+*  This script is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU General Public License for more details.
+*
+*  This copyright notice MUST APPEAR in all copies of the script!
+***************************************************************/
 
+/**
+ * method view helper
+ *
+ * @package ExtbaseKickstarter
+ */
 
 class Tx_ExtbaseKickstarter_ViewHelpers_MethodViewHelper extends Tx_Fluid_Core_ViewHelper_AbstractViewHelper {
 	
 	/**
 	 * 
-	 * @param object $methodSchemaObject
+	 * @param object $methodObject
 	 * @param string $renderElement
 	 * @return 
 	 */
-	public function render($methodSchemaObject,$renderElement) {
+	public function render($methodObject,$renderElement) {
 		$content = '';
-		//t3lib_div::devLog(serialize($methodSchemaObject), $renderElement);
+		//t3lib_div::devLog(serialize($methodObject), $renderElement);
 		switch($renderElement){
-			case 'parameter'		:	$content = $this->renderMethodParameter($methodSchemaObject);
+			case 'parameter'		:	$content = $this->renderMethodParameter($methodObject);
 
 		}
 		return $content;
@@ -22,14 +49,14 @@ class Tx_ExtbaseKickstarter_ViewHelpers_MethodViewHelper extends Tx_Fluid_Core_V
 	/**
 	 * This methods renders the parameters of a method, including typeHints and default values.
 	 * 
-	 * @param $methodSchemaObject
-	 * @return unknown_type
+	 * @param $methodObject
+	 * @return string parameters
 	 */
-	private function renderMethodParameter($methodSchemaObject){
+	private function renderMethodParameter($methodObject){
 		$content = '';
 		$parameters = array();
 		
-		foreach($methodSchemaObject->getParameters()  as $parameter){
+		foreach($methodObject->getParameters()  as $parameter){
 			$parameterName = $parameter->getName();
 			$typeHint = $parameter->getTypeHint ();
 			

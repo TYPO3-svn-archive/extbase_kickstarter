@@ -22,7 +22,6 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-
 /**
  * Backend Module of the Extbase Kickstarter extension
  *
@@ -55,13 +54,8 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	protected $codeGenerator;
 
 	public function initializeAction() {
-		$instance = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ObjectSchemaBuilder');
-		/* @var $instance Tx_ExtbaseKickstarter_ObjectSchemaBuilder */
-       	$this->objectSchemaBuilder = $instance;
-		$instance = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_CodeGenerator');
-		/* @var $instance Tx_ExtbaseKickstarter_Service_CodeGenerator */
-		$this->codeGenerator = $instance;
-		
+		$this->objectSchemaBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ObjectSchemaBuilder');
+		$this->codeGenerator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_CodeGenerator');
 	}
 
 	/**
@@ -70,12 +64,9 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	 * @return string The rendered view
 	 */
 	public function indexAction() {
-
-
 	}
 
 	public function domainmodellingAction() {
-		
 	}
 
 	/**
@@ -84,25 +75,26 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	 * @todo rename this action
 	 */
 	public function generateCodeAction() {
+		
 		$jsonString = file_get_contents('php://input');
 		$request = json_decode($jsonString, true);
-		
 		switch ($request['method']) {
 
 			case 'saveWiring':
-				
 				$extensionConfigurationFromJson = json_decode($request['params']['working'], true);
 				//t3lib_div::devLog("msg1", 'tx_extbasekickstarter', 0, $extensionConfigurationFromJson);
 				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
-				
+
 				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
 				t3lib_div::mkdir($extensionDirectory);
-				$result = $this->codeGenerator->build($extensionSchema);
-				
-				$extensionConfigurationFromJson['md5'] = $extensionSchema->getMD5Hashes();
-				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', json_encode($extensionConfigurationFromJson));
-				return json_encode(array($result));
-				
+				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', $request['params']['working']);
+
+				$build = $this->codeGenerator->build($extensionSchema);
+				if ($build === true) {
+					return json_encode(array('saved'));
+				} else {
+					return json_encode(array($build));
+				}
 				
 			break;
 			case 'listWirings':

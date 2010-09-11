@@ -23,7 +23,8 @@
 ***************************************************************/
 
 /**
- * Extended version of the ReflectionParameter
+ * Extended version of the Tx_Extbase_Reflection_ParameterReflection
+ * implements typeHint
  *
  * @package ExtbaseKickstarter
  * @subpackage Reflection

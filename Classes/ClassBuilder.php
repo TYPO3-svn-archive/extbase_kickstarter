@@ -64,18 +64,22 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		
 		$domainObjectClassFile = $this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php';
 		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Model_' . $domainObject->getName();
-	
+		
+		// is there already a class file? 
 		if(file_exists( $domainObjectClassFile) &&  $this->extension->isModified($domainObjectClassFile)){
 			t3lib_div::devLog('Class '.$className.' was modified', 'extbase_kickstarter');
 			include_once($domainObjectClassFile);
 			try {
+				// import the classObject from the existing file
 				$classObject = $this->importTool->importClassObjectFromFile($className);
 			}
 			catch(Exception $e){
 				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
 			}			
 		}
+		// 
 		else {
+			// otherwise instantiate a new one and set the required attributes
 			$classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
 			$classObject->setFileName($domainObjectClassFile);
 			if($domainObject->isEntity()){

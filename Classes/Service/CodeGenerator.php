@@ -261,18 +261,19 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		if(!is_file(t3lib_extMgm::extPath('extbase_kickstarter').'Resources/Private/CodeTemplates/' . $filePath)){
 			throw(new Exception('TemplateFile '.t3lib_extMgm::extPath('extbase_kickstarter').'Resources/Private/CodeTemplates/' . $filePath.' not found'));
 		}
+				
 		$parsedTemplate = $this->templateParser->parse(file_get_contents(t3lib_extMgm::extPath('extbase_kickstarter').'Resources/Private/CodeTemplates/' . $filePath));
 		return trim($parsedTemplate->render($this->buildRenderingContext($variables)));
 	}
 
 
 	public function generateActionControllerCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject, Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
-		$controllerClassSchema = $this->classBuilder->generateControllerClassObject($domainObject);
-		if(!$controllerClassSchema->hasDocComment()){
-			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
-			$controllerClassSchema->setDocComment($classDocComment);
+		$controllerClassObject = $this->classBuilder->generateControllerClassObject($domainObject);
+		if(!$controllerClassObject->hasDocComment()){
+			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classObject'=>$controllerClassObject));
+			$controllerClassObject->setDocComment($classDocComment);
 		}
-		return $this->renderTemplate('Classes/Controller/actionController.phpt', array('domainObject' => $domainObject, 'extension' => $extension,'classSchema'=>$controllerClassSchema));
+		return $this->renderTemplate('Classes/Controller/actionController.phpt', array('domainObject' => $domainObject, 'extension' => $extension,'classObject'=>$controllerClassObject));
 	}
 
 	public function generateActionControllerCrudActions(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {
@@ -280,21 +281,21 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	}
 	
 	public function generateDomainObjectCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject, Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
-		$modelClassSchema = $this->classBuilder->generateModelClassObject($domainObject);
-		if(!$modelClassSchema->hasDocComment()){
-			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
-			$modelClassSchema->setDocComment($classDocComment);
+		$modelClassObject = $this->classBuilder->generateModelClassObject($domainObject);
+		if(!$modelClassObject->hasDocComment()){
+			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classObject'=>$modelClassObject));
+			$modelClassObject->setDocComment($classDocComment);
 		}
-		return $this->renderTemplate('Classes/Domain/Model/domainObject.phpt', array('domainObject' => $domainObject, 'extension' => $extension,'classSchema'=>$modelClassSchema));
+		return $this->renderTemplate('Classes/Domain/Model/domainObject.phpt', array('domainObject' => $domainObject, 'extension' => $extension,'classObject'=>$modelClassObject));
 	}
 
 	public function generateDomainRepositoryCode(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {
-		$repositoryClassSchema = $this->classBuilder->generateRepositoryClassObject($domainObject);
-		if(!$repositoryClassSchema->hasDocComment()){
-			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classSchema'=>$classSchema));
-			$repositoryClassSchema->setDocComment($classDocComment);
+		$repositoryClassObject = $this->classBuilder->generateRepositoryClassObject($domainObject);
+		if(!$repositoryClassObject->hasDocComment()){
+			$classDocComment = $this->renderTemplate('Partials/Classes/classDocComment.phpt', array('domainObject' => $domainObject, 'extension' => $this->extension,'classObject'=>$repositoryClassObject));
+			$repositoryClassObject->setDocComment($classDocComment);
 		}
-		return $this->renderTemplate('Classes/Domain/Repository/domainRepository.phpt', array('domainObject' => $domainObject,'classSchema' => $repositoryClassSchema));
+		return $this->renderTemplate('Classes/Domain/Repository/domainRepository.phpt', array('domainObject' => $domainObject,'classObject' => $repositoryClassObject));
 	}
 	
 	/**
