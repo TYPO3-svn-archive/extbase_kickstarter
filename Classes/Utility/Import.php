@@ -23,23 +23,59 @@
 ***************************************************************/
 
 /**
- * provides methods to import a class schema 
+ * provides methods to import a class object
  *
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
 class Tx_ExtbaseKickstarter_Utility_Import {
 	  
+	/**
+	 * 
+	 * @var Tx_ExtbaseKickstarter_Domain_Model_Class
+	 */
+	protected $classObject;
+	
+	/**
+	 * 
+	 * @var Tx_ExtbaseKickstarter_Reflection_ClassReflection
+	 */
+	protected $classReflection;
+	
+	/**
+	 * the current line number 
+	 * @var int
+	 */
+	protected $lineCount;
+	
+	/**
+	 * might be set to true from "outside"
+	 * @var boolean
+	 */
 	public $debugMode = false;
 	
+	/**
+	 * The default indent for lines in method bodies
+	 * @var string
+	 */
 	public $indentToken = "\t\t";
 	
+	/**
+	 * The regular expression to detect a method in a line 
+	 * @var string regular expression
+	 */
 	public $methodRegex = "/\s*function\s*([a-zA-Z0-9_]*)/";
-
+	
+	/**
+	 * The regular expression to detect a property (or multiple) in a line 
+	 * @var string regular expression
+	 */
 	public $propertyRegex = "/\s*\\$([a-zA-Z0-9_]*)/";
 	
-	//TODO this regex still needs some improvement
-	// the second round brackets should find all kind of strings, i.e. " 'test' " and ' "test" '
+	/**
+	 * The regular expression to detect a constant in a line 
+	 * @var string regular expression
+	 */
 	public $constantRegex = "/\s*const\s*([a-zA-Z0-9_]*)\s*\=\s*\'*\"*([^;\"']*)'*\"*;/";
 	
 	// TODO parse definitions of namespaces
@@ -63,48 +99,31 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 			throw new Exception('Class not exists: '.$className);
 		} 
 		
-		$classSchema = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
+		$this->classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
 		
-		$classReflection = new Tx_ExtbaseKickstarter_Reflection_ClassReflection($className);
+		$this->classReflection = new Tx_ExtbaseKickstarter_Reflection_ClassReflection($className);
 		
 		if($className == 'Tx_KickstartTest_Controller_BlogController'){
-			//die(json_encode($classReflection));
+			//die(json_encode($this->classReflection));
 		}
 		
 		$propertiesToMap = array('FileName','Modifiers','Tags','ParentClass');
 		
+		// map class variables from ClassReflection to classObject 
 		foreach($propertiesToMap as $propertyToMap){
 			// these are all "value objects" so there is no need to parse them
 			$getterMethod = 'get'.$propertyToMap;
 			$setterMethod = 'set'.$propertyToMap;
 			
-			$classSchema->$setterMethod($classReflection->$getterMethod());
+			$this->classObject->$setterMethod($this->classReflection->$getterMethod());
 		}
 		
-		$file = $classReflection->getFileName();
+		$file = $this->classReflection->getFileName();
 		$fileHandler = fopen($file,'r');
 		
 		if(!$fileHandler){
 			throw new Exception('Could not open file: '.$file);
 		} 
-		
-		/**
-		 *  tokenizer might be useful in case of errors during parsing lines
-		 *  but slows down the whole process by a factor between 5 to 20 ...
-		 *  
-
-		$fContent = fread($fileHandler,filesize($file));
-		$tokenArr = array();
-		$token = token_get_all($fContent);
-		foreach($token as $t){
-			if(count($t)==3){
-				if(!isset($tokenArr[$t[2]]))$tokenArr[$t[2]] = array();
-				$t['name'] = token_name($t[0]);
-				$tokenArr[$t[2]][] = $t; 
-			}
-			
-		}
-		*/
 		
 		/**
 		 * various flags used during parsing process
@@ -120,68 +139,59 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 		 // the new created Tx_ExtbaseKickstarter_Domain_Model_ClassMethod
 		$currentClassMethod = NULL;
 		
-		// remember the last line that matched either a property or a method end
+		// remember the last line that matched either a property, a constant or a method end
+		// this is needed to get all comments between two methods or properties 
+		// (not only the doc comment
 		$lastMatchedLine = 0; 
+		
 		$currentMethodEndLine = 0;
 		
 		$lines = array();
-		$lineCount = 1;
-		// keep all lines above a property or a method and save it in the precedingBlock property
+		
+		$this->lineCount = 1;
+		
 		while(!feof($fileHandler)){
 			$line = fgets($fileHandler);
 			
 			$trimmedLine = trim($line);
 			
-			if($lineCount == $classReflection->getStartLine()){
+			// save all comment found before the class start line
+			if($this->lineCount == $this->classReflection->getStartLine()){
 				$classPreComment = '';
 				foreach($lines as $lN => $lContent){
 					if(strlen(trim($lContent))>0){
 						$classPreComment .= $lContent;
 					}
 				}
-				$classSchema->setPrecedingBlock($classPreComment);
+				$this->classObject->setPrecedingBlock($classPreComment);
 				
-				$lastMatchedLine = $lineCount;
+				$lastMatchedLine = $this->lineCount;
 			}
 			
 			if(!empty($trimmedLine) && !$isMethodBody){
 				
-				// end of multiline comment found (maybe this part could be better solved with tokenizer?
-				if(strrpos($line,'*/')>-1){
-					if(strrpos($line,'/**')>-1){
-						// if a multiline comment starts in the same line after a multiline comment end
-						$isMultilineComment = (strrpos($line,'/**') > strrpos($line,'*/'));
-					}
-					else $isMultilineComment = false;
-				}
-				else if(strrpos($line,'/**')>-1){
-					// multiline comment start
-					$isMultilineComment = true;
-				}
-			
-				// single comment line
-				if(!$isMultilineComment && preg_match("/^\s*\/\\//",$line)){
-					$isSingleLineComment = true;
-				}
-				else {
-					$isSingleLineComment = false;
-				}
+				// process multi line comment
+				$isMultilineComment = $this->isMultiLineComment($line,$isMultilineComment);
 				
+				// process single line comment
+				$isSingleLineComment = $this->isSingleLineComment($line);
+				
+				// if not in a comment we look for methods, properties or constants
 				if(!$isSingleLineComment && !$isMultilineComment && !empty($trimmedLine)){
-					// if not in a comment we look for a method or property
-					//
+					
+
 					$methodMatches = array();
 					$propertyMatches = array();
 					$constantMatches = array();
 					
+					// process methods
 					if(preg_match_all($this->methodRegex,$trimmedLine,$methodMatches)){
-						// a method was found
 						$isMethodBody = true;
 						$methodName = $methodMatches[1][0];
 						
 						try{
 							// the method has to exist in the classReflection
-							$currentMethodReflection = $classReflection->getMethod($methodMatches[1][0]);
+							$currentMethodReflection = $this->classReflection->getMethod($methodName);
 							if($currentMethodReflection){
 								//$parameters = $currentMethodReflection->getParameters();
 								$precedingBlock = $this->concatLinesFromArray($lines,$lastMatchedLine);
@@ -194,7 +204,7 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 							}
 							else {
 								throw new Tx_ExtbaseKickstarter_Exception_ParseError(
-										'Method '. $methodName . ' does not exist. Parsed from line '.$lineCount . 'in '. $classReflection->getFileName()
+										'Method '. $methodName . ' does not exist. Parsed from line '.$this->lineCount . 'in '. $this->classReflection->getFileName()
 									);
 							}
 						}
@@ -203,118 +213,95 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 							t3lib_div::print_array('Exception: '.$e->getMessage());
 						}
 						
-					} // end of pregmatch "function"
+					} // end of preg_match_all method
 					
 					if(!$isMethodBody){
+						// process constants
 						if(preg_match_all($this->constantRegex,$trimmedLine,$constantMatches)){
-						//if(preg_match_all($this->constantRegex,$trimmedLine,$constantMatches)){
-							
-							preg_match_all($this->constantRegex,$trimmedLine,$constantMatches);
-							for($i = 0;$i< count($constantMatches[0]);$i++){
-								try{
-									$constantName = $constantMatches[1][$i];
-									// the constant has to exist in the classReflection
-									$reflectionConstantValue = $classReflection->getConstant($constantName);
-									
-									$classSchema->setConstant($constantName,$reflectionConstantValue);
-								}
-								catch(ReflectionException $e){
-									// ReflectionClass throws an exception if a property was not found
-									t3lib_div::print_array('Exception in line : '.$e->getMessage().' Constant '.$propertyName.' found in line '.$lineCount);
-								}
-							}
+							$this->addConstant($constantMatches);
 						}
+						
+						// process properties
 						if(preg_match_all($this->propertyRegex,$trimmedLine,$propertyMatches)){
-							// a property (or multiple) was found
-							$propertyNames = $propertyMatches[1];
-							$isFirstProperty = true;
-							foreach($propertyNames as $propertyName){
-								try{
-									// the property has to exist in the classReflection
-									$reflectionProperty = $classReflection->getProperty($propertyName);
-									if($reflectionProperty){
-										
-										$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_Class_Property($propertyName);
-										$classProperty->mapToReflectionProperty($reflectionProperty);
-										
-										if($isFirstProperty){
-											// only the first property will get the preceding block assigned
-											$precedingBlock = $this->concatLinesFromArray($lines,$lastMatchedLine);
-											$classProperty->setPrecedingBlock($precedingBlock);
-											$isFirstProperty = false;
-										}
-										
-										$classSchema->addProperty($classProperty);
-										$lastMatchedLine = $lineCount;
-									}
-									else {
-										throw new Tx_ExtbaseKickstarter_Exception_ParseError(
-												'Property '. $propertyName . ' does not exist. Parsed from line '.$lineCount . 'in '. $classReflection->getFileName()
-											);
-									}
-								}
-								catch(ReflectionException $e){
-									// ReflectionClass throws an exception if a property was not found
-									t3lib_div::print_array('Exception in line : '.$e->getMessage().'Property '.$propertyName.' found in line '.$lineCount);
-								}
-							}
-						} // end of pregmatch "property"
+							$this->addProperty($propertyMatches);
+						} 
 						
-						
-						
-						
-					} // end of not in method body
+					}
+					
 					$includeMatches = array();
 					if( preg_match_all($this->includeRegex,$line,$includeMatches)){
 						//preg_match_all($this->includeRegex,$trimmedLine,$includeMatches);
 						foreach($includeMatches[2] as $include){
-							$classSchema->addInclude($include);
+							$this->classObject->addInclude($include);
 						}
 					}
 				} // end of not in comment
 				
 			} // end of not empty and not in method body
-			else if($isMethodBody && ($lineCount == ($currentMethodEndLine -1) || $currentMethodEndLine == $currentMethodReflection->getStartLine())){
+			
+			// endline of a method
+			if($isMethodBody && $this->lineCount == $currentMethodEndLine){
+
 				$methodBodyStartLine = $currentMethodReflection->getStartLine();
-				if($currentMethodEndLine != $currentMethodReflection->getStartLine()){
+				
+				if($currentMethodEndLine - $currentMethodReflection->getStartLine() >= 2){
 					$methodBody = $this->concatLinesFromArray($lines,$methodBodyStartLine);
-					$methodBody .= $line;
 				}
 				else $methodBody = '';
 				
+				if($currentMethodEndLine == $currentMethodReflection->getStartLine()){
+					// a one line method: we have to strip the method body from the rest
+					$methodBodyRegex = '/\{(.*)/';
+					$methodBodyMatches = array();
+					preg_match_all($methodBodyRegex,$line,$methodBodyMatches);
+					if(!empty($methodBodyMatches[1][0])){
+						$trimmedLine = trim($methodBodyMatches[1][0]);
+						// trimmed line now still has a bracket at the end!
+					}
+				}
+				
+				if($trimmedLine != '}' && strlen($trimmedLine)>0){
+					
+					// remove the bracket from last line
+					$trimmedLine = substr(rtrim($trimmedLine),0,-1);
+					// add the trimmed $line
+					$methodBody .= $trimmedLine;
+				}
 				$currentClassMethod->setBody($methodBody);
-				$classSchema->addMethod($currentClassMethod);
+				$this->classObject->addMethod($currentClassMethod);
 				$currentMethodEndLine = 0;
 				// end of a method body
 				$isMethodBody = false;
-				$lastMatchedLine = $lineCount;
+				$lastMatchedLine = $this->lineCount;
 				//TODO what if a method is defined in the same line as the preceding method ends? Should be checked with tokenizer?	
 			}
 			
-			$lines[$lineCount] = $line;
-			$lineCount++;
+			$lines[$this->lineCount] = $line;
+			$this->lineCount++;
 			
 			
 		} // end while feof
 
-		if($lineCount > $classReflection->getEndLine()){
-			$appendedBlock = $this->concatLinesFromArray($lines,$classReflection->getEndLine());
+		if($this->lineCount > $this->classReflection->getEndLine()){
+			$appendedBlock = $this->concatLinesFromArray($lines,$this->classReflection->getEndLine());
 			$appendedBlock = str_replace('?>','',$appendedBlock);
-			$classSchema->setAppendedBlock($appendedBlock);
+			$this->classObject->setAppendedBlock($appendedBlock);
 		}
+		
+		// debug output 
 		if($this->debugMode){
-			if(count($classSchema->getMethods()) != count($classReflection->getNotInheritedMethods())){
-				debug('Errorr: method count does not match: '.count($classSchema->getMethods()).' methods found, should be '.count($classReflection->getNotInheritedMethods()));
-				debug($classSchema->getMethods());
-				debug($classReflection->getNotInheritedMethods());
+			if(count($this->classObject->getMethods()) != count($this->classReflection->getNotInheritedMethods())){
+				debug('Errorr: method count does not match: '.count($this->classObject->getMethods()).' methods found, should be '.count($this->classReflection->getNotInheritedMethods()));
+				debug($this->classObject->getMethods());
+				debug($this->classReflection->getNotInheritedMethods());
 			}
-			if(count($classSchema->getProperties()) != count($classReflection->getNotInheritedProperties())){
-				debug('Error: property count does not match:'.count($classSchema->getProperties()).' properties found, should be '.count($classReflection->getNotInheritedProperties()));
-				debug($classSchema->getProperties());
-				debug($classReflection->getNotInheritedProperties());
+			if(count($this->classObject->getProperties()) != count($this->classReflection->getNotInheritedProperties())){
+				debug('Error: property count does not match:'.count($this->classObject->getProperties()).' properties found, should be '.count($this->classReflection->getNotInheritedProperties()));
+				debug($this->classObject->getProperties());
+				debug($this->classReflection->getNotInheritedProperties());
 			}
 			
-			$info = $classSchema->getInfo();
+			$info = $this->classObject->getInfo();
 			
 			$this->endtime = microtime(true);
 	    	$totaltime = $this->endtime - $this->starttime;
@@ -322,13 +309,114 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 	    	
 	    	$info['Parsetime:'] = $totaltime.' s';
 			
-	    	debug($classSchema->getInfo());
+	    	debug($info);
 		}
 
-		return $classSchema;
+		return $this->classObject;
+	}
+	
+	/**
+	 * Test for singleLineComment
+	 * 
+	 * $param string $line
+	 */
+	protected function isSingleLineComment($line){
+		$isSingleLineComment = false;
+		// single comment line
+		if(!$isSingleLineComment && preg_match("/^\s*\/\\//",$line)){
+			$isSingleLineComment = true;
+		}
+		return $isSingleLineComment;
+	}
+	
+	/**
+	 * Test for multiLineComment
+	 * 
+	 * @param string $line
+	 * @param boolean $isMultilineComment
+	 */
+	protected function isMultiLineComment($line,$isMultilineComment){
+
+		// end of multiline comment found (maybe this part could be better solved with tokenizer?)
+		if(strrpos($line,'*/')>-1){
+			if(strrpos($line,'/**')>-1){
+				// if a multiline comment starts in the same line after a multiline comment end
+				$isMultilineComment = (strrpos($line,'/**') > strrpos($line,'*/'));
+			}
+			else {
+				$isMultilineComment = false;
+			}
+		}
+		else if(strrpos($line,'/**')>-1){
+			// multiline comment start
+			$isMultilineComment = true;
+		}
+		return $isMultilineComment;
 	}
 
-		/**
+	/**
+	 * Adds on (or multiple) constants found in a source code line to the classObject
+	 * 
+	 * @param array $constantMatches as returned from preg_match_all
+	 */
+	protected function addConstant($constantMatches){
+		for($i = 0;$i< count($constantMatches[0]);$i++){
+			try{
+				$constantName = $constantMatches[1][$i];
+				// the constant has to exist in the classReflection
+				$reflectionConstantValue = $this->classReflection->getConstant($constantName);
+				
+				$this->classObject->setConstant($constantName,json_encode($reflectionConstantValue));
+			}
+			catch(ReflectionException $e){
+				// ReflectionClass throws an exception if a property was not found
+				t3lib_div::print_array('Exception in line : '.$e->getMessage().' Constant '.$constantName.' found in line '.$this->lineCount);
+			}
+		}
+	}
+	
+	/**
+	 * Adds one (or multiple) properties found in a source code line to the classObject
+	 * 
+	 * @param array $propertyMatches as returned from preg_match_all
+	 */
+	protected function addProperty(array $propertyMatches){
+		$propertyNames = $propertyMatches[1];
+		$isFirstProperty = true;
+		foreach($propertyNames as $propertyName){
+			try{
+				// the property has to exist in the classReflection
+				$reflectionProperty = $this->classReflection->getProperty($propertyName);
+				if($reflectionProperty){
+					
+					$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_Class_Property($propertyName);
+					$classProperty->mapToReflectionProperty($reflectionProperty);
+					
+					if($isFirstProperty){
+						// only the first property will get the preceding block assigned
+						$precedingBlock = $this->concatLinesFromArray($lines,$lastMatchedLine);
+						$classProperty->setPrecedingBlock($precedingBlock);
+						$isFirstProperty = false;
+					}
+					
+					$this->classObject->addProperty($classProperty);
+					$lastMatchedLine = $this->lineCount;
+				}
+				else {
+					throw new Tx_ExtbaseKickstarter_Exception_ParseError(
+							' Property '. $propertyName . ' does not exist. Parsed from line '.$this->lineCount . 'in '. $this->classReflection->getFileName()
+						);
+				}
+			}
+			catch(ReflectionException $e){
+				// ReflectionClass throws an exception if a property was not found
+				t3lib_div::print_array('Exception in line : '.$e->getMessage().'Property '.$propertyName.' found in line '.$this->lineCount);
+			}
+		}
+	}
+	
+	/**
+	 * Helper function for method bodies
 	 * 
 	 * @param array $lines
 	 * @param int $start

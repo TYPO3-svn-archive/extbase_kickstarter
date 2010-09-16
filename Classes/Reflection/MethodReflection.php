@@ -80,7 +80,7 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 	 */
 	protected function getTypeHintFromReflectionParameter($reflectionParameter){
 		$paramAsString = (string) $reflectionParameter;
-		t3lib_div::devLog('paramAsString: '.$paramAsString,'extbase_kickstarter');
+		//t3lib_div::devLog('paramAsString: '.$paramAsString,'extbase_kickstarter');
 		$paramRegex = '/^Parameter\s\#[0-9]\s\[\s<(required|optional)>\s*.*\$.*]$/';
 		if(!preg_match($paramRegex, $paramAsString)){
 			// since the approach to cast the reflection parameter as a string is not part of the official PHP API
@@ -98,29 +98,13 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 					$typeHint = str_replace('&','',$typeHint);
 				}
 				$typeHint = trim($typeHint);
-				t3lib_div::devLog('typeHint: '.$typeHint,'extbase_kickstarter');
+				//t3lib_div::devLog('typeHint: '.$typeHint,'extbase_kickstarter');
 				return $typeHint;
 			}
 		}
 		return '';
 	}
 	
-	/**
-	 * getter for methodBody
-	 * @return string
-	 */
-	public function getMethodBody(){
-		return $this->methodBody;
-	}
-	
-	/**
-	 * setter for methodBody
-	 * @param string method body
-	 * @return void
-	 */
-	public function setMethodBody($methodBody){
-		$this->methodBody = $methodBody;
-	}
 	
 	public function getDescription(){
 		if(empty($this->description)){

@@ -32,6 +32,17 @@ final class Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass extends Tx_Extbase
 	public function getName(){
 		return $this->name;
 	}
+	// some methods
+	public function getNames(){	return $this->names;}
+	
+	public function getNames1(){  }
+	
+	public function getNames2(){	
+	}
+	
+	public function getNames3(){	
+		return $this->names;		}
+		
 	//startPrecedingBlock
 	
 	/***********************************************************/
@@ -54,7 +65,7 @@ final class Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass extends Tx_Extbase
 		$this->name = $name;
 	}
 	private $another_Property = 'test456_"';
-	static function method_2($param1,&$param2,$param3= 'default'){
+	static function method_2($param1,&$param2,$param3= 'default',array $param4 = array('test'=>array(1,2,3))){
 		/**
 		 * test test
 		 */

@@ -42,7 +42,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder_testcase extends Tx_ExtbaseKicks
 		$description = 'My cool fancy description';
 		$name = 'ExtName';
 		$extensionKey = 'EXTKEY';
-		$state = 'beta';
+		$state = 2;
 
 		$input = array(
 			'properties' => array(
@@ -57,7 +57,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder_testcase extends Tx_ExtbaseKicks
 		$extension->setDescription($description);
 		$extension->setName($name);
 		$extension->setExtensionKey($extensionKey);
-		$extension->setState(1);
+		$extension->setState($state);
 
 		$actual = $this->objectSchemaBuilder->build($input);
 		$this->assertEquals($actual, $extension, 'Extension properties were not extracted.');

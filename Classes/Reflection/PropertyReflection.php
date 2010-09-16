@@ -69,6 +69,8 @@ class Tx_ExtbaseKickstarter_Reflection_PropertyReflection extends Tx_Extbase_Ref
 	 * @return array $tags
 	 */
 	public function getTags(){
+		// getTagsValues does not return an array with tag values only
+		// as the name says, but an associative array with tagName=>tagValue
 		return $this->getTagsValues();
 	}
 	
