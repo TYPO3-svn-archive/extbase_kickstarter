@@ -14,6 +14,7 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 	}
 	
 	public function render() {
+
 		/** @todo This line should be disabled before publication of the extension */
 		$this->pageRenderer->disableCompressJavascript();
 		
@@ -55,12 +56,14 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 				if (is_file($packagesBaseDirectory . $packageFolder . '/Bootstrap.js')) {
 					$jsFiles[] = $packagesBaseDirectory . $packageFolder . '/Bootstrap.js';
 				}
+				
 
 				$iterator = new RecursiveDirectoryIterator($packagesBaseDirectory . $packageFolder);
 
 				foreach (new RecursiveIteratorIterator($iterator) as $file) {
-					if ($file->isFile() && preg_match("/\.js$/i", $file->getPathName()) && !in_array($file->getPathName(), $jsFiles)) {
-						$jsFiles[] = $file->getPathName();
+					$filePathAndName = str_replace('\\', '/', $file->getPathName()); // Clean potential Windows file paths
+					if ($file->isFile() && preg_match("/\.js$/i", $filePathAndName) && !in_array($filePathAndName, $jsFiles)) {
+						$jsFiles[] = $filePathAndName;
 					}
 				}
 			}
