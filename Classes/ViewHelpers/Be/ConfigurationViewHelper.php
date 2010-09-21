@@ -18,9 +18,24 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		/** @todo This line should be disabled before publication of the extension */
 		$this->pageRenderer->disableCompressJavascript();
 
+		$this->pageRenderer->enableExtJsDebug();
+
 		$this->pageRenderer->addInlineSetting('extbase_kickstarter', 'baseUrl', '../' . t3lib_extMgm::siteRelPath('extbase_kickstarter'));
 		$this->setLocallangSettings();
 		$this->setUrlSettings();
+
+		/**
+		 * Oryx settings
+		 */
+		$this->pageRenderer->addInlineSetting('extbase_kickstarter.oryx', 'root_path', '../' . t3lib_extMgm::siteRelPath('extbase_kickstarter') . 'Resources/Public/JavaScript/Oryx/');
+		// Oryx libraries
+		//$this->pageRenderer->addJsFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/JavaScript/Editor/oryx_methods.js');
+		$this->pageRenderer->addJsFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/JavaScript/Editor/path_parser.js');
+		$this->pageRenderer->addJsFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/JavaScript/Editor/translation_en_us.js');
+		$this->pageRenderer->addJsFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/JavaScript/Editor/config.js');
+		$this->pageRenderer->addJsFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/JavaScript/Editor/oryx.debug.js');
+		
+
 
 		//$this->pageRenderer->addExtDirectCode();
 		
@@ -35,9 +50,12 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		$this->pageRenderer->addJsFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/JavaScript/UserInterface/TabLayout.js');
 
 		$this->addJSPackageFiles();
+
+		
 		
 		// SECTION: CSS FILES
 		$this->pageRenderer->addCssFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/CSS/style.css');
+		$this->pageRenderer->addCssFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/CSS/oryx_theme_norm.css');
 
 	}
 
@@ -101,6 +119,19 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		return $packages;
 	}
 
+	/**
+	 * This method loads the locallang.xml file (default language), and
+	 * adds all keys found in it to the TYPO3.settings.extbase_kickstarter._LOCAL_LANG object
+	 * translated into the current language
+	 *
+	 * Dots in a key are replaced by a _
+	 *
+	 * Example:
+	 *		error.name becomes TYPO3.settings.extbase_kickstarter._LOCAL_LANG.error_name
+	 *
+	 * @author Rens Admiraal <rens@rensnel.nl>
+	 * @return void
+	 */
 	private function setLocallangSettings() {
 		$LL = t3lib_div::readLLfile('EXT:extbase_kickstarter/Resources/Private/Language/locallang.xml', 'default');
 
@@ -115,6 +146,14 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		}
 	}
 
+	/**
+	 * This methods adds an entry to TYPO3.settings.extbase_kickstarters.controllers
+	 * for every controller / action combination configured for the module. The value
+	 * is the url to call the action
+	 *
+	 * @author Rens Admiraal <rens@rensnel.nl>
+	 * @return void
+	 */
 	private function setUrlSettings() {
 		$controllerActionArray = array();
 

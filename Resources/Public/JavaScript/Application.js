@@ -79,7 +79,7 @@ Tx.ExtbaseKickstarter.Application = Ext.apply(new Ext.util.Observable, {
 		);
 	},
 	_eventDisplayCallback: function() {
-		console.log(arguments);
+//		console.log(arguments);
 	}
 });
 
