@@ -4,7 +4,10 @@ Tx.ExtbaseKickstarter.Packages.General.General = Ext.extend(Ext.Panel, {
 	// TODO: document event
 	initComponent: function() {
 		var config = {
-			title: 'General Info'
+			title: TYPO3.settings.extbase_kickstarter._LOCAL_LANG.general,
+			autoLoad: {
+				url: TYPO3.settings.extbase_kickstarter.controllers.General.index
+			}
 		};
 		Ext.apply(this, config);
 		Tx.ExtbaseKickstarter.Packages.General.General.superclass.initComponent.call(this);

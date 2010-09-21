@@ -11,6 +11,11 @@
 			<label index="error.extension.1">Illegal character(s) in extension key. Allowed characters are: a-z (lowercase), 0-9 and '_' (underscore)</label>
 			<label index="error.extension.2">The key must not being with one of the following prefixes: tx,u,user_,pages,tt_,sys_,ts_language_,csh_</label>
 			<label index="error.extension.3">Extension keys cannot start or end with 0-9 and '_' (underscore)</label>
+			<label index="help">Help</label>
+			<label index="openProjects">Open projects</label>
+			<label index="welcome">Welcome</label>
+			<label index="general">General info</label>
+			<label index="domainModelling">Domain modelling</label>
 		</languageKey>
 	</data>
 </T3locallang>

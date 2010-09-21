@@ -17,6 +17,12 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 
 		/** @todo This line should be disabled before publication of the extension */
 		$this->pageRenderer->disableCompressJavascript();
+
+		$this->pageRenderer->addInlineSetting('extbase_kickstarter', 'baseUrl', '../' . t3lib_extMgm::siteRelPath('extbase_kickstarter'));
+		$this->setLocallangSettings();
+		$this->setUrlSettings();
+
+		//$this->pageRenderer->addExtDirectCode();
 		
 		// SECTION: JAVASCRIPT FILES
 		$this->pageRenderer->addJsFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/JavaScript/Application.js');
@@ -31,8 +37,7 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		$this->addJSPackageFiles();
 		
 		// SECTION: CSS FILES
-		$this->pageRenderer->addCssFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/css/sprites.css');
-		$this->pageRenderer->addCssFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/css/style.css');
+		$this->pageRenderer->addCssFile(t3lib_extMgm::extRelPath('extbase_kickstarter') . 'Resources/Public/CSS/style.css');
 
 	}
 
@@ -94,5 +99,36 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 			*/
 		);
 		return $packages;
+	}
+
+	private function setLocallangSettings() {
+		$LL = t3lib_div::readLLfile('EXT:extbase_kickstarter/Resources/Private/Language/locallang.xml', 'default');
+
+		if (!empty($LL['default']) && is_array($LL['default'])) {
+			foreach ($LL['default'] as $key => $value) {
+				$this->pageRenderer->addInlineSetting(
+					'extbase_kickstarter._LOCAL_LANG',
+					str_replace('.', '_', $key),
+					Tx_Extbase_Utility_Localization::translate($key, 'extbase_kickstarter')
+				);
+			}
+		}
+	}
+
+	private function setUrlSettings() {
+		$controllerActionArray = array();
+
+		if (is_array($GLOBALS['TBE_MODULES']['_configuration']['tools_ExtbaseKickstarterKickstarter']['controllerActions'])) {
+			foreach ($GLOBALS['TBE_MODULES']['_configuration']['tools_ExtbaseKickstarterKickstarter']['controllerActions'] as $controller => $actionList) {
+				$actions = explode(',', $actionList);
+				foreach ($actions as $action) {
+					$controllerActionArray[$controller][$action] = $this->controllerContext->getUriBuilder()->reset()->uriFor($action, array(), $controller);
+				}
+			}
+		}
+
+		$this->pageRenderer->addInlineSettingArray('extbase_kickstarter', array(
+			'controllers' => $controllerActionArray
+		));
 	}
 }

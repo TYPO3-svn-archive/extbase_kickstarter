@@ -1,0 +1,31 @@
+<h2>Domain Driven Design</h2>
+
+View <a href="http://www.infoq.com/presentations/model-to-work-evans" target="_blank">Putting the Model to Work and Strategic Design</a> by Eric Evans to get an introduction into Domain Driven Design (DDD).
+
+<h2>Domain Modelling</h2>
+
+At first, you will start creating your <b>Domain Model</b> with a graphical editor. This editor will do the following for you:
+
+<ul>
+	<li><b>Extension Skeleton</b>: will create the extension directory structure needed</li>
+	<li><b>Domain Model</b>: Will create basic classes for the Domain Model, residing under Domain/Model/</li>
+	<li><b>Database Tables and TCA</b>: Will create Database Tables and TCA definitions which fit to the domain model.</li>
+	<li><b>Skeleton Locallang Files</b>: Will create skeleton locallang files</li>
+	<li><b>Plugin Configuration</b>: Will create a plugin configuration, so it will work out-of-the-box.</li>
+	<li><b>Dynamic Scaffolding</b>: Automatically create all CRUD actions (Create, Read, Update, Delete) for Aggregate Roots!</li>
+</ul>
+
+<h2>Iterative model refinement</h2>
+
+The first version of the model will usually not be the one you'll use lateron. That's why you should take your time, and improve your model.<br />
+Useful things to know:
+
+<ul>
+	<li><b>Dynamic Scaffolding</b>: The Scaffolding will automatically adjust the templates needed to render CRUD-functionality for your domain models.
+		That is, if you modify your domain model by adding or removing fields, the standard CRUD actions display the new fields as well.</li>
+</ul>
+
+<h2>Improving Views and Controllers</h2>
+After the model has been improved iteratively, at one point, your focus of attention usually shifts to the Controller and View part of your extension.<br />
+At this point, you'll want to <b>disable Dynamic Scaffolding</b>, and instead use <b>Static Scaffolding</b>.
+This means you can take the automatically generated CRUD actions as a basis, and adjust them manually.
