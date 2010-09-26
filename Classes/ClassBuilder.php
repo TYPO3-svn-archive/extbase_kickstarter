@@ -36,7 +36,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	 */
 	public function __construct(){
 		$this->inflector = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_Inflector');
-		$this->importTool = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_Import');
+		$this->classParser = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_ClassParser');
 	}
 	
 	/**
@@ -71,7 +71,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			include_once($domainObjectClassFile);
 			try {
 				// import the classObject from the existing file
-				$classObject = $this->importTool->importClassObjectFromFile($className);
+				$classObject = $this->classParser->parse($className);
 			}
 			catch(Exception $e){
 				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
@@ -266,7 +266,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			}
 			
 			try {
-				$classObject = $this->importTool->importClassObjectFromFile($className);
+				$classObject = $this->classParser->parse($className);
 			}
 			catch(Exception $e){
 				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
@@ -329,7 +329,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		if(file_exists( $repositoryClassFile) &&  $this->extension->isModified($repositoryClassFile)){
 			include_once($repositoryClassFile);
 			try {
-				$classObject = $this->importTool->importClassObjectFromFile($className);
+				$classObject = $this->classParser->parse($className);
 			}
 			catch(Exception $e){
 				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		

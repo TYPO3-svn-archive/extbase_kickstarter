@@ -27,7 +27,7 @@
 
 require_once('BaseTestCase.php');
 
-class Tx_ExtbaseKickstarter_ImportTool_testcase extends Tx_ExtbaseKickstarter_BaseTestCase {
+class Tx_ExtbaseKickstarter_ClassParser_testcase extends Tx_ExtbaseKickstarter_BaseTestCase {
 
 
 	public function setUp() {
@@ -35,21 +35,21 @@ class Tx_ExtbaseKickstarter_ImportTool_testcase extends Tx_ExtbaseKickstarter_Ba
 	}
 	
 	/**
-	 * Import a basic class from a file 
+	 * Parse a basic class from a file 
 	 * @test
 	 */
-	public function TestBasicClassImport(){
+	public function TestBasicClassParse(){
 		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/BasicClass.php');
-		$this->importClass('Tx_ExtbaseKickstarter_Tests_Examples_BasicClass');
+		$this->parseClass('Tx_ExtbaseKickstarter_Tests_Examples_BasicClass');
 	}
 	
 	/**
-	 * Import a complex class from a file 
+	 * Parse a complex class from a file 
 	 * @test
 	 */
-	public function TestComplexClassImport(){
+	public function TestComplexClassParse(){
 		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ComplexClass.php');
-		$classObject = $this->importClass('Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass');
+		$classObject = $this->parseClass('Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass');
 		$getters = $classObject->getGetters();
 		$this->assertEquals(1, count($getters));
 		$firstGetter = array_pop($getters);
@@ -61,20 +61,20 @@ class Tx_ExtbaseKickstarter_ImportTool_testcase extends Tx_ExtbaseKickstarter_Ba
 	}
 	
 	/**
-	 * Import a basic class from a file 
+	 * Parse a basic class from a file 
 	 * @test
 	 */
-	public function TestExtendedClassImport(){
-		$this->importClass('Tx_ExtbaseKickstarter_Controller_KickstarterModuleController');
+	public function TestExtendedClassParse(){
+		$this->parseClass('Tx_ExtbaseKickstarter_Controller_KickstarterModuleController');
 	}
 	
 	/**
-	 * Import a complex class from a file 
+	 * Parse a complex class from a file 
 	 * @test
 	 */
-	public function TestAnotherComplexClassImport(){
+	public function TestAnotherComplexClassParse(){
 		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/AnotherComplexClass.php');
-		$classObject = $this->importClass('Tx_ExtbaseKickstarter_Tests_Examples_AnotherComplexClass');
+		$classObject = $this->parseClass('Tx_ExtbaseKickstarter_Tests_Examples_AnotherComplexClass');
 		
 		/**  here we could include some more tests
 		$p = $classObject->getMethod('methodWithStrangePrecedingBlock')->getPrecedingBlock();
@@ -83,12 +83,12 @@ class Tx_ExtbaseKickstarter_ImportTool_testcase extends Tx_ExtbaseKickstarter_Ba
 	}
 	
 	/**
-	 * Import a big class from a file  
+	 * Parse a big class from a file  
 	 * @test
 	 */
-	public function Test_t3lib_div_ClassImport(){
+	public function Test_t3lib_div_ClassParse(){
 		//require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/BasicClass.php');
-		$this->importClass('t3lib_div');
+		$this->parseClass('t3lib_div');
 	}
 	
 	/**
@@ -96,14 +96,14 @@ class Tx_ExtbaseKickstarter_ImportTool_testcase extends Tx_ExtbaseKickstarter_Ba
 	 * @param $className
 	 * @return unknown_type
 	 */
-	protected function importClass($className){
-		$importTool = new Tx_ExtbaseKickstarter_Utility_Import();
-		$importTool->debugMode = true;
-		$classObject = $importTool->importClassObjectFromFile($className);
+	protected function parseClass($className){
+		$classParser = new Tx_ExtbaseKickstarter_Utility_ClassParser();
+		$classParser->debugMode = true;
+		$classObject = $classParser->parse($className);
 		$this->assertTrue($classObject instanceof Tx_ExtbaseKickstarter_Domain_Model_Class);
 		$classReflection = new Tx_ExtbaseKickstarter_Reflection_ClassReflection($className);
-		$this->ImportFindsAllMethods($classObject,$classReflection);
-		$this->ImportFindsAllProperties($classObject,$classReflection);
+		$this->ParserFindsAllMethods($classObject,$classReflection);
+		$this->ParserFindsAllProperties($classObject,$classReflection);
 		
 		return $classObject;
 	}
@@ -114,10 +114,10 @@ class Tx_ExtbaseKickstarter_ImportTool_testcase extends Tx_ExtbaseKickstarter_Ba
 	 * @param Tx_ExtbaseKickstarter_Reflection_ClassReflection $classReflection
 	 * @return void
 	 */
-	public function ImportFindsAllMethods($classObject,$classReflection){
+	public function ParserFindsAllMethods($classObject,$classReflection){
 		$reflectionMethodCount = count($classReflection->getNotInheritedMethods());
 		$classObjectMethodCount = count($classObject->getMethods());
-		$this->assertEquals($classObjectMethodCount, $reflectionMethodCount, 'Not all Methods were imported!');
+		$this->assertEquals($classObjectMethodCount, $reflectionMethodCount, 'Not all Methods were found!');
 	}
 	
 	/**
@@ -126,10 +126,10 @@ class Tx_ExtbaseKickstarter_ImportTool_testcase extends Tx_ExtbaseKickstarter_Ba
 	 * @param Tx_ExtbaseKickstarter_Reflection_ClassReflection $classReflection
 	 * @return void
 	 */
-	public function ImportFindsAllProperties($classObject,$classReflection){
+	public function ParserFindsAllProperties($classObject,$classReflection){
 		$reflectionPropertyCount = count($classReflection->getNotInheritedProperties());
 		$classObjectPropertCount = count($classObject->getProperties());
-		$this->assertEquals($classObjectPropertCount, $reflectionPropertyCount, 'Not all Properties were imported!');
+		$this->assertEquals($classObjectPropertCount, $reflectionPropertyCount, 'Not all Properties were found!');
 		
 	}
 

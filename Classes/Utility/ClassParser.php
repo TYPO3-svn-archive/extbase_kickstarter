@@ -28,7 +28,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Utility_Import {
+class Tx_ExtbaseKickstarter_Utility_ClassParser {
 	  
 	/**
 	 * 
@@ -91,7 +91,7 @@ class Tx_ExtbaseKickstarter_Utility_Import {
 	 * @param string $className
 	 * @return Tx_ExtbaseKickstarter_Domain_Model_Class_Schema 
 	 */
-	public function importClassObjectFromFile($className){
+	public function parse($className){
 		
 		$this->starttime = microtime(true); // for profiling
 		
