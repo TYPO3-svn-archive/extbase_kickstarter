@@ -37,6 +37,9 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	public function __construct(){
 		$this->inflector = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_Inflector');
 		$this->classParser = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_ClassParser');
+		$config = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
+		$this->config = $config['settings']['classBuilder'];
+		
 	}
 	
 	/**
@@ -62,6 +65,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	 */
 	public function generateModelClassObject($domainObject, $oldDomainObject= NULL){
 		
+		//t3lib_div::devLog(serialize($this->config), 'extbase_kickstarter');
 		$domainObjectClassFile = $this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php';
 		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Model_' . $domainObject->getName();
 		
@@ -83,10 +87,28 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
 			$classObject->setFileName($domainObjectClassFile);
 			if($domainObject->isEntity()){
-				$classObject->setParentClass('Tx_Extbase_DomainObject_AbstractEntity');
+				if(!empty($this->config['Model']['entityParentClass'])){
+					if(strpos($this->config['Model']['entityParentClass'],'Tx_')!==0){
+						$parentClass = 'Tx_'.Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Model_'. $this->config['Model']['entityParentClass'];
+					}
+					else {
+						$parentClass = $this->config['Model']['entityParentClass'];
+					}
+				}
+				else $parentClass = 'Tx_Extbase_DomainObject_AbstractEntity';
+				$classObject->setParentClass($parentClass);
 			}
 			else {
-				$classObject->setParentClass('Tx_Extbase_DomainObject_AbstractValueObject');
+				if(!empty($this->config['Model']['valueObjectParentClass'])){
+					if(strpos($this->config['Model']['valueObjectParentClass'],'Tx_')!==0){
+						$parentClass = 'Tx_'.Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Model_'. $this->config['Model']['valueObjectParentClass'];
+					}
+					else {
+						$parentClass = $this->config['Model']['valueObjectParentClass'];
+					}
+				}
+				else $parentClass = 'Tx_Extbase_DomainObject_AbstractValueObject';
+				$classObject->setParentClass($parentClass);
 			}
 		}
 		
@@ -136,8 +158,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$classObject->setProperty($classProperty);
 			
 			if (is_subclass_of($domainProperty, 'Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AnyToManyRelation')) {
-				//TODO relation properties need add/remove methods	
-				// add (or update) a getter method
+			
 				$addMethodName = 'add'.ucfirst($this->inflector->singularize($propertyName));
 				
 				if($classObject->methodExists($addMethodName)){
@@ -275,7 +296,17 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		else {
 			$classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
 			$classObject->setFileName($controllerClassFile);
-			$classObject->setParentClass('Tx_Extbase_MVC_Controller_ActionController');
+			// get parent class from config
+			if(!empty($this->config['Controller']['parentClass'])){
+				if(strpos($this->config['Controller']['parentClass'],'Tx_')!==0){
+					$parentClass = 'Tx_'.Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Controller_'. $this->config['Controller']['parentClass'];
+				}
+				else {
+					$parentClass = $this->config['Controller']['parentClass'];
+				}
+			}
+			else $parentClass = 'Tx_Extbase_MVC_Controller_ActionController';
+			$classObject->setParentClass($parentClass);
 			$classObject->setDescription('Controller for '.$domainObject->getName());
 		}
 		
@@ -338,7 +369,13 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		else {
 			$classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
 			$classObject->setFileName($repositoryClassFile);
-			$classObject->setParentClass('Tx_Extbase_Persistence_Repository');
+			if(!empty($this->config['Repository']['parentClass'])){
+				$parentClass = $this->config['Repository']['parentClass'];
+			}
+			else {
+				$parentClass = 'Tx_Extbase_Persistence_Repository';
+			}
+			$classObject->setParentClass($parentClass);
 			$classObject->setDescription('Repository for '.$domainObject->getName());
 		}
 		

@@ -60,6 +60,11 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		$this->objectManager = new Tx_Fluid_Compatibility_ObjectManager();
 		$this->inflector = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_Inflector');
 		$this->classBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ClassBuilder');
+		
+		$this->config = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
+		if($this->config['settings']['enableRoundtrip']){
+			$this->roundTripService =  t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_RoundTrip');
+		}
 	}
 	
 	/**
@@ -123,7 +128,10 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 			t3lib_div::mkdir_deep($extensionDirectory, 'Configuration/TypoScript');
 			$typoscriptDirectory = $extensionDirectory . 'Configuration/TypoScript/';
 			$fileContents = $this->generateTyposcriptSetup($extension);
-			t3lib_div::writeFile($typoscriptDirectory . 'setup.txt', $fileContents);
+			$targetFile = $typoscriptDirectory . 'setup.txt';
+			if(!file_exists($targetFile) || $this->roundTripService->getOverWriteSetting($targetFile) < 2){
+				t3lib_div::writeFile($typoscriptDirectory . 'setup.txt', $fileContents);
+			}
 		} catch (Exception $e) {
 			return 'Could not generate typoscript setup, error: ' . $e->getMessage();
 		}
@@ -258,11 +266,18 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	}
 
 	protected function renderTemplate($filePath, $variables) {
-		if(!is_file(t3lib_extMgm::extPath('extbase_kickstarter').'Resources/Private/CodeTemplates/' . $filePath)){
-			throw(new Exception('TemplateFile '.t3lib_extMgm::extPath('extbase_kickstarter').'Resources/Private/CodeTemplates/' . $filePath.' not found'));
+		if(isset($this->config['view']['codeTemplateRootPath'])){
+			$codeTemplateRootPath = PATH_site.$this->config['view']['codeTemplateRootPath'];
+		}
+		else {
+			$codeTemplateRootPath = t3lib_extMgm::extPath('extbase_kickstarter').'Resources/Private/CodeTemplates/';
+		}
+		t3lib_div::devLog($codeTemplateRootPath . $filePath,'extbase_kickstarter');
+		if(!is_file($codeTemplateRootPath. $filePath)){
+			throw(new Exception('TemplateFile '.$codeTemplateRootPath . $filePath.' not found'));
 		}
 				
-		$parsedTemplate = $this->templateParser->parse(file_get_contents(t3lib_extMgm::extPath('extbase_kickstarter').'Resources/Private/CodeTemplates/' . $filePath));
+		$parsedTemplate = $this->templateParser->parse(file_get_contents($codeTemplateRootPath . $filePath));
 		return trim($parsedTemplate->render($this->buildRenderingContext($variables)));
 	}
 

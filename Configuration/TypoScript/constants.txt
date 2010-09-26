@@ -1,0 +1,25 @@
+module.tx_extbasekickstarter.settings {
+	
+	# cat=plugin.extbase_kickstarter - defaults//; type=boolean; label=Enable roundtrip: If true you can modify the source code of auto generated files and continue editing with the kickstarter 
+	enableRoundTrip = 1
+	
+	classBuilder {
+				
+		Controller {
+				# cat=plugin.extbase_kickstarter - classBuilder //; type=string; label=Parent Controller Class: The class, that all controller in an extension extend. If the class name does not start with Tx_ it will be prefixed with the current Extension key and Controller directory. 
+				parentClass = Tx_Extbase_MVC_Controller_ActionController
+				
+		}
+		
+		
+		Model {
+				# cat=plugin.extbase_kickstarter - classBuilder //; type=string; label=Parent Entity Model Class: The class, that all model object classes in an extension extend. If the class name does not start with Tx_ it will be prefixed with the current Extension key and Domain/Model directory. 
+				entityParentClass = Tx_Extbase_DomainObject_AbstractEntity
+				
+				# cat=plugin.extbase_kickstarter - classBuilder //; type=string; label=Parent Value Object Model Class: The class, that all model object classes in an extension extend. If the class name does not start with Tx_ it will be prefixed with the current Extension key and Domain/Model directory. 
+				valueObjectParentClass = Tx_Extbase_DomainObject_AbstractValueObject
+				
+		}
+	}
+		
+}

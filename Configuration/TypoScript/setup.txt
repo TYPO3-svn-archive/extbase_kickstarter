@@ -1,0 +1,73 @@
+ # Module configuration
+module.tx_extbasekickstarter {
+
+	view {
+		# example: codeTemplateRootPath = fileadmin/templates/kickstarter/CodeTemplates/
+	}
+	
+	settings {
+		
+		
+		
+		classBuilder {
+				
+			Controller {
+				parentClass = {$module.tx_extbasekickstarter.settings.classBuilder.Controller.parentClass}
+			}
+			
+			Modell {
+				
+				entityParentClass = {$module.tx_extbasekickstarter.settings.classBuilder.Model.entityParentClass}
+				
+				valueObjectParentClass = {$module.tx_extbasekickstarter.settings.classBuilder.Model.valueObjectParentClass}
+			}
+		}
+		
+		enableRoundtrip = {$module.tx_extbasekickstarter.settings.enableRoundtrip}
+		
+		roundtrip {
+		
+			overWriteSettings {
+				
+				#######################################
+				# these settings apply if a file exists
+				#
+				# 0 always overwrite
+				# 1 merge (if possible)
+				# 2 never overwrite
+				#
+				########################################
+				
+				Classes {
+					### The naming schema in the classes subdirectory is different, 
+					### since the names may vary, depending on the models name
+					Controller = 1
+					Model = 1
+					Repository = 1
+				}	
+				
+				Configuration{
+					TypoScript{
+						constants.txt = 2
+						setup.txt 	  = 2
+					}
+				}
+				Resources {
+					Private {
+						Language {
+							locallang_db.xml = 0
+							locallang.xml = 1
+						}
+					}
+				}
+				ext_emconf.php = 0
+				ext_tables.php = 0
+				ext_tables.sql = 0
+				ext_localconf.php = 1
+				ext_icon.gif = 0
+			}
+		}
+	}
+	
+	
+}
