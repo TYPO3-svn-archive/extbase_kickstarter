@@ -76,6 +76,10 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	public function build(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		$this->extension = $extension;
 		$this->classBuilder->injectExtension($extension);
+		$this->roundTripService->injectExtension($extension);
+		if($this->config['settings']['enableRoundtrip']){
+			$this->roundTripService->injectExtension($extension);
+		}
 
 		// Validate the extension
 		$extensionValidator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Validator_ExtensionValidator');
@@ -272,7 +276,6 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		else {
 			$codeTemplateRootPath = t3lib_extMgm::extPath('extbase_kickstarter').'Resources/Private/CodeTemplates/';
 		}
-		t3lib_div::devLog($codeTemplateRootPath . $filePath,'extbase_kickstarter');
 		if(!is_file($codeTemplateRootPath. $filePath)){
 			throw(new Exception('TemplateFile '.$codeTemplateRootPath . $filePath.' not found'));
 		}

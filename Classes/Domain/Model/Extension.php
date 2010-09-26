@@ -238,7 +238,6 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	}
 	
 	public function isModified( $filePath){
-		return true;
 		if(is_file($filePath) && isset($this->md5Hashes[$filePath])){
 			if(md5_file($filePath) != $this->md5Hashes[$filePath]){
 				return true;

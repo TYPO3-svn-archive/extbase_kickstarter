@@ -30,9 +30,76 @@
  */
 class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 	
+	
+	protected $oldExtension = NULL;
+	
 	public function __construct() {
 		$config = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
+		$this->inflector = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_Inflector');
 		$this->config = $config['settings']['roundtrip'];
+		//PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey()
+	}
+	
+	/**
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Extension $extension
+	 * @return void
+	 */
+	public function injectExtension(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension){
+		$this->extension = $extension;
+		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
+		if(file_exists($this->extensionDirectory . '/kickstarter.json')){
+			$objectSchemaBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ObjectSchemaBuilder');
+			$jsonConfig =  json_decode(file_get_contents($this->extensionDirectory . '/kickstarter.json'),true);
+			
+			$this->oldExtension = $objectSchemaBuilder->build($jsonConfig);
+			
+		}
+	}
+	
+	/**
+	 * Find the deleted properties and remove them and their getter/setter methods from the classObject
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class $classObject
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
+	 */
+	public function removeDeletedProperties(Tx_ExtbaseKickstarter_Domain_Model_Class $classObject,Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject){
+		if(!$this->oldExtension){
+			t3lib_div::devLog('No old Extension', 'extbase_kickstarter');
+			return;
+		}
+		
+		$newPropertyNames = array();
+		foreach($domainObject->getProperties() as $newProperty){
+			$newPropertyNames[] = $newProperty->getName();
+		}
+		t3lib_div::devLog('$newPropertyNames: ', 'extbase_kickstarter',0,$newPropertyNames);
+		
+		$oldDomainObject = $this->oldExtension->getDomainObjectByName($domainObject->getName());
+		
+		if($oldDomainObject){
+			foreach($oldDomainObject->getProperties() as $oldProperty){
+				$oldPropertyName = $oldProperty->getName();
+				$newProperty = $domainObject->getPropertyByName($oldPropertyName);
+				if(!$newProperty || ($oldProperty->getTypeHint() != $newProperty->getTypeHint())){
+					// the property was removed or the relation type changed 
+					$classObject->removeProperty($oldPropertyName);
+					if (is_subclass_of($oldProperty, 'Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AnyToManyRelation')) {
+						$classObject->removeMethod( 'add'.ucfirst($this->inflector->singularize($oldPropertyName)));
+						$classObject->removeMethod( 'remove'.ucfirst($this->inflector->singularize($oldPropertyName)));
+						t3lib_div::devLog('Methods removed: '.'add'.ucfirst($this->inflector->singularize($oldPropertyName)), 'extbase_kickstarter');
+					}
+					else {
+						$classObject->removeMethod('get'.ucfirst($oldPropertyName));
+						$classObject->removeMethod('set'.ucfirst($oldPropertyName));
+						t3lib_div::devLog('Methods removed: '.'get'.ucfirst($oldPropertyName), 'extbase_kickstarter');
+					}
+				}
+			}
+		}
+		else t3lib_div::devLog('No old Domainobject: '.$domainObject->getName(), 'extbase_kickstarter');
+		
+		return $classObject;
+		//$addMethodName = 'add'.ucfirst($this->inflector->singularize($propertyName));
 	}
 	
 	/**

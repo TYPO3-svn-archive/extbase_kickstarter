@@ -85,11 +85,12 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 				//t3lib_div::devLog("msg1", 'tx_extbasekickstarter', 0, $extensionConfigurationFromJson);
 				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
 
+				$build = $this->codeGenerator->build($extensionSchema);
+				
 				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
 				t3lib_div::mkdir($extensionDirectory);
 				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', $request['params']['working']);
-
-				$build = $this->codeGenerator->build($extensionSchema);
+				
 				if ($build === true) {
 					return json_encode(array('saved'));
 				} else {

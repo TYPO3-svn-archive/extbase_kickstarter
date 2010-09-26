@@ -390,6 +390,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty {
 	public function getDomainObject() {
 		return $this->domainObject;
 	}
+	
 }
 
 ?>

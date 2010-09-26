@@ -351,7 +351,8 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class extends Tx_ExtbaseKickstarter_Dom
 	public function removeProperty($propertyName){
 		//TODO: not yet tested
 		if($this->propertyExists($propertyName)){
-			unset($this->propertys[$propertyName]);
+			unset($this->properties[$propertyName]);
+			t3lib_div::devLog('Property removed: '.$propertyName, 'extbase_kickstarter',0,$this->properties);
 			return true;
 		}
 		return false;

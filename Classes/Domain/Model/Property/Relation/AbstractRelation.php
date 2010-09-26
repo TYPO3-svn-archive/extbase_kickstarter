@@ -63,5 +63,6 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRela
 		return FALSE;
 	}
 	
+	
 }
 ?>

@@ -177,10 +177,23 @@ class Tx_ExtbaseKickstarter_Domain_Model_DomainObject {
 
 	/**
 	 * Get all properties
-	 * @return array<Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty>
+	 * @return array <Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty>
 	 */
 	public function getProperties() {
 		return $this->properties;
+	}
+	
+	/**
+	 * Get property
+	 * @return object <Tx_ExtbaseKickstarter_Domain_Model_AbstractProperty>
+	 */
+	public function getPropertyByName($propertyName) {
+		foreach($this->properties as $property){
+			if($property->getName() == $propertyName){
+				return $property;
+			}
+		}
+		return NULL;
 	}
 	
 	/**
