@@ -76,7 +76,6 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	public function build(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		$this->extension = $extension;
 		$this->classBuilder->injectExtension($extension);
-		$this->roundTripService->injectExtension($extension);
 		if($this->config['settings']['enableRoundtrip']){
 			$this->roundTripService->injectExtension($extension);
 		}
@@ -133,7 +132,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 			$typoscriptDirectory = $extensionDirectory . 'Configuration/TypoScript/';
 			$fileContents = $this->generateTyposcriptSetup($extension);
 			$targetFile = $typoscriptDirectory . 'setup.txt';
-			if(!file_exists($targetFile) || $this->roundTripService->getOverWriteSetting($targetFile) < 2){
+			if(!file_exists($targetFile) || ($this->config['settings']['enableRoundtrip'] && $this->roundTripService->getOverWriteSetting($targetFile) < 2)){
 				t3lib_div::writeFile($typoscriptDirectory . 'setup.txt', $fileContents);
 			}
 		} catch (Exception $e) {
