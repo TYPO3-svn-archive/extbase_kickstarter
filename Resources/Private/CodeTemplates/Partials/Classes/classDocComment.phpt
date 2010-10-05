@@ -23,7 +23,7 @@
 ***************************************************************/
 
 /**
- * {classSchema.description}
+ * {classSchema.description} This is the default comment
  *
  * @version $Id$
  * @copyright Copyright belongs to the respective authors

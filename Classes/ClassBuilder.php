@@ -52,6 +52,9 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		$config = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
 		$this->config = $config['settings']['classBuilder'];
 		$this->roundTripService =  t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_RoundTrip');
+		$config = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
+		$this->config = $config['settings']['classBuilder'];
+		
 	}
 	
 	/**

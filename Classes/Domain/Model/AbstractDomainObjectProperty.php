@@ -317,6 +317,25 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty {
 	public function setRequired($required) {
 		$this->required = $required;
 	}
+	
+	/**
+	 * Set whether this property is exclude field
+	 *
+	 * @param boolean $excludeField
+	 * @return void
+	 */
+	public function setExcludeField($excludeField) {
+		$this->excludeField = $excludeField;
+	}
+	
+	/**
+	 * TRUE if this property is an exclude field, FALSE otherwise.
+	 *
+	 * @return boolean
+	 */
+	public function getExcludeField() {
+		return $this->excludeField;
+	}
 
 	/**
 	 * Get the validate annotation to be used in the domain model for this property.

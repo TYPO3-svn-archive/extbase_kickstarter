@@ -162,6 +162,12 @@ var extbaseModeling_wiringEditorLanguage = {
 							name: "objectsettings",
 							fields: [
 								{
+									inputParams: {
+										name: "uid", 
+										className:'hiddenField'
+									}
+								},
+								{
 									type: "select", 
 									inputParams: {
 										label: "Object Type", 
@@ -235,7 +241,15 @@ var extbaseModeling_wiringEditorLanguage = {
 											type: "group",
 											inputParams: {
 												name: "property",
+												className: "propertyGroup",
 												fields: [
+													{
+														type: "hidden",
+															inputParams: {
+															name: "uid",
+															className:'hiddenField'
+														}
+													},
 													{
 														inputParams: {
 															label: "Property Name", 
@@ -267,9 +281,12 @@ var extbaseModeling_wiringEditorLanguage = {
 														}
 													},
 													{
+														type:'text',
 														inputParams: {
 															label: "Description", 
 															name: "propertyDescription",
+															cols:20,
+															rows:1
 														}
 													},
 													{
@@ -277,7 +294,15 @@ var extbaseModeling_wiringEditorLanguage = {
 														inputParams: {
 															label: "Is Required?", 
 															name: "propertyIsRequired",
-															value: false,
+															value: false
+														}
+													},
+													{
+														type: "boolean",
+														inputParams: {
+															label: "Is ExcludeField?", 
+															name: "propertyIsExcludeField",
+															value: false
 														}
 													}
 												]
@@ -306,13 +331,39 @@ var extbaseModeling_wiringEditorLanguage = {
 											type: "group",
 											inputParams: {
 												name: "relation",
+												className: "relationGroup",
 												fields: [
+													{
+														type: "hidden",
+															inputParams: {
+															name: "uid",
+															className:'hiddenField'
+														}
+													},
 													{
 														type: "string", 
 														inputParams: {
 															label: "Name", 
 															name: "relationName", 
+															required: false
+														}
+													},
+													{
+														type: "boolean",
+														inputParams: {
+															label: "Is ExcludeField?", 
+															name: "propertyIsExcludeField",
+															value: false
+														}
+													},
+													{
+														type: "text", 
+														inputParams: {
+															label: "Description", 
+															name: "relationDescription", 
 															required: false, 
+															cols:20,
+															rows:1
 														}
 													},
 													{

@@ -82,14 +82,16 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 
 			case 'saveWiring':
 				$extensionConfigurationFromJson = json_decode($request['params']['working'], true);
-				//t3lib_div::devLog("msg1", 'tx_extbasekickstarter', 0, $extensionConfigurationFromJson);
+				t3lib_div::devLog("before", 'tx_extbasekickstarter', 0, $extensionConfigurationFromJson['modules']);
 				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
 
 				$build = $this->codeGenerator->build($extensionSchema);
 				
 				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
 				t3lib_div::mkdir($extensionDirectory);
-				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', $request['params']['working']);
+				$extensionConfigurationFromJson['modules'] = $this->generateUniqueIDs($extensionConfigurationFromJson['modules']);
+				t3lib_div::devLog("after", 'tx_extbasekickstarter', 0, $extensionConfigurationFromJson['modules']);
+				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', json_encode($extensionConfigurationFromJson));
 				
 				if ($build === true) {
 					return json_encode(array('saved'));
@@ -140,6 +142,31 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 			)
 		);
 		$this->scBase->menuConfig();
+	}
+	
+	/**
+	 * enable unique IDs to track modifications of properties and relations
+	 * @param $jsonConfig
+	 * @return array $jsonConfig with unique IDs
+	 */
+	protected function generateUniqueIDs($jsonConfig){
+		//  generate unique IDs
+		foreach($jsonConfig as &$module){
+			if(empty($module['value']['uid'])){
+				$module['value']['objectsettings']['uid'] = md5(microtime().$module['name']);
+			}
+			foreach($module['value']['propertyGroup']['properties'] as &$property){
+				if(empty($property['uid'])){
+					$property['uid'] = md5(microtime().$property['name']);
+				}
+			}
+			foreach($module['value']['relationGroup']['relations'] as &$relation){
+				if(empty($relation['uid'])){
+					$relation['uid'] = md5(microtime().$relation['name']);
+				}
+			}
+		}
+		return $jsonConfig;
 	}
 
 }

@@ -161,4 +161,14 @@ div.WireIt-Container-ddhandle span {
 div.inputEx-InPlaceEdit-visu:hover {
    background-color: #000000;
 }
+
+div.hiddenField {
+	display:none;
+}
+
+div.propertyGroup,div.relationGroup  {
+	border:1px solid #BBB;
+	margin-bottom:8px;
+	padding:6px;
+}
 /*********** End of CSS code for inplaceEdit as container title ************/
