@@ -28,7 +28,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstarter_Domain_Model_AbstractClass{
+class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstarter_Domain_Model_Class_AbstractObject{
 	
 	/**
 	 * body

@@ -82,7 +82,6 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 
 			case 'saveWiring':
 				$extensionConfigurationFromJson = json_decode($request['params']['working'], true);
-				t3lib_div::devLog("before", 'tx_extbasekickstarter', 0, $extensionConfigurationFromJson['modules']);
 				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
 
 				$build = $this->codeGenerator->build($extensionSchema);
@@ -90,7 +89,6 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
 				t3lib_div::mkdir($extensionDirectory);
 				$extensionConfigurationFromJson['modules'] = $this->generateUniqueIDs($extensionConfigurationFromJson['modules']);
-				t3lib_div::devLog("after", 'tx_extbasekickstarter', 0, $extensionConfigurationFromJson['modules']);
 				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', json_encode($extensionConfigurationFromJson));
 				
 				if ($build === true) {

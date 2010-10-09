@@ -117,6 +117,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 
 	protected function buildDomainObject(array $jsonDomainObject) {
 		$domainObject = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_DomainObject');
+		$domainObject->setUniqueIdentifier($jsonDomainObject['uid']);
 		$domainObject->setName($jsonDomainObject['name']);
 		$domainObject->setDescription($jsonDomainObject['objectsettings']['description']);
 		if ($jsonDomainObject['objectsettings']['type'] === 'Entity') {
@@ -132,6 +133,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 			$propertyClassName = 'Tx_ExtbaseKickstarter_Domain_Model_Property_' . $propertyType . 'Property';
 			if (!class_exists($propertyClassName)) throw new Exception('Property of type ' . $propertyType . ' not found');
 			$property = t3lib_div::makeInstance($propertyClassName);
+			$property->setUniqueIdentifier($jsonProperty['uid']);
 			$property->setName($jsonProperty['propertyName']);
 			$property->setDescription($jsonProperty['propertyDescription']);
 

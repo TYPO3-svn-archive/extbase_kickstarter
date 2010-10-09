@@ -168,6 +168,12 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty {
 	);
 	
 	/**
+	 * 
+	 * @var string
+	 */
+	protected $uniqueIdentifier;
+	
+	/**
 	 * Name of the property
 	 * @var string
 	 */
@@ -227,6 +233,34 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty {
 	public function setName($name) {
 		$this->name = $name;
 	}
+	
+	/**
+	 * Get property uniqueIdentifier
+	 *
+	 * @return string
+	 */
+	public function getUniqueIdentifier() {
+		return $this->uniqueIdentifier;
+	}
+	
+	/**
+	 * Set property uniqueIdentifier
+	 * 
+	 * @param string Property uniqueIdentifier
+	 */
+	public function setUniqueIdentifier($uniqueIdentifier) {
+		$this->uniqueIdentifier = $uniqueIdentifier;
+	}
+	
+	/**
+	 * 
+	 * @return boolean true (if property is of type relation any to many)
+	 */
+	public function isAnyToManyRelation(){
+		return is_subclass_of($this, 'Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AnyToManyRelation');
+	}
+	
+	
 
 	/**
 	 * Get property description to be used in comments

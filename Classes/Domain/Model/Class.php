@@ -30,7 +30,7 @@
  */
 
 
-class Tx_ExtbaseKickstarter_Domain_Model_Class extends Tx_ExtbaseKickstarter_Domain_Model_AbstractClass{
+class Tx_ExtbaseKickstarter_Domain_Model_Class extends Tx_ExtbaseKickstarter_Domain_Model_Class_AbstractObject{
 	
 	/**
 	 * constants

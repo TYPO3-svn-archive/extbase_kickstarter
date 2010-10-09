@@ -35,6 +35,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_DomainObject {
 	 * @var string
 	 */
 	protected $name;
+	
+	/**
+	 * 
+	 * @var string
+	 */
+	protected $uniqueIdentifier;
 
 	/**
 	 * Description of the domain object
@@ -101,6 +107,23 @@ class Tx_ExtbaseKickstarter_Domain_Model_DomainObject {
 		return 'tx_' . strtolower(Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey())) . '_domain_model_' . strtolower($this->getName());
 	}
 	
+	/**
+	 * Get property uniqueIdentifier
+	 *
+	 * @return string
+	 */
+	public function getUniqueIdentifier() {
+		return $this->uniqueIdentifier;
+	}
+	
+	/**
+	 * Set property uniqueIdentifier
+	 * 
+	 * @param string Property uniqueIdentifier
+	 */
+	public function setUniqueIdentifier($uniqueIdentifier) {
+		$this->uniqueIdentifier = $uniqueIdentifier;
+	}
 	
 	/**
 	 * Get description
