@@ -2,6 +2,9 @@
 
 class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fluid_ViewHelpers_Be_AbstractBackendViewHelper {
 	public function render() {
+		
+		$this->conf = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
+		
 		$doc = $this->getDocInstance();
 		$doc->bodyTagAdditions .= 'class="yui-skin-sam"';
 
@@ -22,15 +25,21 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		// InputEx with wirable options
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/inputex.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/Field.js');
+		if($this->conf['settings']['enableRoundtrip']){
+			$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/extended/ListField.js');
+			$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/extended/Group.js');
+		}
+		else  {
+			$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/ListField.js');
+			$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/Group.js');
+		}
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/js/util/inputex/WirableField-beta.js');
-		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/Group.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/Visus.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/StringField.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/Textarea.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/SelectField.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/EmailField.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/UrlField.js');
-		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/ListField.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/CheckBox.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/InPlaceEdit.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/MenuField.js');
@@ -50,7 +59,11 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/js/util/inputex/FormContainer-beta.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/js/LayerMap.js');
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/wireit/js/WiringEditor.js');
-
+		
+		if($this->conf['settings']['enableRoundtrip']){
+			$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/roundtrip.js');
+		}
+		
 		// Extbase Modelling definition
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/extbaseModeling.js');
 

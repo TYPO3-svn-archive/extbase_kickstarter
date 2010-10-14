@@ -57,7 +57,8 @@ var extbaseModeling_wiringEditorLanguage = {
 			inputParams: {
 				name: "name",
 				label: "Name",
-				typeInvite: "Extension title"
+				typeInvite: "Extension title",
+				required: true
 			}
 		},
 		{
@@ -66,7 +67,8 @@ var extbaseModeling_wiringEditorLanguage = {
 				name: "extensionKey", 
 				label: "Key",
 				typeInvite: "Extension Key",
-				cols: 30
+				cols: 30,
+				required: true
 			}
 		},
 		{
@@ -116,7 +118,9 @@ var extbaseModeling_wiringEditorLanguage = {
 								inputParams: {
 									label: "Email", 
 									name: "email",
-									required: false
+									required: false,
+									showMsg: true,
+									regexp: inputEx.regexps.email
 								}
 							},
 							{
@@ -148,7 +152,9 @@ var extbaseModeling_wiringEditorLanguage = {
 							className: "inputEx-Field extbase-modelTitleEditor",
 							editorField:{
 								type: "string",
-								inputParams: {}
+								inputParams: {
+									required	: true
+								}
 							}, 
 							animColors: {from: "#000000" , to: "#5C85D6"}
 						}
@@ -254,7 +260,7 @@ var extbaseModeling_wiringEditorLanguage = {
 														inputParams: {
 															label: "Property Name", 
 															name: "propertyName",
-															required: false
+															required: true
 														}
 													},
 													{
@@ -345,7 +351,7 @@ var extbaseModeling_wiringEditorLanguage = {
 														inputParams: {
 															label: "Name", 
 															name: "relationName", 
-															required: false
+															required: true
 														}
 													},
 													{
@@ -415,3 +421,4 @@ var extbaseModeling_wiringEditorLanguage = {
 		}
 	]
 };
+
