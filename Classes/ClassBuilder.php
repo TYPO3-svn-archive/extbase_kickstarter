@@ -50,6 +50,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	public function __construct(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension){
 		$this->extension = $extension;
 		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
+		$this->extClassPrefix = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey());
 		
 		$this->classParser = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_ClassParser');
 		$this->roundTripService =  t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_RoundTrip',$extension);
@@ -72,27 +73,24 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	 * @return 
 	 */
 	public function generateModelClassObject($domainObject){
+		t3lib_div::devlog('','---');
+		t3lib_div::devlog('------------------------------------- generateModelClassObject('.$domainObject->getName().') ---------------------------------','extbase_kickstarter',1);
+		$this->classObject = NULL;
 		
-		//t3lib_div::devLog(serialize($this->settings), 'extbase_kickstarter');
-		$domainObjectClassFile = $this->extensionDirectory.'Classes/Domain/Model/' . $domainObject->getName() . '.php';
-		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Model_' . $domainObject->getName();
-		
+		$domainObjectClassFile = Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Model') . $domainObject->getName() . '.php';
+		$className = $domainObject->getClassName();
 		// is there already a class file? 
-		if( $this->roundTripService->getOverWriteSetting('Classes/Domain/Model/' . $domainObject->getName() . '.php') != 0 && $this->roundTripService->modelClassExists($domainObject)){
-			t3lib_div::devLog('Class '.$className.' was modified', 'extbase_kickstarter',0,array($domainObjectClassFile));
-			include_once($domainObjectClassFile);
+		if( $this->roundTripService->getOverWriteSetting('Classes/Domain/Model/' . $domainObject->getName() . '.php') != 0){
 			try {
-				// import the classObject from the existing file
-				$this->classObject = $this->classParser->parse($className);
-				$this->classObject = $this->roundTripService->refactorClass($this->classObject,$domainObject);
+				$this->classObject = $this->roundTripService->getDomainModelClass($domainObject);
 			}
 			catch(Exception $e){
-				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
+				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getMessage(), 'extbase_kickstarter',2);		
 			}
-				
 		}
-		// 
-		else {
+		
+		if($this->classObject == NULL) {
+			t3lib_div::devLog('DomainObject '. $domainObject->getName().' new created', 'extbase_kickstarter',1,array($domainObject));
 			// otherwise instantiate a new one and set the required attributes
 			$this->classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
 			$this->classObject->setFileName($domainObjectClassFile);
@@ -100,7 +98,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 				// set the parent class from TS configuration
 				if(!empty($this->settings['Model']['entityParentClass'])){
 					if(strpos($this->settings['Model']['entityParentClass'],'Tx_')!==0){
-						$parentClass = 'Tx_'.Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Model_'. $this->settings['Model']['entityParentClass'];
+						$parentClass = $this->extClassPrefix. '_Model_'. $this->settings['Model']['entityParentClass'];
 					}
 					else {
 						$parentClass = $this->settings['Model']['entityParentClass'];
@@ -112,7 +110,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			else {
 				if(!empty($this->settings['Model']['valueObjectParentClass'])){
 					if(strpos($this->settings['Model']['valueObjectParentClass'],'Tx_')!==0){
-						$parentClass = 'Tx_'.Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Model_'. $this->settings['Model']['valueObjectParentClass'];
+						$parentClass = $this->extClassPrefix . '_Model_'. $this->settings['Model']['valueObjectParentClass'];
 					}
 					else {
 						$parentClass = $this->settings['Model']['valueObjectParentClass'];
@@ -122,7 +120,9 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 				$this->classObject->setParentClass($parentClass);
 			}
 		}
-		
+		if(!$this->classObject){
+			throw new Exception('Class object could not be created');
+		}
 		if(!$this->classObject->hasDescription()){
 			$this->classObject->setDescription($domainObject->getDescription());
 		}
@@ -131,8 +131,8 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		
 		$anyToManyRelationProperties = $domainObject->getAnyToManyRelationProperties();
 		
-		if(!$this->classObject->methodExists('__constructor')){
-			$constructorMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method('__constructor');
+		if(!$this->classObject->methodExists('__construct')){
+			$constructorMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method('__construct');
 			$constructorMethod->setDescription('The constructor of this '.$domainObject->getName());
 			if(count($anyToManyRelationProperties) > 0){
 				$constructorMethod->setBody($this->initStorageObjectCall);
@@ -140,6 +140,19 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$constructorMethod->addModifier('public');
 			$constructorMethod->setTag('return','void');
 			$this->classObject->addMethod($constructorMethod);
+		}
+		else if(count($anyToManyRelationProperties) > 0){
+			$constructorMethod = $this->classObject->getMethod('__construct');
+			if(preg_match('$this->initStorageObjects()',$constructorMethod->getBody()) < 1){
+				$constructorMethod->setBody($this->initStorageObjectCall);
+				$this->classObject->setMethod($constructorMethod);
+				t3lib_div::devLog('Constructor method in Class '. $this->classObject->getName().' was overwritten since the initStorageObjectCall was missing', 'extbase_kickstarter',2,$this->classObject->getMethods());		
+			}
+			else t3lib_div::devLog('Constructor method in Class '. $this->classObject->getName().': '.$constructorMethod->getBody(), 'extbase_kickstarter',2);		
+			//initStorageObjects
+		}
+		else {
+			t3lib_div::devLog('$anyToManyRelationProperties < 0 in Class '. $this->classObject->getName(), 'extbase_kickstarter',2);	
 		}
 		
 		if(count($anyToManyRelationProperties) > 0){
@@ -163,6 +176,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$propertyName = $domainProperty->getName();
 			// add the property to class Object (or update an existing class Object property)
 			if($this->classObject->propertyExists($propertyName)){
+				t3lib_div::devLog('property exists: '.$propertyName, 'extbase_kickstarter',1);
 				$classProperty = $this->classObject->getProperty($propertyName);
 				$classPropertyTags = $classProperty->getTags();
 			}
@@ -170,6 +184,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 				$classProperty = new Tx_ExtbaseKickstarter_Domain_Model_Class_Property($propertyName);
 				$classProperty->setTag('var',$domainProperty->getTypeForComment());
 				$classProperty->addModifier('protected');
+				t3lib_div::devLog('New property: '.$propertyName.':'.$domainProperty->getTypeForComment(), 'extbase_kickstarter',1);
 			}
 			
 			$classProperty->setAssociatedDomainObjectProperty($domainProperty);
@@ -187,7 +202,9 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $domainProperty
 	 */
 	protected function setPropertyRelatedMethods($domainProperty){
+		t3lib_div::devlog('setPropertyRelatedMethods:'.$domainProperty->getName(),'extbase_kickstarter',1);
 		if (is_subclass_of($domainProperty, 'Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AnyToManyRelation')) {
+			t3lib_div::devlog('setPropertyAddMethods:'.$domainProperty->getName(),'extbase_kickstarter',1);
 			$addMethod = $this->buildAddMethod($domainProperty);
 			$removeMethod = $this->buildRemoveMethod($domainProperty);
 			$this->classObject->setMethod($addMethod);
@@ -198,6 +215,10 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$setMethod = $this->buildSetterMethod($domainProperty);
 			$this->classObject->setMethod($getMethod);
 			$this->classObject->setMethod($setMethod);
+			if ($domainProperty->getTypeForComment() == 'boolean'){
+				$isMethod = $this->buildIsMethod($domainProperty);
+				$this->classObject->setMethod($isMethod);
+			}
 		}
 	}
 	
@@ -215,6 +236,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$getterMethodTags = $getterMethod->getTags();
 		}
 		else {
+			t3lib_div::devlog('new getMethod:'.$getterMethodName,'extbase_kickstarter',1);
 			$getterMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($getterMethodName);
 			// default method body
 			$getterMethod->setBody($this->getDefaultMethodBody($domainProperty,'get'));
@@ -241,6 +263,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$setterMethodTags = $setterMethod->getTags();
 		}
 		else {
+			t3lib_div::devlog('new setMethod:'.$setterMethodName,'extbase_kickstarter',1);
 			$setterMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($setterMethodName);
 			// default method body
 			$setterMethod->setBody($this->getDefaultMethodBody($domainProperty,'set'));
@@ -274,6 +297,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$addMethod = $this->classObject->getMethod($addMethodName);
 		}
 		else {
+			t3lib_div::devlog('new addMethod:'.$addMethodName,'extbase_kickstarter',1);
 			$addMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($addMethodName);
 			// default method body
 			$addMethod->setBody($this->getDefaultMethodBody($domainProperty,'add'));
@@ -282,7 +306,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$addMethod->addModifier('public');
 		}
 		$addParameters = $addMethod->getParameterNames();
-		
+	
 		if(!in_array(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName),$addParameters)){
 			$addParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName));
 			$addParameter->setVarType($domainProperty->getForeignClass()->getClassName());
@@ -309,6 +333,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$removeMethod = $this->classObject->getMethod($removeMethodName);
 		}
 		else {
+			t3lib_div::devlog('new removeMethod:'.$removeMethodName,'extbase_kickstarter',1);
 			$removeMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($removeMethodName);
 			// default method body
 			$removeMethod->setBody($this->getDefaultMethodBody($domainProperty,'remove'));
@@ -345,6 +370,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 			$isMethod = $this->classObject->getMethod($isMethodName);
 		}
 		else {
+			t3lib_div::devlog('new isMethod:'.$isMethodName,'extbase_kickstarter',1);
 			$isMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($isMethodName);
 			// default method body
 			$isMethod->setBody($this->getDefaultMethodBody($domainProperty,'is'));
@@ -353,7 +379,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		}
 		
 		if(!$isMethod->hasDescription()){
-			$isMethod->setDescription('Returns the boolean state of '.$property->getName());
+			$isMethod->setDescription('Returns the boolean state of '.$domainProperty->getName());
 		}
 		return $isMethod;
 	}
@@ -391,18 +417,22 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		
 		switch($methodType){
 			
-			case 'set'		: return "\t\$this->".$propertyName." = \$".$propertyName.";\n";
+			case 'set'			: return "\t\$this->".$propertyName." = \$".$propertyName.";\n";
 			
-			case 'get'		: return "\treturn \$this->".$propertyName.";\n";
+			case 'get'			: return "\treturn \$this->".$propertyName.";\n";
 			
-			case 'add'		: return "\t\$this->".$propertyName."->attach(\$".Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName).");\n";
+			case 'add'			: return "\t\$this->".$propertyName."->attach(\$".Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName).");\n";
 			
-			case 'remove'	: return "\t\$this->".$propertyName."->detach(\$".Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName)."ToRemove);";
+			case 'remove'		: return "\t\$this->".$propertyName."->detach(\$".Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName)."ToRemove);";
 			
-			case 'is'		: return "\treturn \$this->get".ucfirst($propertyName)."();\n";
+			case 'is'			: return "\treturn \$this->get".ucfirst($propertyName)."();\n";
+			
 		}
 	}
 	
+	public static function getDefaultInitializeMethodBody($domainObject){
+		return '$this->'.t3lib_div::lcfirst($domainObject->getName()).'Repository = t3lib_div::makeInstance('.$omainObject->getDomainRepositoryClassName().');';
+	}
 	/**
 	 * This method generates the class object, which is passed to the template
 	 * it keeps all methods and properties including user modified method bodies and 
@@ -412,29 +442,31 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	 * @return 
 	 */
 	public function generateControllerClassObject($domainObject){
-		$controllerClassFile = $this->extensionDirectory . 'Classes/Controller/' . $domainObject->getName() . 'Controller.php';
+		t3lib_div::devlog('','---');
+		t3lib_div::devlog('------------------------------------- generateControllerClassObject('.$domainObject->getName().') ---------------------------------','extbase_kickstarter',1);
 		
-		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Controller_' . $domainObject->getName().'Controller';
+		$this->classObject = NULL;
+		
+		$controllerClassFile = Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Controller')  . $domainObject->getName() . 'Controller.php';
+		
+		$className =  $domainObject->getControllerName();
 	
-		if(file_exists( $controllerClassFile) &&  $this->extension->isModified($controllerClassFile)){
-			if(!class_exists($className)){
-				include_once($controllerClassFile);
-			}
+		if($this->roundTripService->getOverWriteSetting('Classes/Controller/' . $domainObject->getName() . 'Controller.php') != 0){
 			
 			try {
-				$this->classObject = $this->classParser->parse($className);
+				$this->classObject = $this->roundTripService->getControllerClass($domainObject);
 			}
 			catch(Exception $e){
-				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
+				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getMessage(), 'extbase_kickstarter');		
 			}				
 		}
-		else {
+		if($this->classObject == NULL) {
 			$this->classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
 			$this->classObject->setFileName($controllerClassFile);
 			// get parent class from config
 			if(!empty($this->settings['Controller']['parentClass'])){
 				if(strpos($this->settings['Controller']['parentClass'],'Tx_')!==0){
-					$parentClass = 'Tx_'.Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Controller_'. $this->settings['Controller']['parentClass'];
+					$parentClass = $this->extClassPrefix . '_Controller_'. $this->settings['Controller']['parentClass'];
 				}
 				else {
 					$parentClass = $this->settings['Controller']['parentClass'];
@@ -468,19 +500,21 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		
 		foreach($domainObject->getActions() as $action){
 			$actionMethodName = $action->getName().'Action';
-			$actionMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($actionMethodName);
-			$actionMethod->setDescription('action '.$action->getName());
-			$actionMethod->setBody('');
-			$actionMethod->setTag('return','string The rendered ' . $action->getName() .' action');
-			$actionMethod->addModifier('public');
-			
-			$this->classObject->addMethod($actionMethod);
+			if(!$this->classObject->methodExists($initializeMethodName)){
+				$actionMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($actionMethodName);
+				$actionMethod->setDescription('action '.$action->getName());
+				$actionMethod->setBody('');
+				$actionMethod->setTag('return','string The rendered ' . $action->getName() .' action');
+				$actionMethod->addModifier('public');
+				
+				$this->classObject->addMethod($actionMethod);
+			}
 		}
 		return $this->classObject;
 	}
 	
 	/**
-	 * This method generates the class object, which is passed to the template
+	 * This method generates the repository class object, which is passed to the template
 	 * it keeps all methods and properties including user modified method bodies and comments 
 	 * needed to create a repository class file
 	 * 
@@ -488,20 +522,25 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	 * @return 
 	 */
 	public function generateRepositoryClassObject($domainObject){
-		$repositoryClassFile = $this->extensionDirectory . 'Classes/Domain/Repository/' . $domainObject->getName() . 'Repository.php';
+		t3lib_div::devlog('','---');
+		t3lib_div::devlog('------------------------------------- generateRepositoryClassObject('.$domainObject->getName().') ---------------------------------','extbase_kickstarter',1);
 		
-		$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Repository_' . $domainObject->getName().'Repository';
+		$this->classObject = NULL;
+		
+		$repositoryClassFile = Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Repository')  . $domainObject->getName() . 'Repository.php';
+		
+		$className = $domainObject->getDomainRepositoryClassName();
 	
-		if(file_exists( $repositoryClassFile) &&  $this->extension->isModified($repositoryClassFile)){
-			include_once($repositoryClassFile);
+		if($this->roundTripService->getOverWriteSetting('Classes/Domain/Repository/' . $domainObject->getName() . 'Repository.php') != 0){
+			t3lib_div::devlog('RepositoryClass exists:'.$domainObject->getName() . 'Repository.php','extbase_kickstarter',1);
 			try {
-				$this->classObject = $this->classParser->parse($className);
+				$this->classObject = $this->roundTripService->getRepositoryClass($domainObject);
 			}
 			catch(Exception $e){
-				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getError(), 'extbase_kickstarter');		
+				t3lib_div::devLog('Class '.$className.' could not be imported: '.$e->getMessage(), 'extbase_kickstarter');		
 			}		
 		}
-		else {
+		if($this->classObject == NULL) {
 			$this->classObject = new Tx_ExtbaseKickstarter_Domain_Model_Class($className);
 			$this->classObject->setFileName($repositoryClassFile);
 			if(!empty($this->settings['Repository']['parentClass'])){

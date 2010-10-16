@@ -57,6 +57,7 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 	 * @return array of Tx_ExtbaseKickstarter_Reflection_ParameterReflection Parameter reflection objects of the parameters of this method
 	 */
 	public function getParameters() {
+		
 		$extendedParameters = array();
 		foreach (parent::getParameters() as $parameter) {
 			$typeHint = $this->getTypeHintFromReflectionParameter($parameter);
@@ -80,7 +81,6 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 	 */
 	protected function getTypeHintFromReflectionParameter($reflectionParameter){
 		$paramAsString = (string) $reflectionParameter;
-		//t3lib_div::devLog('paramAsString: '.$paramAsString,'extbase_kickstarter');
 		$paramRegex = '/^Parameter\s\#[0-9]\s\[\s<(required|optional)>\s*.*\$.*]$/';
 		if(!preg_match($paramRegex, $paramAsString)){
 			// since the approach to cast the reflection parameter as a string is not part of the official PHP API
@@ -88,7 +88,7 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 			t3lib_div::devLog('ReflectionParameter casted as string has no the expected format: '.$paramAsString,'extbase_kickstarter');
 			return '';
 		}
-		$typeHintRegex = '/>\s*([a-zA-Z_&\s]*)\s*\$/';
+		$typeHintRegex = '/>\s*([a-zA-Z0-9_&\s]*)\s*\$/';
 		$matches = array();
 		if(preg_match($typeHintRegex, $paramAsString, $matches)){
 			if(!empty($matches[1])){
@@ -98,7 +98,6 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 					$typeHint = str_replace('&','',$typeHint);
 				}
 				$typeHint = trim($typeHint);
-				//t3lib_div::devLog('typeHint: '.$typeHint,'extbase_kickstarter');
 				return $typeHint;
 			}
 		}

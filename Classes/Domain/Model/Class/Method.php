@@ -138,6 +138,17 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	}
 	
 	/**
+	 * replace a single parameter, depending on position
+	 * @param array $parameter
+	 * @return void
+	 */
+	public function replaceParameter($parameter){
+		t3lib_div::devlog('replaceParameter:'.$parameter->getPosition(),'extbase',0,$this->parameters);
+		$this->parameters[$parameter->getPosition()] = $parameter;
+		t3lib_div::devlog('replaceParameter:'.$parameter->getPosition(),'extbase',0,$this->parameters);
+	}
+	
+	/**
 	 * removes a parameter
 	 * @param $parameterName
 	 * @param $parameterSortingIndex
@@ -158,7 +169,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	 * @param $parameterSortingIndex
 	 * @return boolean true (if successfull removed)
 	 */
-	public function renameParameter($oldName, $newName, $parameterSortingIndex){
+	public function renameParameter($oldName, $newName, $parameterPosition){
 		//TODO: Not yet tested
 		if(isset($this->parameter[$parameterPosition])){
 			$parameter = $this->parameter[$parameterPosition];

@@ -59,7 +59,6 @@ class Tx_ExtbaseKickstarter_ViewHelpers_MethodViewHelper extends Tx_Fluid_Core_V
 		foreach($methodObject->getParameters()  as $parameter){
 			$parameterName = $parameter->getName();
 			$typeHint = $parameter->getTypeHint ();
-			
 			if($parameter->isOptional()){
 				$defaultValue = $parameter->getDefaultValue();
 				// optional parameters have a default value
@@ -101,6 +100,7 @@ class Tx_ExtbaseKickstarter_ViewHelpers_MethodViewHelper extends Tx_Fluid_Core_V
 			$parameters[] = $typeHint.' '.$parameterName;
 			//t3lib_div::devLog($methodSchemaObject->getName().':'.$parameter->getName(), 'parameter debug');			
 		}
+		
 		return implode(', ',$parameters);
 	}
 	

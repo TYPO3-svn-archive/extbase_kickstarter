@@ -35,7 +35,13 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 	
 	protected $oldDomainObjects = array();
 	
+	protected $renamedDomainObjects = array();
+	
+	
 	/**
+	 * If a JSON file is found in the extensions directory the previous version
+	 * of the extension is build to compare it with the new configuration coming 
+	 * from the kickstarter input
 	 * 
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_Extension $extension
 	 */
@@ -45,111 +51,421 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 		$this->classParser = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_ClassParser');
 		$this->extension = $extension;
 		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
+		$this->extClassPrefix = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey());
 		if(file_exists($this->extensionDirectory . '/kickstarter.json')){
 			$objectSchemaBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ObjectSchemaBuilder');
-			$jsonConfig =  json_decode(file_get_contents($this->extensionDirectory . '/kickstarter.json'),true);
-			
+			$jsonConfig =  json_decode(file_get_contents($this->extensionDirectory . 'kickstarter.json'),true);
+			//t3lib_div::devlog('old JSON:'.$this->extensionDirectory . 'kickstarter.json','extbase_kickstarter',0,$jsonConfig);
 			$this->previousExtension = $objectSchemaBuilder->build($jsonConfig);
 			
 			$oldDomainObjects = $this->previousExtension->getDomainObjects();
 			foreach($oldDomainObjects as $oldDomainObject){
-				$this->domainObjects[$oldDomainObject->getUniqueIdentifier()] = $oldDomainObject;
+				$this->oldDomainObjects[$oldDomainObject->getUniqueIdentifier()] = $oldDomainObject;
 			}
 			
-		}
-	}
-	
-	public function getExistingClass($domainObject){
-		if(isset($this->domainObjects[$domainObject->getUniqueIdentifier()])){
-			$oldDomainObject = $this->domainObjects[$domainObject->getUniqueIdentifier()];
-			$fileName = Tx_ExtbaseKickstarter_Service_CodeGenerator::getDomainModelPath().$oldDomainObject->getName().'.php';
-			if(file_exists($fileName)){
-				include_once($fileName);
-				$className = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Model_' . $oldDomainObject->getName();
-				$classObject = $this->classParser->parse($className);
-				if($oldDomainObject->getName() != $domainObject->getName()){
-					$newClassName = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey()) . '_Domain_Model_' . $domainObject->getName();
-					$classObject->setName($newClassName);
-				}
-				$newProperties = array();
-				foreach($domainObject->getProperties() as $property){
-					$newProperties[$property->getUniqueIdentifier()] = $property;
-				}
-				foreach($oldDomainObject->getProperties() as $oldProperty){
-					if(isset($newProperties[$oldProperty->getUniqueIdentifier()])){
-						$newProperty = $newProperties[$oldProperty->getUniqueIdentifier()];
-						
-						if($oldProperty->isAnyToManyRelation() != $newProperty->isAnyToManyRelation()){
-							// remove old methods since we won't convert modified getter and setter to add/remove methods
-							if($oldProperty->isAnyToManyRelation()){
-								$classObject->removeMethod('add'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
-								$classObject->removeMethod('remove'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
-							}
-							else{
-								$classObject->removeMethod('get'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
-								$classObject->removeMethod('set'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
-							}
-						}
-						
-						else if($newProperty->getName() != $oldProperty->getName()){
-							// rename methods
-							if($newProperty->isAnyToManyRelation()){
-								$oldMethodName = Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($oldProperty.'add');
-								$newMethodName = Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($newProperty,'add');
-								$mergedMethod = $classObject->getMethod($oldMethodName);
-								$mergedMethod->setName($newMethodName);
-								$oldMethodBody = $method->getBody();
-								$newMethodBody = $this->replacePropertyNameInMethodBody($oldMethodBody,$oldProperty->getName(),$newProperty->getName());
-								$mergedMethod->setBody($newMethodBody);
-								$classObject->removeMethod($oldMethodName);
-								$classObject->addMethod($mergedMethod);
-							}
-							
-						}
+			// now we store all renamed domainObjects in an array to enable detection of renaming in 
+			// relationProperties (property->getForeignClass)
+			foreach($this->extension->getDomainObjects() as $domainObject){
+				if(isset($this->oldDomainObjects[$domainObject->getUniqueIdentifier()])){
+					if($this->oldDomainObjects[$domainObject->getUniqueIdentifier()]->getName() != $domainObject->getName()){
+						$renamedDomainObjects[$domainObject->getUniqueIdentifier()] = $domainObject;
 					}
 				}
+			}
+		}
+		spl_autoload_register('Tx_ExtbaseKickstarter_Utility_ClassLoader::loadClass',false,true);
+	}
+	
+	/**
+	 * This method is the main part of the roundtrip functionality
+	 * It looks for a previous version of the current domain object and 
+	 * parses the existing class file for that domain model
+	 * compares all properties and methods with the previous version.
+	 * 
+	 * Methods are either removed/added or updated according to the new property names
+	 * 
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class $classObject The class object parsed from an existing class
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject The new domain object
+	 * 
+	 * @return Tx_ExtbaseKickstarter_Domain_Model_Class OR NULL
+	 */
+	public function getDomainModelClass(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $currentDomainObject){
+		
+		if(isset($this->oldDomainObjects[$currentDomainObject->getUniqueIdentifier()])){
+			t3lib_div::devlog('domainObjectIdentified:'.$currentDomainObject->getName(),'extbase_kickstarter');
+			$oldDomainObject = $this->oldDomainObjects[$currentDomainObject->getUniqueIdentifier()];
+			$fileName = Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Model').$oldDomainObject->getName().'.php';
+			if(file_exists($fileName)){
+				t3lib_div::devLog('Filename of existing class:'.$fileName, 'extbase_kickstarter');
+				// import the classObject from the existing file
+				include_once($fileName);
+				$className = $oldDomainObject->getClassName();
+				$this->classObject  = $this->classParser->parse($className);
+				t3lib_div::devlog('Model class methods','extbase_kickstarter',0,$this->classObject->getMethods());
+				if($oldDomainObject->getName() != $currentDomainObject->getName()){
+					t3lib_div::devlog('domainObject renamed. old: '.$oldDomainObject->getName().' new: '.$currentDomainObject->getName(),'extbase_kickstarter');
+					$newClassName = $currentDomainObject->getClassName();
+					$this->classObject->setName($newClassName);
+					$this->classObject->setFileName($currentDomainObject->getName().'.php');
+					$this->cleanUp( Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Model'),$oldDomainObject->getName().'.php');
+				}
 				
-				// TODO: check actions
-				// TODO: check parent class
+				$this->updateModelClassProperties($oldDomainObject,$currentDomainObject);
+
+				$newActions = array();
+				foreach($currentDomainObject->getActions() as $newAction){
+					$newActions[$newAction->getName()] = $newAction;
+				}
+				$oldActions = $oldDomainObject->getActions();
 				
+				if((empty($newActions) && !$currentDomainObject->isAggregateRoot()) && (!empty($oldActions) || $oldDomainObject->isAggregateRoot())){
+					// remove the controller
+					$this->cleanUp(Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Controller'),$oldDomainObject->getName().'Controller.php');
+				}
+				return $this->classObject;
+			}
+			else {
+				t3lib_div::devLog('class file didn\'t exist:'.$fileName, 'extbase_kickstarter');
+			}
+		}
+		else {
+			t3lib_div::devlog('domainObject not identified:'.$currentDomainObject->getUniqueIdentifier(),'extbase_kickstarter',0,$this->oldDomainObjects);
+		}
+		return NULL;
+	}
+	
+	/**
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
+	 */
+	public function getControllerClass(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $currentDomainObject){
+		if(isset($this->oldDomainObjects[$currentDomainObject->getUniqueIdentifier()])){
+			$oldDomainObject = $this->oldDomainObjects[$currentDomainObject->getUniqueIdentifier()];
+			$fileName =  Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Controller').$oldDomainObject->getName().'Controller.php';
+			if(file_exists($fileName)){
+				t3lib_div::devlog('existing controller class:'.$fileName,'extbase_kickstarter');
+				include_once($fileName);
+				$className = $oldDomainObject->getControllerName();
+				$this->classObject  = $this->classParser->parse($className);
+				t3lib_div::devlog('Controller class methods','extbase_kickstarter',0,$this->classObject->getMethods());
+				if($oldDomainObject->getName() != $currentDomainObject->getName()){
+					$newClassName = $currentDomainObject->getControllerName();
+					$this->classObject->setName($newClassName);
+					if($oldDomainObject->isAggregateRoot()){
+						// should we keep the old properties comments and tags?
+						$this->classObject->removeProperty(t3lib_div::lcfirst($oldDomainObject->getName()).'Repository');
+						
+						if($currentDomainObject->isAggregateRoot()){
+							// update the initializeAction method body
+							$initializeMethod = $this->classObject->getMethod('initializeAction');
+							if($initializeMethod != NULL){
+								$initializeMethodBody = $initializeMethod->getBody();
+								if($currentDomainObject->isAggregateRoot()){
+									$newMethodBody = str_replace($oldDomainObject->getDomainRepositoryClassName(), $currentDomainObject->getDomainRepositoryClassName(),$initializeMethodBody);
+									$newMethodBody = str_replace(t3lib_div::lcfirst($oldDomainObject->getName()).'Repository', t3lib_div::lcfirst($currentDomainObject->getName()).'Repository',$newMethodBody);
+									$initializeMethod->setBody($newMethodBody);
+									$this->classObject->setMethod($initializeMethod);
+								}
+								else {
+									$this->classObject->removeMethod('initializeAction');
+								}
+							}
+						}
+						else {
+							$this->cleanUp(Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Repository'),$oldDomainObject->getName().'Repository.php');
+						}
+					}
+					
+					$this->classObject->setFileName($currentDomainObject->getName().'Controller.php');
+					$this->cleanUp( Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Controller'),$oldDomainObject->getName().'Controller.php');
+				}
+				
+				$newActions = array();
+				foreach($currentDomainObject->getActions() as $newAction){
+					$newActions[$newAction->getName()] = $newAction;
+				}
+				$oldActions = $oldDomainObject->getActions();
+				if(isset($this->oldDomainObjects[$currentDomainObject->getUniqueIdentifier()])){
+					// now we remove old action methods
+					foreach($oldActions as $oldAction){
+						if(!isset($newActions[$oldAction->getName()])){
+							// an action was removed
+							$this->classObject->removeMethod($oldAction->getName().'Action');
+							t3lib_div::devlog('Action method removed:'.$oldAction->getName(),'extbase_kickstarter',0,$this->classObject->getMethods());
+						}
+					}
+					// we don't have to add new ones, this will be done automatically by the class builder
+				}
+				
+				return $this->classObject;
+			}
+			else {
+				t3lib_div::devLog('class file didn\'t exist:'.$fileName, 'extbase_kickstarter');
+			}
+		}
+		t3lib_div::devlog('No existing controller class:'.$currentDomainObject->getName(),'extbase_kickstarter');
+		return NULL;
+	}
+	
+	/**
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
+	 */
+	public function getRepositoryClass(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $currentDomainObject){
+		if(isset($this->oldDomainObjects[$currentDomainObject->getUniqueIdentifier()])){
+			$oldDomainObject = $this->oldDomainObjects[$currentDomainObject->getUniqueIdentifier()];
+			$fileName =  Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Repository').$oldDomainObject->getName().'Repository.php';
+			if(file_exists($fileName)){
+				t3lib_div::devlog('existing Repository class:'.$fileName,'extbase_kickstarter');
+				include_once($fileName);
+				$className = $oldDomainObject->getDomainRepositoryClassName();
+				$this->classObject  = $this->classParser->parse($className);
+				t3lib_div::devlog('Repository class methods','extbase_kickstarter',0,$this->classObject->getMethods());
+				if($oldDomainObject->getName() != $currentDomainObject->getName()){
+					$newClassName = $currentDomainObject->getDomainRepositoryClassName();
+					$this->classObject->setName($newClassName);
+					$this->classObject->setFileName($currentDomainObject->getName().'_Repository.php');
+					$this->cleanUp( Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Repository'),$oldDomainObject->getName().'Repository.php');
+				}
+				return $this->classObject;
+			}
+			else {
+				t3lib_div::devLog('class file didn\'t exist:'.$fileName, 'extbase_kickstarter');
+			}
+		}
+		t3lib_div::devlog('No existing Repository class:'.$currentDomainObject->getName(),'extbase_kickstarter');
+		return NULL;
+	}
+	
+	/**
+	 * Compare the properties of each object and remove/update 
+	 * the properties and the related methods
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $oldDomainObject
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $newDomainObject
+	 * 
+	 * return void (all actions are performed on $this->classObject
+	 */
+	protected function updateModelClassProperties($oldDomainObject,$newDomainObject){
+		$newProperties = array();
+		foreach($newDomainObject->getProperties() as $property){
+			$newProperties[$property->getUniqueIdentifier()] = $property;
+		}
+		
+		// compare all old properties with new ones
+		foreach($oldDomainObject->getProperties() as $oldProperty){
+			
+			if(isset($newProperties[$oldProperty->getUniqueIdentifier()])){
+				
+				$newProperty = $newProperties[$oldProperty->getUniqueIdentifier()];
+				
+				// relation type changed
+				if($oldProperty->isAnyToManyRelation() != $newProperty->isAnyToManyRelation()){
+					t3lib_div::devlog('property type changed:'.$oldProperty->getName().' '.$newProperty->getName(),'extbase_kickstarter',0,$newProperties);
+					// remove old methods since we won't convert getter and setter methods to add/remove methods
+					if($oldProperty->isAnyToManyRelation()){
+						$this->classObject->removeMethod('add'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
+						$this->classObject->removeMethod('remove'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
+					}
+					else{
+						$this->classObject->removeMethod('get'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
+						$this->classObject->removeMethod('set'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
+						if ($oldProperty->isBoolean()){
+							$this->removeMethod('is'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
+						}
+					}
+					$this->classObject->removeProperty($oldProperty->getName());
+					t3lib_div::devlog('property type changed => removed:'.$oldProperty->getName(),'extbase_kickstarter');
+				}
+				else {
+					$this->updateProperty($oldProperty,$newProperty);
+				}
 			}
 		}
 	}
 	
-	protected function updateMethod(){
-		
+	/**
+	 * Rename a property and update comment (var tag and description)
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $oldProperty
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $newProperty
+	 * 
+	 * @return void
+	 */
+	protected function updateProperty($oldProperty,$newProperty){
+		$classProperty = $this->classObject->getProperty($oldProperty->getName());
+		if($classProperty){
+			$classProperty->setName($newProperty->getName());
+			$classProperty->setTag('var',$newProperty->getTypeForComment().' $'.$newProperty->getName());
+			$newDescription = str_replace($oldProperty->getName(),$newProperty->getName(),$classProperty->getDescription());
+			$classProperty->setDescription($newDescription);
+			$this->classObject->removeProperty($oldProperty->getName());
+			$this->classObject->setProperty($classProperty);
+			if($this->relatedMethodsNeedUpdate($oldProperty,$newProperty)){
+				$this->updatePropertyRelatedMethods($oldProperty,$newProperty);
+			}
+		}
 	}
+	
+	/**
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $oldProperty
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $newProperty
+	 * 
+	 * @return boolean
+	 */
+	protected function relatedMethodsNeedUpdate($oldProperty,$newProperty){
+		if($newProperty->getName() != $oldProperty->getName()){
+			t3lib_div::devlog('property renamed:'.$oldProperty->getName().' '.$newProperty->getName(),'extbase_kickstarter',0,$this->classObject->getProperties());
+			return true;
+		}
+		if($newProperty->isRelation()){
+			// if only the related domain object was renamed
+			if($oldProperty->getForeignClass()->getClassName() != $this->getForeignClassName($newProperty)){
+				t3lib_div::devlog('related domainObject was renamed:'.$oldProperty->getForeignClass()->getClassName() .' ->' .$this->getForeignClassName($newProperty),'extbase_kickstarter');
+				return true;
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $oldProperty
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $newProperty
+	 */
+	protected function updatePropertyRelatedMethods($oldProperty,$newProperty){
+		if($newProperty->isAnyToManyRelation()){
+			$this->updateMethod($oldProperty,$newProperty,'add');
+			$this->updateMethod($oldProperty,$newProperty,'remove');
+		}
+		else {
+			$this->updateMethod($oldProperty,$newProperty,'get');
+			$this->updateMethod($oldProperty,$newProperty,'set');
+			if ($newProperty->isBoolean()){
+				$this->updateMethod($oldProperty,$newProperty,'is');
+			}
+		}
+	}
+	
+	/**
+	 * update the method
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $oldProperty
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $newProperty
+	 * @param string $methodType get,set,add,remove,is
+	 */
+	protected function updateMethod($oldProperty,$newProperty,$methodType){
+		
+		$oldMethodName = Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($oldProperty,$methodType);
+		$mergedMethod = $this->classObject->getMethod($oldMethodName);
+		t3lib_div::devlog('updateMethod:'.$oldMethodName,'extbase_kickstarter');
+		if(!$mergedMethod){
+			// no previous version of the method exists
+			return;
+		}
+		$newMethodName = Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($newProperty,$methodType);
+		
+		if($oldProperty->getName() != $newProperty->getName()){
+			$mergedMethod->setName($newMethodName);
+			$oldMethodBody = $mergedMethod->getBody();
+			
+			if(trim($oldMethodBody) ==  trim(Tx_ExtbaseKickstarter_ClassBuilder::getDefaultMethodBody($oldProperty, $methodType))){
+				// this means the method was not modified so we can remove it and it will be regenerated from ClassBuilder
+				// TODO: Not yet tested
+				$this->classObject->removeMethod($oldMethodName);
+				return;
+			}
+			$newMethodBody = $this->replacePropertyNameInString($oldMethodBody,$oldProperty->getName(),$newProperty->getName());
+			$mergedMethod->setBody($newMethodBody);
+		}
+		
+		
+		
+		
+		// update the method parameters
+		$methodParameters = $mergedMethod->getParameters();
+		if(!empty($methodParameters)){
+			foreach($methodParameters as $methodParameter){
+				$oldParameterName = $methodParameter->getName();
+				if($oldParameterName == $oldProperty->getName()){
+					$methodParameter->setName(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($newProperty->getName()));
+				}
+				else {
+					$newParameterName = str_replace(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName()),Tx_ExtbaseKickstarter_Utility_Inflector::singularize($newProperty->getName()),$oldParameterName); // TODO: str_replace is insufficient in certain cases 
+					$methodParameter->setName($newParameterName);
+					//  we have to replace the old parameter name with the new one in method body 
+					$newMethodBody = $this->replacePropertyNameInString($newMethodBody,$oldParameterName,$newParameterName);
+					$mergedMethod->setBody($newMethodBody);
+				}
+				$typeHint = $methodParameter->getTypeHint();
+				if($typeHint){
+					if($oldProperty->isRelation() && $typeHint == $oldProperty->getForeignClass()->getClassName()){
+						$methodParameter->setTypeHint($this->getForeignClassName($newProperty));
+					}
+					t3lib_div::devlog('new typeHint:'.$this->getForeignClassName($newProperty),'extbase_kickstarter');
+				}
+				$mergedMethod->replaceParameter($methodParameter);
+			}
+		}
+		
+		// update the tags
+		$tags = $mergedMethod->getTags();
+		foreach($tags as $tagKey => $tagValue){
+			//  we need to update the param tag
+			if($tagKey == 'param'){
+				$mergedMethod->removeTag('param');
+				if(is_array($tagValue)){
+					$newValues = array();
+					foreach($tagValue as $v){
+						if(method_exists($oldProperty,'getForeignClass')){
+							$v = str_replace($oldProperty->getForeignClass()->getClassName(),$this->getForeignClassName($newProperty),$v);
+						}
+						$v = str_replace(ucfirst($oldProperty->getName()),ucfirst($newProperty->getName()),$v);
+						$v = str_replace(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName()),Tx_ExtbaseKickstarter_Utility_Inflector::singularize($newProperty->getName()),$v);
+						$newValues[] = $v;
+					}
+					$mergedMethod->setTag('param',$newValues);
+				}
+				else {
+					// TODO: str_replace is insufficient in certain cases 
+					$tagValue = str_replace($oldProperty->getName(),$newProperty->getName(),$tagValue); 
+					$tagValue = str_replace(ucfirst($oldProperty->getName()),ucfirst($newProperty->getName()),$tagValue);
+					$mergedMethod->setTag('param',$tagValue);
+				}
+			}
+			if($tagKey == 'return'){
+				$mergedMethod->removeTag('return');
+				$tagValue = str_replace($oldProperty->getName(),$newProperty->getName(),$tagValue);
+				$mergedMethod->setTag('return',$tagValue);
+			}
+		}
+		$mergedMethod->setDescription(str_replace($oldProperty->getName(),$newProperty->getName(),$mergedMethod->getDescription()));
+		
+		$this->classObject->removeMethod($oldMethodName);
+		$this->classObject->addMethod($mergedMethod);
+	}
+	
 	
 	/**
 	 * Replace all occurences of the old property name with the new name
 	 * 
-	 * @param string $methodBody
+	 * @param string $string
 	 * @param string $oldName
 	 * @param string $newName
 	 */
-	protected function replacePropertyNameInMethodBody($methodBody,$oldName,$newName){
+	protected function replacePropertyNameInString($string,$oldName,$newName){
 		$regex = '/([\$|>])'.$oldName.'([^a-zA-Z0-9_])/';
-		$result = preg_replace($regex, '$1'.$newName.'$2', $methodBody);
+		$result = preg_replace($regex, '$1'.$newName.'$2', $string);
 		return $result;
 	}
 	
-	/**
-	 * Find the deleted properties and remove them and their getter/setter methods from the classObject
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_Class $classObject
-	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
-	 */
-	public function refactorClass(Tx_ExtbaseKickstarter_Domain_Model_Class $classObject,Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject){
-		//TODO implement Refactoring
-		return $classObject;
-		$this->classObject = $classObject;
-		if(isset($this->domainObjects[$domainObject->getUniqueIdentifier()])){
-			$oldDomainObject = $this->domainObjects[$domainObject->getUniqueIdentifier()];	
+	public function getForeignClassName($relation){
+		if(isset($this->renamedDomainObjects[$relation->getForeignClass()->getUniqueIdentifier()])){
+			$renamedObject = $this->renamedDomainObjects[$relation->getForeignClass()->getUniqueIdentifier()];
+			return $renamedObject->getClassName();
 		}
-		else {
-			// a class with the same name was found but it was not build from the current model...
-		}
+		else return $relation->getForeignClass()->getClassName();
 	}
-	
 	
 	/**
 	 * Find the deleted properties and remove them and their getter/setter methods from the classObject
@@ -196,6 +512,33 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 		//$addMethodName = 'add'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName));
 	}
 	
+	public function cleanUp($path,$file){
+		t3lib_div::devLog('cleanUp calledd: '.$path.$file, 'extbase_kickstarter',0);
+		if(!is_file($path.$file)){
+			t3lib_div::devLog('cleanUp File not found: '.$path.$file, 'extbase_kickstarter',0);
+			return;
+		}
+		if($this->settings['backupFiles']){
+			$backupDir = t3lib_div::mkdir($this->extensionDirectory.$this->settings['backupDir']);
+			if(t3lib_div::validPathStr($backupDir)){
+				if(!is_dir($backupDir)){
+					t3lib_div::mkdir($backupDir);
+				}
+				if(copy($path.$file,$backupDir.$file)){
+					t3lib_div::fixPermissions($backupDir.$file);
+					t3lib_div::devLog('File moved to backup: '.$backupDir.$file, 'extbase_kickstarter');
+				}
+				else {
+					throw new Exception('File could not be copied to backup: '.$backupDir.$file);
+				}
+			}
+			else {
+				throw new Exception('Backup dir not allowed: '.$backupDir);
+			}
+		}
+		unlink($path.$file);
+	}
+	
 	/**
 	 * finds a related typoscript setting to a path
 	 * and returns the overWrite setting
@@ -211,21 +554,24 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 		$settings = $this->settings['overWriteSettings'];
 		if($pathParts[0] == 'Classes'){
 			if($pathParts[1] == 'Controller' && isset($settings['Classes']['Controller'])){
+				//t3lib_div::devLog('Overwrite setting for File: '.$path.'->'.$settings['Classes']['Controller'], 'extbase_kickstarter',0,$settings);
 				return $settings['Classes']['Controller'];
 			}
 			else if($pathParts[2] == 'Model' && isset($settings['Classes']['Model'])){
+				//t3lib_div::devLog('Overwrite setting for File: '.$path.'->'.$settings['Classes']['Model'], 'extbase_kickstarter',0,$settings);
 				return $settings['Classes']['Model'];
 			}
 			else if($pathParts[2] == 'Repository' && isset($settings['Classes']['Repository'])){
+				//t3lib_div::devLog('Overwrite setting for File: '.$path.'->'.$settings['Classes']['Repository'], 'extbase_kickstarter',0,$settings);
 				return $settings['Classes']['Repository'];
 			}
 		}
 		else {
-			//'Configuration/TypoScript/setup.txt'
 			foreach($pathParts as $pathPart){
 				if(strpos($pathPart,'.')>-1){
 					$fileNameParts = explode('.',$pathPart);
 					if(isset($settings[$fileNameParts[0]][$fileNameParts[1]])){
+						//t3lib_div::devLog('Overwrite setting for File: '.$path.'->'.$settings[$fileNameParts[0]][$fileNameParts[1]], 'extbase_kickstarter',0,$settings);
 						return $settings[$fileNameParts[0]][$fileNameParts[1]];
 					}
 				}

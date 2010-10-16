@@ -164,6 +164,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Class_AbstractObject {
 	 * @return void
 	 */
 	public function setTag($tagName,$tagValue) {
+		//TODO: multiple tags with same tagname must be possible (param etc.)
 		$this->tags[$tagName] = $tagValue;
 	}	
 	
@@ -174,6 +175,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Class_AbstractObject {
 	 * @return void
 	 */
 	public function removeTag($tagName) {
+		//TODO: multiple tags with same tagname must be possible (param etc.)
 		unset($this->tags[$tagName]);
 	}	
 	

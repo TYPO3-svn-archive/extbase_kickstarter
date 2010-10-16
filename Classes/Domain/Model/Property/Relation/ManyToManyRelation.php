@@ -39,7 +39,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_ManyToManyRelation ex
 	 * @return string The type.
 	 */
 	public function getTypeForComment() {
-		return 'Tx_Extbase_Persistence_ObjectStorage <' . $this->getForeignClass()->getClassName() . '>';
+		return 'Tx_Extbase_Persistence_ObjectStorage<' . $this->getForeignClass()->getClassName() . '>';
 	}
 
 	/**

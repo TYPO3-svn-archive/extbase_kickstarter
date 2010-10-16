@@ -75,7 +75,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	 * @todo rename this action
 	 */
 	public function generateCodeAction() {
-		
+		$this->config = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
 		$jsonString = file_get_contents('php://input');
 		$request = json_decode($jsonString, true);
 		switch ($request['method']) {
@@ -83,14 +83,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 			case 'saveWiring':
 				$extensionConfigurationFromJson = json_decode($request['params']['working'], true);
 				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
-
 				$build = $this->codeGenerator->build($extensionSchema);
-				
-				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
-				t3lib_div::mkdir($extensionDirectory);
-				$extensionConfigurationFromJson['modules'] = $this->generateUniqueIDs($extensionConfigurationFromJson['modules']);
-				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', json_encode($extensionConfigurationFromJson));
-				
 				if ($build === true) {
 					return json_encode(array('saved'));
 				} else {
@@ -113,16 +106,26 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 
 		$extensionDirectoryHandle = opendir(PATH_typo3conf . 'ext/');
 		while (false !== ($singleExtensionDirectory = readdir($extensionDirectoryHandle))) {
-			if ($singleExtensionDirectory[0] == '.') continue;
-			if (file_exists(PATH_typo3conf . 'ext/' . $singleExtensionDirectory . '/kickstarter.json')) {
+			if ($singleExtensionDirectory[0] == '.'){
+				continue;
+			}
+			$jsonFile =  PATH_typo3conf . 'ext/' . $singleExtensionDirectory . '/kickstarter.json';
+			if (file_exists($jsonFile)) {
+				if($this->config['settings']['enableRoundtrip']){
+					// generate unique IDs 
+					$extensionConfigurationFromJson = json_decode(file_get_contents($jsonFile),true);
+					$extensionConfigurationFromJson['modules'] = $this->generateUniqueIDs($extensionConfigurationFromJson['modules']);
+					t3lib_div::writeFile($jsonFile, json_encode($extensionConfigurationFromJson));
+				}
+				
 				$result[] = array(
 					'name' => $singleExtensionDirectory,
-					'working' => file_get_contents(PATH_typo3conf . 'ext/' . $singleExtensionDirectory . '/kickstarter.json')
+					'working' => file_get_contents($jsonFile)
 				);
 			}
 		}
 		closedir($extensionDirectoryHandle);
-
+		
 		return $result;
 	}
 
@@ -150,17 +153,28 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	protected function generateUniqueIDs($jsonConfig){
 		//  generate unique IDs
 		foreach($jsonConfig as &$module){
-			if(empty($module['value']['uid'])){
-				$module['value']['objectsettings']['uid'] = md5(microtime().$module['name']);
+			
+			if(empty($module['value']['objectsettings']['uid'])){
+				$module['value']['objectsettings']['uid'] = md5(microtime().$module['propertyName']);
 			}
-			foreach($module['value']['propertyGroup']['properties'] as &$property){
-				if(empty($property['uid'])){
-					$property['uid'] = md5(microtime().$property['name']);
+		
+			for($i=0;$i < count($module['value']['propertyGroup']['properties']);$i++){
+				// don't save empty properties
+				if(empty($module['value']['propertyGroup']['properties'][$i]['propertyName'])){
+					unset($module['value']['propertyGroup']['properties'][$i]);
+				}
+				else if(empty($module['value']['propertyGroup']['properties'][$i]['uid'])){
+					$module['value']['propertyGroup']['properties'][$i]['uid'] = md5(microtime().$module['value']['propertyGroup']['properties'][$i]['propertyName']);
 				}
 			}
-			foreach($module['value']['relationGroup']['relations'] as &$relation){
-				if(empty($relation['uid'])){
-					$relation['uid'] = md5(microtime().$relation['name']);
+			for($i=0;$i < count($module['value']['relationGroup']['relations']);$i++){
+				// don't save empty relations
+				if(empty($module['value']['relationGroup']['relations'][$i]['relationName'])){
+					unset($module['value']['relationGroup']['relations'][$i]);
+					t3lib_div::devlog('Unset called:'.$i,'extbase',0,$jsonConfig);
+				}
+				else if(empty($module['value']['relationGroup']['relations'][$i]['uid'])){
+					$module['value']['relationGroup']['relations'][$i]['uid'] = md5(microtime().$module['value']['relationGroup']['relations'][$i]['relationName']);
 				}
 			}
 		}

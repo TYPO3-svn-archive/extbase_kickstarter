@@ -118,6 +118,14 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
 		return $this->name;
 	}
 	
+	/**
+	 * 
+	 * @param string $name
+	 */
+	public function setName($name){
+		$this->name = $name;
+	}
+	
 	    /**
      * Returns $varType.
      *

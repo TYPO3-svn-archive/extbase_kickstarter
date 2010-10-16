@@ -40,7 +40,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_DomainObject {
 	 * 
 	 * @var string
 	 */
-	protected $uniqueIdentifier;
+	protected $uniqueIdentifier = NULL;
 
 	/**
 	 * Description of the domain object

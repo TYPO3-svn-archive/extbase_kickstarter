@@ -106,6 +106,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 				if (!class_exists($relationSchemaClassName)) throw new Exception('Relation of type ' . $relationSchemaClassName . ' not found');
 				$relation = new $relationSchemaClassName;
 				$relation->setName($relationJsonConfiguration['relationName']);
+				$relation->setUniqueIdentifier($relationJsonConfiguration['uid']);
 				$relation->setForeignClass($extension->getDomainObjectByName($foreignClassName));
 
 				$extension->getDomainObjectByName($localClassName)->addProperty($relation);
@@ -117,7 +118,8 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 
 	protected function buildDomainObject(array $jsonDomainObject) {
 		$domainObject = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_DomainObject');
-		$domainObject->setUniqueIdentifier($jsonDomainObject['uid']);
+		$domainObject->setUniqueIdentifier($jsonDomainObject['objectsettings']['uid']);
+		
 		$domainObject->setName($jsonDomainObject['name']);
 		$domainObject->setDescription($jsonDomainObject['objectsettings']['description']);
 		if ($jsonDomainObject['objectsettings']['type'] === 'Entity') {
@@ -125,7 +127,6 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 		} else {
 			$domainObject->setEntity(FALSE);
 		}
-
 		$domainObject->setAggregateRoot($jsonDomainObject['objectsettings']['aggregateRoot']);
 
 		foreach ($jsonDomainObject['propertyGroup']['properties'] as $jsonProperty) {

@@ -260,6 +260,22 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty {
 		return is_subclass_of($this, 'Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AnyToManyRelation');
 	}
 	
+
+	/**
+	 * 
+	 * @return boolean true (if property is of type relation)
+	 */
+	public function isRelation(){
+		return is_subclass_of($this, 'Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRelation');
+	}
+	
+	/**
+	 * 
+	 * @return boolean true (if property is of type boolean)
+	 */
+	public function isBoolean(){
+		return is_a($this, 'Tx_ExtbaseKickstarter_Domain_Model_Property_BooleanProperty');
+	}
 	
 
 	/**

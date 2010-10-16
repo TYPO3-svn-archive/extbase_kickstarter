@@ -4,7 +4,7 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 	public function render() {
 		
 		$this->conf = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
-		
+				
 		$doc = $this->getDocInstance();
 		$doc->bodyTagAdditions .= 'class="yui-skin-sam"';
 

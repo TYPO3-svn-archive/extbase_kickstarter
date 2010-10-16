@@ -352,7 +352,6 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class extends Tx_ExtbaseKickstarter_Dom
 		//TODO: not yet tested
 		if($this->propertyExists($propertyName)){
 			unset($this->properties[$propertyName]);
-			t3lib_div::devLog('Property removed: '.$propertyName, 'extbase_kickstarter',0,$this->properties);
 			return true;
 		}
 		return false;
@@ -365,7 +364,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class extends Tx_ExtbaseKickstarter_Dom
 	 * @return boolean success
 	 */
 	public function renameProperty($oldName, $newName){
-		if($this->propertyExists($oldPropertyName)){
+		if($this->propertyExists($oldName)){
 			$property = $this->properties[$oldName];
 			$property->setName($newName);
 			$this->properties[$newName] = $property;
@@ -375,6 +374,16 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class extends Tx_ExtbaseKickstarter_Dom
 		else return false;
 	}
 	
+	/**
+	 * 
+	 * @param string $propertyName
+	 * @param array $tag
+	 */
+	public function setPropertyTag($propertyName,$tag){
+		if($this->propertyExists($propertyName)){
+			$this->properties[$propertyName]->setTag($tag['name'],$tag['value']);
+		}
+	}
 	/**
 	 * Setter for staticProperties
 	 *
