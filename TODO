@@ -1,17 +1,11 @@
-Property of type SelectList produces error
+Enable sorting of methods: Currently the sort order of the properties is only reflected the first time a class is created.
 
-1. Implement updating of existing classes:
-	1.1 Change from entity to value objects
-	1.2 Change from non aggregate root to aggregate root
-	1.3 Renaming of domain objects, actions etc.
-	1.4 Renaming of properties, changes in property types
+Enable multiple tags with the same name. Wen need for example multiple @param tags, which is not possible right now.
 
-2. Write tests for CodeGenerator, ClassSchemaBuilder etc.
+Unit Tests!!
 
-3. Implement updating of other files (TCA, tables.sql, locallang etc.) keeping modifications 
+Save the Kickstarter Version in the JSON file, to enable easy compatibility handling for future changes
 
-4. Implement some sorting control (for methods, properties, tags)
+Implement a IncludeViewHelper: Should be possible to do something like <k:include file="{domain.name}_customTCA.php" /> and make that configurable via typoscript
 
-5. Implement a configuration possibility (To define defaults for various situations)
-
-6. Implement some functionality to preserve comments in a class file (non docComments) 
+Implement some functionality to preserve comments in a class file (non docComments) 

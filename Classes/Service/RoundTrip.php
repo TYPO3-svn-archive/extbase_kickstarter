@@ -348,7 +348,7 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 	}
 	
 	/**
-	 * update the method
+	 * update means renaming of method name, parameter and replacing parameter names in method body
 	 * 
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $oldProperty
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $newProperty
@@ -459,6 +459,12 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 		return $result;
 	}
 	
+	/**
+	 * if the foreign DomainObject was renamed, the relation has to be updated also
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRelation $relation
+	 * @return string className of foreign class
+	 */
 	public function getForeignClassName($relation){
 		if(isset($this->renamedDomainObjects[$relation->getForeignClass()->getUniqueIdentifier()])){
 			$renamedObject = $this->renamedDomainObjects[$relation->getForeignClass()->getUniqueIdentifier()];
@@ -512,10 +518,16 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 		//$addMethodName = 'add'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName));
 	}
 	
-	public function cleanUp($path,$file){
-		t3lib_div::devLog('cleanUp calledd: '.$path.$file, 'extbase_kickstarter',0);
-		if(!is_file($path.$file)){
-			t3lib_div::devLog('cleanUp File not found: '.$path.$file, 'extbase_kickstarter',0);
+	/**
+	 * remove class files that are not required any more, due to renaming of ModelObjects or changed types
+	 * @param string $path
+	 * @param string $file
+	 * @return unknown_type
+	 */
+	public function cleanUp($path,$fileName){
+		t3lib_div::devLog('cleanUp calledd: '.$path.$fileName, 'extbase_kickstarter',0);
+		if(!is_file($path.$fileName)){
+			t3lib_div::devLog('cleanUp File not found: '.$path.$fileName, 'extbase_kickstarter',0);
 			return;
 		}
 		if($this->settings['backupFiles']){
@@ -524,19 +536,19 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 				if(!is_dir($backupDir)){
 					t3lib_div::mkdir($backupDir);
 				}
-				if(copy($path.$file,$backupDir.$file)){
-					t3lib_div::fixPermissions($backupDir.$file);
-					t3lib_div::devLog('File moved to backup: '.$backupDir.$file, 'extbase_kickstarter');
+				if(copy($path.$fileName,$backupDir.$fileName)){
+					t3lib_div::fixPermissions($backupDir.$fileName);
+					t3lib_div::devLog('File moved to backup: '.$backupDir.$fileName, 'extbase_kickstarter');
 				}
 				else {
-					throw new Exception('File could not be copied to backup: '.$backupDir.$file);
+					throw new Exception('File could not be copied to backup: '.$backupDir.$fileName);
 				}
 			}
 			else {
 				throw new Exception('Backup dir not allowed: '.$backupDir);
 			}
 		}
-		unlink($path.$file);
+		unlink($path.$fileName);
 	}
 	
 	/**

@@ -61,9 +61,6 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	
 	
 	
-	//TODO the methods below need to reflect changing or deleting of elements in the kickstarter
-	// currently the json provides no information about that, so it can't be processed yet
-	
 	/**
 	 * This method generates the class schema object, which is passed to the template
 	 * it keeps all methods and properties including user modified method bodies and comments 
