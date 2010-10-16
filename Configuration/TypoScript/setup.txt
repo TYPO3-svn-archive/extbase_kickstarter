@@ -66,6 +66,10 @@ module.tx_extbasekickstarter {
 				ext_localconf.php = 1
 				ext_icon.gif = 0
 			}
+			
+			backupFiles = {$module.tx_extbasekickstarter.settings.roundtrip.backupFiles}
+			
+			backupDir =  {$module.tx_extbasekickstarter.settings.roundtrip.backupDir}
 		}
 	}
 	
