@@ -83,7 +83,15 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 			case 'saveWiring':
 				$extensionConfigurationFromJson = json_decode($request['params']['working'], true);
 				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
+
+				if(!is_dir($extensionDirectory)){
+					t3lib_div::mkdir($extensionDirectory);
+				}
+				
 				$build = $this->codeGenerator->build($extensionSchema);
+				
+				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', json_encode($extensionConfigurationFromJson));
+
 				if ($build === true) {
 					return json_encode(array('saved'));
 				} else {
