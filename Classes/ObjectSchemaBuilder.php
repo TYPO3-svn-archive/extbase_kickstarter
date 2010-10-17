@@ -50,6 +50,8 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 		$extension->setDescription($globalProperties['description']);
 			// extensionKey
 		$extension->setExtensionKey($globalProperties['extensionKey']);
+			// version
+		$extension->setVersion($globalProperties['version']);
 		
 		foreach($globalProperties['persons'] as $personValues) {
 			$person=t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Person');
@@ -102,10 +104,10 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 				$localClassName = $jsonArray['modules'][$wire['src']['moduleId']]['value']['name'];
 
 				$relationSchemaClassName = 'Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_' . ucfirst($relationJsonConfiguration['relationType']) . 'Relation';
-
 				if (!class_exists($relationSchemaClassName)) throw new Exception('Relation of type ' . $relationSchemaClassName . ' not found');
 				$relation = new $relationSchemaClassName;
 				$relation->setName($relationJsonConfiguration['relationName']);
+				$relation->setDescription($relationJsonConfiguration['relationDescription']);
 				$relation->setUniqueIdentifier($relationJsonConfiguration['uid']);
 				$relation->setForeignClass($extension->getDomainObjectByName($foreignClassName));
 

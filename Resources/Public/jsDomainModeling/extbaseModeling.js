@@ -89,6 +89,15 @@ var extbaseModeling_wiringEditorLanguage = {
 			}
 		},
 		{
+			type: "string",
+			inputParams: {
+				name: "version", 
+				label: "Version",
+				required: false,
+				size: 5
+			}
+		},
+		{
 			type: "list", 
 			inputParams: {
 				label: "Persons",
