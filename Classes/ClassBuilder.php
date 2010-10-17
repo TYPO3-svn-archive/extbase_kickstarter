@@ -140,16 +140,15 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		}
 		else if(count($anyToManyRelationProperties) > 0){
 			$constructorMethod = $this->classObject->getMethod('__construct');
-			if(preg_match('$this->initStorageObjects()',$constructorMethod->getBody()) < 1){
+			if(preg_match('/\$this->initStorageObjects()/',$constructorMethod->getBody()) < 1){
+				t3lib_div::devLog('Constructor method in Class '. $this->classObject->getName().' was overwritten since the initStorageObjectCall was missing', 'extbase_kickstarter',2,array('body'=>$constructorMethod->getBody()));		
 				$constructorMethod->setBody($this->initStorageObjectCall);
 				$this->classObject->setMethod($constructorMethod);
-				t3lib_div::devLog('Constructor method in Class '. $this->classObject->getName().' was overwritten since the initStorageObjectCall was missing', 'extbase_kickstarter',2,$this->classObject->getMethods());		
+				
 			}
-			else t3lib_div::devLog('Constructor method in Class '. $this->classObject->getName().': '.$constructorMethod->getBody(), 'extbase_kickstarter',2);		
 			//initStorageObjects
 		}
 		else {
-			t3lib_div::devLog('$anyToManyRelationProperties < 0 in Class '. $this->classObject->getName(), 'extbase_kickstarter',2);	
 		}
 		
 		if(count($anyToManyRelationProperties) > 0){
@@ -171,9 +170,9 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		//what should be obligatory in existing properties and methods
 		foreach ($domainObject->getProperties() as $domainProperty) {
 			$propertyName = $domainProperty->getName();
+			t3lib_div::devLog('Property: '.$propertyName.':'.$domainProperty->getDescription(), 'extbase_kickstarter',1);
 			// add the property to class Object (or update an existing class Object property)
 			if($this->classObject->propertyExists($propertyName)){
-				t3lib_div::devLog('property exists: '.$propertyName, 'extbase_kickstarter',1);
 				$classProperty = $this->classObject->getProperty($propertyName);
 				$classPropertyTags = $classProperty->getTags();
 			}
