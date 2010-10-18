@@ -86,6 +86,13 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Property extends Tx_ExtbaseKickst
 				t3lib_div::devLog('No var type set for property $'.$this->name. ' in class '.$propertyReflection->getDeclaringClass()->name,'extbase_kickstarter');
 			}
 			
+			if(empty($this->tags)){
+				// strange behaviour in php ReflectionProperty->getDescription(). A backslash is added to the description
+				$this->description = str_replace("\n/",'',$this->description);
+				$this->description = trim($this->description);
+				$this->setTag('var','mixed // please define a var type here');
+			}
+			
 		}
 	}
 	
