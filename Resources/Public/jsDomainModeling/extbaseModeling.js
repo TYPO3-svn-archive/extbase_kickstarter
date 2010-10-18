@@ -342,7 +342,6 @@ var extbaseModeling_wiringEditorLanguage = {
 										label: "",
 										name: "relations",
 										wirable: false,
-										sortable:true,
 										elementType: {
 											type: "group",
 											inputParams: {
