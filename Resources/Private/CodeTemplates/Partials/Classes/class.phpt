@@ -13,19 +13,17 @@
 	const {constant.name} = {constant.value};
 </f:for>
 <f:for each="{classObject.properties}" as="property">
-	/**
-	* <f:for each="{property.descriptionLines}" as="descriptionLine">
-	* {descriptionLine} 	</f:for>
+	/**<f:for each="{property.descriptionLines}" as="descriptionLine">
+	* {descriptionLine}</f:for>
 	* <f:for each="{property.annotations}" as="annotation">
-	* @{annotation} 	</f:for>
+	* @{annotation}</f:for>
 	*/
 	<f:for each="{property.modifierNames}" as="modifierName">{modifierName} </f:for>${property.name}{property.defaultDeclaration};
 </f:for>
 
 <f:for each="{classObject.methods}" as="method">
-	/**
-	* <f:for each="{method.descriptionLines}" as="descriptionLine">
-	* {descriptionLine} </f:for>
+	/** <f:for each="{method.descriptionLines}" as="descriptionLine">
+	* {descriptionLine}</f:for>
 	* <f:for each="{method.annotations}" as="annotation">
 	* @{annotation}</f:for>
 	*/
@@ -34,5 +32,4 @@
 	<![CDATA[}]]>
 </f:for>
 }
-{classObject.appendedBlock}
-?>
+{classObject.appendedBlock}?>
