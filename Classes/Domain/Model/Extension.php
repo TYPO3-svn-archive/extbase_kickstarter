@@ -43,6 +43,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	protected $name;
 
 	/**
+	 * Extension's version
+	 * @var string
+	 */
+	protected $version;
+	
+	/**
 	 *
 	 * @var string
 	 */
@@ -110,6 +116,22 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 */
 	public function setName($name) {
 		$this->name = $name;
+	}
+	
+	/**
+	 *
+	 * @return string
+	 */
+	public function getVersion() {
+		return $this->version;
+	}
+
+	/**
+	 *
+	 * @param string $version
+	 */
+	public function setVersion($version) {
+		$this->version = $version;
 	}
 
 	/**

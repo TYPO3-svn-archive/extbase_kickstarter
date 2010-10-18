@@ -56,7 +56,6 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 				if(method_exists($methodReflection,$getterMethodName) && method_exists($this,$setterMethodName) ){
 					$this->$setterMethodName($methodReflection->$getterMethodName());
 	    			//t3lib_div::print_array($getterMethodName);
-	    			
 	    		}
 				
 			}

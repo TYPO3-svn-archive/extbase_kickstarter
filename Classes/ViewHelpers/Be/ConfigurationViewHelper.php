@@ -66,7 +66,9 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		
 		// Extbase Modelling definition
 		$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/extbaseModeling.js');
-
+		if($this->conf['settings']['extendedForms']){
+			$pageRenderer->addJsFile('../typo3conf/ext/extbase_kickstarter/Resources/Public/jsDomainModeling/extended/extbaseModeling.js');
+		}
 
 		// SECTION: CSS Files
 		// YUI CSS

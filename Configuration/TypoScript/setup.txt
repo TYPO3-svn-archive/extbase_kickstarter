@@ -23,6 +23,8 @@ module.tx_extbasekickstarter {
 			}
 		}
 		
+		extendedForms= {$module.tx_extbasekickstarter.settings.extendedForms}
+		
 		enableRoundtrip = {$module.tx_extbasekickstarter.settings.enableRoundtrip}
 		
 		roundtrip {

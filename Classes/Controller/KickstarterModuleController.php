@@ -82,6 +82,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 
 			case 'saveWiring':
 				$extensionConfigurationFromJson = json_decode($request['params']['working'], true);
+				$extensionConfigurationFromJson['modules'] = $this->mapAdvancedMode($extensionConfigurationFromJson['modules']);
 				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
 
 				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
@@ -124,6 +125,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 					// generate unique IDs 
 					$extensionConfigurationFromJson = json_decode(file_get_contents($jsonFile),true);
 					$extensionConfigurationFromJson['modules'] = $this->generateUniqueIDs($extensionConfigurationFromJson['modules']);
+					$extensionConfigurationFromJson['modules'] = $this->mapAdvancedMode($extensionConfigurationFromJson['modules']);
 					t3lib_div::writeFile($jsonFile, json_encode($extensionConfigurationFromJson));
 				}
 				
@@ -184,6 +186,30 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 				}
 				else if(empty($module['value']['relationGroup']['relations'][$i]['uid'])){
 					$module['value']['relationGroup']['relations'][$i]['uid'] = md5(microtime().$module['value']['relationGroup']['relations'][$i]['relationName']);
+				}
+			}
+		}
+		return $jsonConfig;
+	}
+	
+	
+	/**
+	 * copy values from advanced fieldset to simbple mode filedset and vice versa
+	 * @param array $jsonConfig
+	 */
+	protected function mapAdvancedMode($jsonConfig){
+		foreach($jsonConfig as &$module){
+			for($i=0;$i < count($module['value']['relationGroup']['relations']);$i++){
+				if(empty($module['value']['relationGroup']['relations'][$i]['advancedSettings'])){
+					$module['value']['relationGroup']['relations'][$i]['advancedSettings'] = array();
+					$module['value']['relationGroup']['relations'][$i]['advancedSettings']['relationType'] = $module['value']['relationGroup']['relations'][$i]['relationType'];
+					$module['value']['relationGroup']['relations'][$i]['advancedSettings']['propertyIsExcludeField'] = $module['value']['relationGroup']['relations'][$i]['propertyIsExcludeField'];
+				}
+				else {
+					foreach($module['value']['relationGroup']['relations'][$i]['advancedSettings'] as $key => $value){
+						$module['value']['relationGroup']['relations'][$i][$key] = $value;
+					}
+					
 				}
 			}
 		}

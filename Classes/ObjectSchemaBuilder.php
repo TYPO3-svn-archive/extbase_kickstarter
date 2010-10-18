@@ -96,7 +96,10 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 		if (is_array($jsonArray['wires'])) {
 			foreach ($jsonArray['wires'] as $wire) {
 				$relationJsonConfiguration = $jsonArray['modules'][$wire['src']['moduleId']]['value']['relationGroup']['relations'][substr($wire['src']['terminal'], 13)];
-				if (!is_array($relationJsonConfiguration)) throw new Exception('Error. Relation JSON config was not found');
+				if (!is_array($relationJsonConfiguration)){
+					t3lib_div::devlog('jsonArray:','extbase_kickstarter',3,$jsonArray);
+					throw new Exception('Error. Relation JSON config was not found','extbase_kickstarter');
+				}
 
 				if ($wire['tgt']['terminal'] !== 'SOURCES') throw new Exception('Connections to other places than SOURCES not supported.');
 
