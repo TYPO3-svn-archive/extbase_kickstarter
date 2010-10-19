@@ -319,6 +319,11 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 			t3lib_div::devlog('property renamed:'.$oldProperty->getName().' '.$newProperty->getName(),'extbase_kickstarter',0,$this->classObject->getProperties());
 			return true;
 		}
+		if($newProperty->getTypeForComment() != $oldProperty->getTypeForComment()){
+			//TODO: 
+			t3lib_div::devlog('property type changed from '.$oldProperty->getTypeForComment().' to '.$newProperty->getTypeForComment(),'extbase_kickstarter',1);
+			return true;
+		}
 		if($newProperty->isRelation()){
 			// if only the related domain object was renamed
 			if($oldProperty->getForeignClass()->getClassName() != $this->getForeignClassName($newProperty)){
@@ -343,6 +348,12 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 			$this->updateMethod($oldProperty,$newProperty,'set');
 			if ($newProperty->isBoolean()){
 				$this->updateMethod($oldProperty,$newProperty,'is');
+			}
+		}
+		if($newProperty->getTypeForComment() != $oldProperty->getTypeForComment()){
+			if($oldProperty->isBoolean() && !$newProperty->isBoolean()){
+				$this->classObject->removeMethod(Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($oldProperty,'is'));
+				t3lib_div::devlog('Method removed:'.Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($oldProperty,'is'),'extbase_kickstarter',1,$this->classObject->getMethods());
 			}
 		}
 	}
@@ -378,7 +389,6 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 			$newMethodBody = $this->replacePropertyNameInString($oldMethodBody,$oldProperty->getName(),$newProperty->getName());
 			$mergedMethod->setBody($newMethodBody);
 		}
-		
 		
 		
 		
@@ -422,6 +432,7 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 						}
 						$v = str_replace(ucfirst($oldProperty->getName()),ucfirst($newProperty->getName()),$v);
 						$v = str_replace(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName()),Tx_ExtbaseKickstarter_Utility_Inflector::singularize($newProperty->getName()),$v);
+						$v = str_replace($oldProperty->getTypeForComment(),$newProperty->getTypeForComment(),$v);
 						$newValues[] = $v;
 					}
 					$mergedMethod->setTag('param',$newValues);
@@ -429,13 +440,14 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 				else {
 					// TODO: str_replace is insufficient in certain cases 
 					$tagValue = str_replace($oldProperty->getName(),$newProperty->getName(),$tagValue); 
-					$tagValue = str_replace(ucfirst($oldProperty->getName()),ucfirst($newProperty->getName()),$tagValue);
+					$tagValue = str_replace($oldProperty->getTypeForComment(),$newProperty->getTypeForComment(),$tagValue);
 					$mergedMethod->setTag('param',$tagValue);
 				}
 			}
 			if($tagKey == 'return'){
 				$mergedMethod->removeTag('return');
 				$tagValue = str_replace($oldProperty->getName(),$newProperty->getName(),$tagValue);
+				$tagValue = str_replace($oldProperty->getTypeForComment(),$newProperty->getTypeForComment(),$tagValue);
 				$mergedMethod->setTag('return',$tagValue);
 			}
 		}
