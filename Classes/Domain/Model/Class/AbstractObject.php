@@ -198,7 +198,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Class_AbstractObject {
 	 * @return string Property description
 	 */
 	public function getDescriptionLines() {
-		return  explode("\n",trim($this->getDescription()));
+		return t3lib_div::trimExplode("\n",trim($this->getDescription()));
 	}
 
 	/**

@@ -59,6 +59,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Method extends Tx_ExtbaseKickstar
 	    		}
 				
 			}
+			if(empty($this->tags)){
+				// strange behaviour in php ReflectionProperty->getDescription(). A backslash is added to the description
+				$this->description = str_replace("\n/",'',$this->description);
+				$this->description = trim($this->description);
+				$this->setTag('return','void');
+			}
 		}
 		
 	}
