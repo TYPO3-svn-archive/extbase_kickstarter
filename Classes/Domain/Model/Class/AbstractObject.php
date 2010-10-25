@@ -227,7 +227,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Class_AbstractObject {
 	 * @return array Values of the given tag
 	 */
 	public function getTagsValues($tagName) {
-		return $this->tags($tagName);
+		return $this->tags[$tagName];
 	}
 	
 	/**

@@ -49,7 +49,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 	 */
 	public function __construct(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension){
 		$this->extension = $extension;
-		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
+		$this->extensionDirectory = $this->extension->getExtensionDir();
 		$this->extClassPrefix = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey());
 		
 		$this->classParser = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_ClassParser');
@@ -73,8 +73,12 @@ class Tx_ExtbaseKickstarter_ClassBuilder  implements t3lib_Singleton {
 		t3lib_div::devlog('','---');
 		t3lib_div::devlog('------------------------------------- generateModelClassObject('.$domainObject->getName().') ---------------------------------','extbase_kickstarter',1);
 		$this->classObject = NULL;
-		
-		$domainObjectClassFile = Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Model') . $domainObject->getName() . '.php';
+		try{
+			$domainObjectClassFile = Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Model') . $domainObject->getName() . '.php';
+		}
+		catch(Exception $e){
+			t3lib_div::devlog('Error:'.$e->getMessage(),'extbase_kickstarter',2);
+		}
 		$className = $domainObject->getClassName();
 		// is there already a class file? 
 		if( $this->roundTripService->getOverWriteSetting('Classes/Domain/Model/' . $domainObject->getName() . '.php') != 0){

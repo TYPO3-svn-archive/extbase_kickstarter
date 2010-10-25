@@ -24,15 +24,29 @@
 *
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
-if (!class_exists('Tx_Extbase_Utility_ClassLoader')) {
-	require(t3lib_extmgm::extPath('extbase') . 'Classes/Utility/ClassLoader.php');
-}
+require_once('BaseTestCase.php');
 
-$classLoader = new Tx_Extbase_Utility_ClassLoader();
-spl_autoload_register(array($classLoader, 'loadClass'));
-require_once(t3lib_extmgm::extPath('extbase') . 'Tests/BaseTestCase.php');
-
-abstract class Tx_ExtbaseKickstarter_BaseTestCase extends Tx_Extbase_BaseTestCase {
+abstract class Tx_ExtbaseKickstarter_BaseRoundTripTestCase extends Tx_ExtbaseKickstarter_BaseTestCase {
+	
+	function setUp(){
+		$this->extension = $this->getMock('Tx_ExtbaseKickstarter_Domain_Model_Extension',array('getExtensionDir'));
+		$extensionKey = 'dummy';
+		$dummyExtensionDir = PATH_typo3conf.'ext/extbase_kickstarter/Tests/Examples/'.$extensionKey.'/';
+		if(!is_dir($dummyExtensionDir)){
+			t3lib_div::mkdir_deep(PATH_typo3conf.'ext/extbase_kickstarter/Tests/Examples/',$extensionKey);
+		}
+		$this->extension->setExtensionKey($extensionKey);
+		$this->extension->expects($this->any())
+             ->method('getExtensionDir')
+             ->will($this->returnValue($dummyExtensionDir));
+             
+        $this->roundTripService =  $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_Service_RoundTrip'),array('dummy'),array($this->extension));
+        $this->classBuilder = $this->getMock('Tx_ExtbaseKickstarter_ClassBuilder',array('dummy'),array($this->extension));
+        
+        $this->codeGenerator = $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_Service_CodeGenerator'),array('dummy'));
+        $this->codeGenerator->conf = array('settings'=>array('enableRoundtrip'=>'1'));
+	}
+	
 	
 	/**
 	 * Helper function
@@ -42,7 +56,7 @@ abstract class Tx_ExtbaseKickstarter_BaseTestCase extends Tx_Extbase_BaseTestCas
 	 * @return object Tx_ExtbaseKickstarter_Domain_Model_DomainObject
 	 */
 	protected function buildDomainObject($name, $entity = false, $aggregateRoot = false){
-		$domainObject = new Tx_ExtbaseKickstarter_Domain_Model_DomainObject();
+		$domainObject = $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_Domain_Model_DomainObject'),array('dummy'));
 		$domainObject->setExtension($this->extension);
 		$domainObject->setName($name);
 		$domainObject->setEntity($entity);

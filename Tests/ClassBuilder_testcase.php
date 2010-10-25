@@ -25,10 +25,123 @@
  *  This copyright notice MUST APPEAR in all copies of the script!
  ***************************************************************/
 
-require_once('BaseTestCase.php');
+require_once('BaseRoundTripTestCase.php');
 
-class Tx_ExtbaseKickstarter_ClassBuilder_testcase extends Tx_ExtbaseKickstarter_BaseTestCase {
-	//TODO: merging of classes after renaming/deleting properties should be tested
+class Tx_ExtbaseKickstarter_ClassBuilder_testcase extends Tx_ExtbaseKickstarter_BaseRoundTripTestCase {
+	
+	function setUp(){
+		parent::setUp();
+	}
+	
+	/**
+	* @test
+	*/
+	public function classBuilderGeneratesSetterMethodForSimpleProperty() {
+		$domainObject = $this->buildDomainObject('Blog',true,true);
+
+		$property0 = new Tx_ExtbaseKickstarter_Domain_Model_Property_StringProperty();
+		$property0->setName('name');
+		$property0->setRequired(TRUE);
+		$domainObject->addProperty($property0);
+		
+		$modelClassObject = $this->classBuilder->generateModelClassObject($domainObject);
+		
+		$this->assertTrue($modelClassObject->methodExists('setName'),'No method: setName');
+		
+		$setNameMethod = $modelClassObject->getMethod('setName');
+		$parameters = $setNameMethod->getParameters();
+		$this->assertEquals(count($parameters),1);
+		$firstParameter = array_shift($parameters);
+		$this->assertEquals($firstParameter->getName(),'name');
+	}
+	
+
+	/**
+	* @test
+	*/
+	
+	public function classBuilderGeneratesGetterMethodForSimpleProperty() {
+		
+		$domainObject = $this->buildDomainObject('Blog',true,true);
+		$property0 = new Tx_ExtbaseKickstarter_Domain_Model_Property_StringProperty();
+		$property0->setName('name');
+		$property0->setRequired(TRUE);
+		$domainObject->addProperty($property0);
+		
+		$modelClassObject = $this->classBuilder->generateModelClassObject($domainObject);
+		$this->assertTrue($modelClassObject->methodExists('getName'),'No method: getName');
+	
+	}
+	
+	/**
+	 * 
+	 * @test
+	 */
+	public function classBuilderGeneratesIsMethodForBooleanProperty() {
+		
+		$domainObject = $this->buildDomainObject('Dummy',true,true);
+		$property = new Tx_ExtbaseKickstarter_Domain_Model_Property_BooleanProperty();
+		$property->setName('blue');
+		$property->setRequired(TRUE);
+		$domainObject->addProperty($property);
+		
+		$modelClassObject = $this->classBuilder->generateModelClassObject($domainObject);
+		$this->assertTrue($modelClassObject->methodExists('isBlue'),'No method: isBlue');
+	
+	}
+	
+	/**
+	* @test
+	*/
+	public function classBuilderGeneratesAddMethodForRelationProperty() {
+		$domainObject1 = $this->buildDomainObject('Blog',true,true);
+		$domainObject2 = $this->buildDomainObject('Post');
+		
+		$relationProperty = new Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_ManyToManyRelation();
+		$relationProperty->setName('posts');
+		$relationProperty->setForeignClass($domainObject2);
+		$domainObject1->addProperty($relationProperty);
+		
+		$modelClassObject = $this->classBuilder->generateModelClassObject($domainObject1);
+		
+		$this->assertTrue($modelClassObject->methodExists('addPost'),'No method: addPost');
+		
+		$setNameMethod = $modelClassObject->getMethod('addPost');
+		$this->assertEquals($setNameMethod->getTagsValues('param'),'Tx_Dummy_Domain_Model_Post $post');
+		
+		$parameters = $setNameMethod->getParameters();
+		$this->assertEquals(count($parameters),1);
+		$firstParameter = array_shift($parameters);
+		$this->assertEquals($firstParameter->getName(),'post');
+		$this->assertEquals($firstParameter->getTypeHint(),'Tx_Dummy_Domain_Model_Post');
+		
+	}
+	
+	/**
+	* @test
+	*/
+	public function classBuilderGeneratesRemoveMethodForRelationProperty() {
+		$domainObject1 = $this->buildDomainObject('Blog',true,true);
+		$domainObject2 = $this->buildDomainObject('Post');
+		
+		$relationProperty = new Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_ManyToManyRelation();
+		$relationProperty->setName('posts');
+		$relationProperty->setForeignClass($domainObject2);
+		$domainObject1->addProperty($relationProperty);
+		
+		$modelClassObject = $this->classBuilder->generateModelClassObject($domainObject1);
+		
+		$this->assertTrue($modelClassObject->methodExists('removePost'),'No method: removePost');
+		
+		$setNameMethod = $modelClassObject->getMethod('removePost');
+		$parameters = $setNameMethod->getParameters();
+		$this->assertEquals(count($parameters),1);
+		$firstParameter = array_shift($parameters);
+		$this->assertEquals($firstParameter->getName(),'postToRemove');
+		$this->assertEquals($firstParameter->getTypeHint(),'Tx_Dummy_Domain_Model_Post');
+	}
+	
+	
 }
 
 ?>

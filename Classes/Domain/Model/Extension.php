@@ -41,6 +41,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 * @var string
 	 */
 	protected $name;
+	
+	/**
+	 * Extension dir
+	 * @var string
+	 */
+	protected $extensionDir;
 
 	/**
 	 * Extension's version
@@ -100,6 +106,29 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 */
 	public function setExtensionKey($extensionKey) {
 		$this->extensionKey = $extensionKey;
+	}
+	
+	/**
+	 *
+	 * @return string
+	 */
+	public function getExtensionDir() {
+		if(empty($this->extensionDir)){
+			if(empty($this->extensionKey)){
+				throw new Exception('ExtensionDir can only be created if a extensionKey is defined first');
+			}
+			$this->extensionDir = PATH_typo3conf.'ext/'.$this->extensionKey.'/';
+			return $this->extensionDir;
+		}
+		return $this->extensionDir;
+	}
+
+	/**
+	 *
+	 * @param string $extensionDir
+	 */
+	public function setExtensionDir($extensionDir) {
+		$this->extensionDir = $extensionDir;
 	}
 
 	/**

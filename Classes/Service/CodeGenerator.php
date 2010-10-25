@@ -97,7 +97,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		
 		
 		// Base directory already exists at this point
-		$extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
+		$extensionDirectory = $this->extension->getExtensionDir();
 		if(!is_dir($extensionDirectory)){
 			t3lib_div::mkdir($extensionDirectory);
 		}

@@ -19,7 +19,7 @@
  * @package	TYPO3
  * @subpackage	Tx_GimmeFive
  */
-class Tx_ExtbaseKickstarter_Tests_Examples_AnotherComplexClass {
+class Tx_ExtbaseKickstarter_Tests_Examples_ClassParser_AnotherComplexClass {
 	const PACKAGE_PREFIX = 'Tx';
 	const THIS_PACKAGE_KEY = 'GimmeFive';
 	const DIRECTORY_CLASSES = 'Classes/';

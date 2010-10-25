@@ -29,7 +29,12 @@ require_once('BaseTestCase.php');
 
 class Tx_ExtbaseKickstarter_ClassParser_testcase extends Tx_ExtbaseKickstarter_BaseTestCase {
 
-
+	/**
+	 * set to true to see an overview of the parsed class objects in the backend
+	 */
+	protected $debugMode = false;
+	
+	
 	public function setUp() {
 		$this->objectSchemaBuilder = $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_ObjectSchemaBuilder'), array('dummy'));
 	}
@@ -39,8 +44,8 @@ class Tx_ExtbaseKickstarter_ClassParser_testcase extends Tx_ExtbaseKickstarter_B
 	 * @test
 	 */
 	public function TestBasicClassParse(){
-		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/BasicClass.php');
-		$this->parseClass('Tx_ExtbaseKickstarter_Tests_Examples_BasicClass');
+		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ClassParser/BasicClass.php');
+		$this->parseClass('Tx_ExtbaseKickstarter_Tests_Examples_ClassParser_BasicClass');
 	}
 	
 	/**
@@ -48,8 +53,8 @@ class Tx_ExtbaseKickstarter_ClassParser_testcase extends Tx_ExtbaseKickstarter_B
 	 * @test
 	 */
 	public function TestComplexClassParse(){
-		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ComplexClass.php');
-		$classObject = $this->parseClass('Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass');
+		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ClassParser/ComplexClass.php');
+		$classObject = $this->parseClass('Tx_ExtbaseKickstarter_Tests_Examples_ClassParser_ComplexClass');
 		$getters = $classObject->getGetters();
 		$this->assertEquals(1, count($getters));
 		$firstGetter = array_pop($getters);
@@ -73,8 +78,8 @@ class Tx_ExtbaseKickstarter_ClassParser_testcase extends Tx_ExtbaseKickstarter_B
 	 * @test
 	 */
 	public function TestAnotherComplexClassParse(){
-		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/AnotherComplexClass.php');
-		$classObject = $this->parseClass('Tx_ExtbaseKickstarter_Tests_Examples_AnotherComplexClass');
+		require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ClassParser/AnotherComplexClass.php');
+		$classObject = $this->parseClass('Tx_ExtbaseKickstarter_Tests_Examples_ClassParser_AnotherComplexClass');
 		
 		/**  here we could include some more tests
 		$p = $classObject->getMethod('methodWithStrangePrecedingBlock')->getPrecedingBlock();
@@ -98,7 +103,7 @@ class Tx_ExtbaseKickstarter_ClassParser_testcase extends Tx_ExtbaseKickstarter_B
 	 */
 	protected function parseClass($className){
 		$classParser = new Tx_ExtbaseKickstarter_Utility_ClassParser();
-		$classParser->debugMode = true;
+		$classParser->debugMode = $this->debugMode;
 		$classObject = $classParser->parse($className);
 		$this->assertTrue($classObject instanceof Tx_ExtbaseKickstarter_Domain_Model_Class);
 		$classReflection = new Tx_ExtbaseKickstarter_Reflection_ClassReflection($className);

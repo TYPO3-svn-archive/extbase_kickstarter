@@ -16,10 +16,10 @@
  *
  * @test testtag
  */
-require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/BasicClass.php');
+require_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ClassParser/BasicClass.php');
 		
 
-final class Tx_ExtbaseKickstarter_Tests_Examples_ComplexClass extends Tx_ExtbaseKickstarter_Tests_Examples_BasicClass{
+final class Tx_ExtbaseKickstarter_Tests_Examples_ClassParser_ComplexClass extends Tx_ExtbaseKickstarter_Tests_Examples_ClassParser_BasicClass{
 	
 	protected $name; private $propertiesInOneLine;
 	
@@ -80,7 +80,7 @@ var $testProperty4 = 123;
 /**
  *  dfg dfg dfg dfg
  */
-require_once(t3lib_extmgm:: extPath('extbase_kickstarter') . 'Tests/Examples/BasicClass.php');   include_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ComplexClass.php'); // test
+require_once(t3lib_extmgm:: extPath('extbase_kickstarter') . 'Tests/Examples/ClassParser/BasicClass.php');   include_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ComplexClass.php'); // test
 
- include_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ComplexClass.php'); // test
+ include_once(t3lib_extmgm::extPath('extbase_kickstarter') . 'Tests/Examples/ClassParser/ComplexClass.php'); // test
 ?>

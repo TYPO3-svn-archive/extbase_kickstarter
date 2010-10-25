@@ -50,7 +50,7 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 		$this->settings = $config['settings']['roundtrip'];
 		$this->classParser = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_ClassParser');
 		$this->extension = $extension;
-		$this->extensionDirectory = PATH_typo3conf . 'ext/' . $this->extension->getExtensionKey().'/';
+		$this->extensionDirectory =  $this->extension->getExtensionDir();
 		$this->extClassPrefix = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey());
 		if(file_exists($this->extensionDirectory . '/kickstarter.json')){
 			$objectSchemaBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ObjectSchemaBuilder');
@@ -252,10 +252,11 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 		foreach($newDomainObject->getProperties() as $property){
 			$newProperties[$property->getUniqueIdentifier()] = $property;
 		}
+		t3lib_div::devlog('properties new:','extbase_kickstarter',0,$newProperties);
 		
 		// compare all old properties with new ones
 		foreach($oldDomainObject->getProperties() as $oldProperty){
-			
+			t3lib_div::devlog('properties old:'.$oldProperty->getUniqueIdentifier(),'extbase_kickstarter',0,$oldDomainObject->getProperties());
 			if(isset($newProperties[$oldProperty->getUniqueIdentifier()])){
 				
 				$newProperty = $newProperties[$oldProperty->getUniqueIdentifier()];
@@ -372,12 +373,12 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_Singleton {
 		
 		$oldMethodName = Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($oldProperty,$methodType);
 		$mergedMethod = $this->classObject->getMethod($oldMethodName);
-		t3lib_div::devlog('updateMethod:'.$oldMethodName,'extbase_kickstarter');
 		if(!$mergedMethod){
 			// no previous version of the method exists
 			return;
 		}
 		$newMethodName = Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($newProperty,$methodType);
+		t3lib_div::devlog('updateMethod:'.$oldMethodName.'=>'.$newMethodName,'extbase_kickstarter');
 		
 		if($oldProperty->getName() != $newProperty->getName()){
 			$mergedMethod->setName($newMethodName);

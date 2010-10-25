@@ -1,6 +1,6 @@
 <?php 
 
-class Tx_ExtbaseKickstarter_Tests_Examples_BasicClass {
+class Tx_ExtbaseKickstarter_Tests_Examples_ClassParser_BasicClass {
 	
 	protected $names;
 	

@@ -42,7 +42,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder_testcase extends Tx_ExtbaseKicks
 		$description = 'My cool fancy description';
 		$name = 'ExtName';
 		$extensionKey = 'EXTKEY';
-		$state = 2;
+		$state = 0;
 
 		$input = array(
 			'properties' => array(
