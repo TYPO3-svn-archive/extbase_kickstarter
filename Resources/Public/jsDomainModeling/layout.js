@@ -3,11 +3,6 @@ extbaseModeling_wiringEditorLanguage.layoutOptions =
 {
 	units: [
 		{
-			position: 'top', 
-			height: 50, 
-			body: 'top'
-		},
-		{
 			position: 'left', 
 			width: 500, 
 			resize: true, 

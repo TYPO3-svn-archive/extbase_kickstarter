@@ -150,9 +150,8 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 					$extensionConfigurationFromJson = json_decode(file_get_contents($jsonFile),true);
 					$extensionConfigurationFromJson['modules'] = $this->generateUniqueIDs($extensionConfigurationFromJson['modules']);
 					$extensionConfigurationFromJson['modules'] = $this->mapAdvancedMode($extensionConfigurationFromJson['modules']);
-					if(empty($extensionConfigurationFromJson['properties']['originalExtensionKey'])){
-						$extensionConfigurationFromJson['properties']['originalExtensionKey'] = $singleExtensionDirectory;
-					}
+					$extensionConfigurationFromJson['properties']['originalExtensionKey'] = $singleExtensionDirectory;
+
 					t3lib_div::writeFile($jsonFile, json_encode($extensionConfigurationFromJson));
 				}
 				

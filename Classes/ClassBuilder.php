@@ -106,7 +106,6 @@ class Tx_ExtbaseKickstarter_ClassBuilder implements t3lib_Singleton {
 	 * @return 
 	 */
 	public function generateModelClassObject($domainObject){
-		t3lib_div::devlog('','---');
 		t3lib_div::devlog('------------------------------------- generateModelClassObject('.$domainObject->getName().') ---------------------------------','extbase_kickstarter',1);
 		$this->classObject = NULL;
 		try{
@@ -480,7 +479,6 @@ class Tx_ExtbaseKickstarter_ClassBuilder implements t3lib_Singleton {
 	 * @return 
 	 */
 	public function generateControllerClassObject($domainObject){
-		t3lib_div::devlog('','---');
 		t3lib_div::devlog('------------------------------------- generateControllerClassObject('.$domainObject->getName().') ---------------------------------','extbase_kickstarter',1);
 		
 		$this->classObject = NULL;
@@ -560,7 +558,6 @@ class Tx_ExtbaseKickstarter_ClassBuilder implements t3lib_Singleton {
 	 * @return 
 	 */
 	public function generateRepositoryClassObject($domainObject){
-		t3lib_div::devlog('','---');
 		t3lib_div::devlog('------------------------------------- generateRepositoryClassObject('.$domainObject->getName().') ---------------------------------','extbase_kickstarter',1);
 		
 		$this->classObject = NULL;
@@ -570,7 +567,6 @@ class Tx_ExtbaseKickstarter_ClassBuilder implements t3lib_Singleton {
 		$className = $domainObject->getDomainRepositoryClassName();
 	
 		if(Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSetting('Classes/Domain/Repository/' . $domainObject->getName() . 'Repository.php',$this->settings) != 0){
-			t3lib_div::devlog('RepositoryClass exists:'.$domainObject->getName() . 'Repository.php','extbase_kickstarter',1);
 			try {
 				$this->classObject = $this->roundTripService->getRepositoryClass($domainObject);
 			}

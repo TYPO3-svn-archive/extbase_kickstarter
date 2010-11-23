@@ -85,6 +85,9 @@ div.WireIt-Layer {
 	background-color: transparent;
 }
 
+.yui-layout-unit-left {
+	background-color: #EDEEEE;
+}
 
 
 div#typo3-inner-docbody {

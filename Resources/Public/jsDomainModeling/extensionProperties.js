@@ -18,6 +18,12 @@ extbaseModeling_wiringEditorLanguage.propertiesFields =
 		}
 	},
 	{
+		inputParams: {
+			name: "originalExtensionKey", 
+			className:'hiddenField'
+		}
+	},
+	{
 		type: "text",
 		inputParams: {
 			name: "description",
