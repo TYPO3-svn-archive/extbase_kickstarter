@@ -26,13 +26,13 @@
  ***************************************************************/
 
 require_once('BaseTestCase.php');
-class Tx_ExtbaseKickstarter_ObjectSchemaBuilder_testcase extends Tx_ExtbaseKickstarter_BaseTestCase {
+class Tx_ExtbaseKickstarter_ObjectSchemaBuilder_testcase extends Tx_ExtbaseKickstarter_BaseRoundTripTestCase {
 
 	protected $objectSchemaBuilder;
 
 	public function setUp() {
+		parent::setUp();
 		$this->objectSchemaBuilder = $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_ObjectSchemaBuilder'), array('dummy'));
-		
 	}
 	/**
 	 * @test
@@ -155,8 +155,8 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder_testcase extends Tx_ExtbaseKicks
 		$this->objectSchemaBuilder->extension = $extension;
 
 		$actual = $this->objectSchemaBuilder->_call('buildDomainObject', $input);
-		$this->codeGenerator = $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_Service_CodeGenerator'), array('dummy'));
-		$this->codeGenerator->build($this->objectSchemaBuilder->extension);
+		//$this->codeGenerator = $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_Service_CodeGenerator'), array('dummy'));
+		//$this->codeGenerator->build($this->objectSchemaBuilder->extension);
 		$domainObjects = $this->objectSchemaBuilder->extension->getDomainObjects();
 		
 		//$this->assertEquals($actual, $expected, 'Domain Object not built correctly.');
