@@ -41,7 +41,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Property_StringProperty extends Tx_Extb
 		return '';
 	}
 	public function getSqlDefinition() {
-		return $this->getFieldName() . " tinytext,";
+		return $this->getFieldName() . " varchar(255) DEFAULT '' NOT NULL,";
 	}
 }
 ?>

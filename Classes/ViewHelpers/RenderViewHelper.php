@@ -1,5 +1,4 @@
 <?php
-
 /*                                                                        *
  * This script belongs to the FLOW3 package "Fluid".                      *
  *                                                                        *
@@ -27,6 +26,7 @@
  * @scope prototype
  */
 class Tx_ExtbaseKickstarter_ViewHelpers_RenderViewHelper extends Tx_Fluid_Core_ViewHelper_AbstractViewHelper {
+
 	/**
 	 *
 	 * @var Tx_Fluid_Core_Parser_TemplateParser
@@ -39,16 +39,41 @@ class Tx_ExtbaseKickstarter_ViewHelpers_RenderViewHelper extends Tx_Fluid_Core_V
 	 */
 	protected $objectManager;
 
+	/**
+	 *
+	 * @var Tx_ExtbaseKickstarter_Domain_Model_Extension
+	 */
+	protected $extension;
+
 	public function __construct() {
-		
-		if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
+		if (Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
 			$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
-			$this->objectManager = new Tx_Fluid_Compatibility_ObjectManager();
-		} else {
-			$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
-			$this->objectManager = t3lib_div::makeInstance('Tx_Extbase_Object_ObjectManager');
+
+			if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.1.0', '<')) {
+				// Compatibility with Fluid 1.0
+				$this->objectManager = new Tx_Fluid_Compatibility_ObjectFactory();
+			} else {
+				$this->objectManager = new Tx_Fluid_Compatibility_ObjectManager();
+			}
 		}
 	}
+
+	/**
+	 * @param Tx_Fluid_Core_Parser_TemplateParser $templateParser
+	 * @return void
+	 */
+	public function injectTemplateParser(Tx_Fluid_Core_Parser_TemplateParser $templateParser) {
+		$this->templateParser = $templateParser;
+	}
+
+	/**
+	 * @param Tx_Extbase_Object_ObjectManagerInterface $objectManager
+	 * @return void
+	 */
+	public function injectObjectManager(Tx_Extbase_Object_ObjectManagerInterface $objectManager) {
+		$this->objectManager = $objectManager;
+	}
+
 	/**
 	 * Renders the content.
 	 *
@@ -70,13 +95,15 @@ class Tx_ExtbaseKickstarter_ViewHelpers_RenderViewHelper extends Tx_Fluid_Core_V
 		$renderingContext = $this->objectManager->create('Tx_Fluid_Core_Rendering_RenderingContext');
 		$viewHelperVariableContainer = $this->objectManager->create('Tx_Fluid_Core_ViewHelper_ViewHelperVariableContainer');
 		
-		if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.2.0', '<')) {
-			$renderingContext->injectTemplateVariableContainer($variableContainer);
-			$renderingContext->injectViewHelperVariableContainer($viewHelperVariableContainer);
-		} else {
+		// FIXME The inject*() method is not implemented in Fluid, yet
+		//if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
+				// Compatibility with Fluid 1.2
 			$renderingContext->setTemplateVariableContainer($variableContainer);
 			$renderingContext->setViewHelperVariableContainer($viewHelperVariableContainer);
-		}
+		//} else {
+			//$renderingContext->injectTemplateVariableContainer($variableContainer);
+			//$renderingContext->injectViewHelperVariableContainer($viewHelperVariableContainer);
+		//}
 
 		return $renderingContext;
 	}
@@ -86,6 +113,5 @@ class Tx_ExtbaseKickstarter_ViewHelpers_RenderViewHelper extends Tx_Fluid_Core_V
 		return $parsedTemplate->render($this->buildRenderingContext($variables));
 	}
 }
-
 
 ?>

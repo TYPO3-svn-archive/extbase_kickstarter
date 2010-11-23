@@ -48,9 +48,16 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	 */
 	protected $scBase;
 
-
+	
+	/**
+	 * @var Tx_ExtbaseKickstarter_ObjectSchemaBuilder
+	 */
 	protected $objectSchemaBuilder;
 
+	
+	/**
+	 * @var Tx_ExtbaseKickstarter_Service_CodeGenerator
+	 */
 	protected $codeGenerator;
 
 	public function initializeAction() {
@@ -89,7 +96,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 
 	/**
 	 * Main entry point for the buttons in the frontend
-	 * @return unknown_type
+	 * @return string
 	 * @todo rename this action
 	 */
 	public function generateCodeAction() {

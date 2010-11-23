@@ -2,6 +2,7 @@
 /***************************************************************
 *  Copyright notice
 *
+*  (c) 2009 Ingmar Schlecht
 *  All rights reserved
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -21,9 +22,21 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
-class Tx_ExtbaseKickstarter_ViewHelpers_CommentViewHelper extends Tx_Fluid_Core_ViewHelper_AbstractViewHelper {
-	public function render() {
+/**
+ * @package ExtbaseKickstarter
+ * @version $ID:$
+ */
+class Tx_ExtbaseKickstarter_Domain_Model_Property_TextProperty extends Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty {
+
+	public function getTypeForComment() {
+		return 'string';
+	}
+
+	public function getTypeHint() {
 		return '';
+	}
+	public function getSqlDefinition() {
+		return $this->getFieldName() . " text NOT NULL,";
 	}
 }
 

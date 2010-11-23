@@ -40,8 +40,19 @@ class Tx_ExtbaseKickstarter_Controller_WriteScaffoldingController extends Tx_Ext
 	protected $codeGenerator;
 
 	public function initializeAction() {
-		$this->codeGenerator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_CodeGenerator');
+		if (Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
+			$this->codeGenerator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_CodeGenerator');
+		}
 	}
+
+	/**
+	 * @param Tx_ExtbaseKickstarter_Service_CodeGenerator $codeGenerator
+	 * @return void
+	 */
+	public function injectCodeGenerator(Tx_ExtbaseKickstarter_Service_CodeGenerator $codeGenerator) {
+		$this->codeGenerator = $codeGenerator;
+	}
+
 	public function indexAction() {
 		$controllersWithScaffoldingEnabled = $this->findControllersWithScaffoldingEnabled();
 		$this->view->assign('extensions', $controllersWithScaffoldingEnabled);
@@ -87,6 +98,9 @@ class Tx_ExtbaseKickstarter_Controller_WriteScaffoldingController extends Tx_Ext
 	 * @param string $controllerName
 	 */
 	public function generateFilesAction($extensionKey, $controllerName) {
+		if (Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
+			$objectSchemaBuilder = $this->objectSchemaBuilder;
+		}
 		$objectSchemaBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ObjectSchemaBuilder');
 
 		$domainObjectName = substr($controllerName, 0, -10);
@@ -102,7 +116,7 @@ class Tx_ExtbaseKickstarter_Controller_WriteScaffoldingController extends Tx_Ext
 			$action->setName($actionName);
 			$template = $this->codeGenerator->generateDomainTemplate($domainObject, $action);
 
-			file_put_contents($templateDirectory . $actionName . '.html', $template);
+			file_put_contents($templateDirectory . ucfirst($actionName) . '.html', $template);
 		}
 
 		$partialsDirectory = PATH_typo3conf . 'ext/' . $extensionKey . '/Resources/Private/Partials/';

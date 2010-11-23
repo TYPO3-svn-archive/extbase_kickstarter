@@ -30,9 +30,8 @@
  *
  * @package ExtbaseKickstarter
  * @version $ID:$
- * 
  */
-class Tx_ExtbaseKickstarter_ObjectSchemaBuilder  implements t3lib_singleton {
+class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_singleton {
 	
 	/**
 	 * 
@@ -43,7 +42,6 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder  implements t3lib_singleton {
 		$extension = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Extension');
 		$globalProperties = $jsonArray['properties'];
 		if (!is_array($globalProperties)) throw new Exception('Wrong 1');
-
 
 			// name
 		$extension->setName($globalProperties['name']);
@@ -66,6 +64,14 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder  implements t3lib_singleton {
 			$person->setEmail($personValues['email']);
 			$person->setCompany($personValues['company']);
 			$extension->addPerson($person);
+		}
+		
+		foreach ($globalProperties['plugins'] as $pluginValues) {
+			$plugin = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Plugin');
+			$plugin->setName($pluginValues['name']);
+			$plugin->setType($pluginValues['type']);
+			$plugin->setKey($pluginValues['key']);
+			$extension->addPlugin($plugin);
 		}
 		
 			// state
@@ -113,6 +119,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder  implements t3lib_singleton {
 				$localClassName = $jsonArray['modules'][$wire['src']['moduleId']]['value']['name'];
 
 				$relationSchemaClassName = 'Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_' . ucfirst($relationJsonConfiguration['relationType']) . 'Relation';
+				
 				if (!class_exists($relationSchemaClassName)) throw new Exception('Relation of type ' . $relationSchemaClassName . ' not found');
 				$relation = new $relationSchemaClassName;
 				$relation->setName($relationJsonConfiguration['relationName']);

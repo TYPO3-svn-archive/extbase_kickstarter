@@ -80,7 +80,7 @@ class {domainObject.className} extends {domainObject.baseClass} {
 	 * @return boolean The state of {property.name}
 	 */
 	public function is{property.name -> k:uppercaseFirst()}() {
-		return $this->get{property.name -> k:uppercaseFirst()}();
+	return $this->get{property.name -> k:uppercaseFirst()}();
 	}
 	</f:if><f:if condition="{k:isOfType(object:property, type:'Property_Relation_AnyToManyRelation')}">
 	/**
