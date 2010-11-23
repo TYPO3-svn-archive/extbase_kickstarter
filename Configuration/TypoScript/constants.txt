@@ -1,9 +1,9 @@
 module.tx_extbasekickstarter.settings {
 	
-	# cat=plugin.tx_extbasekickstarter - defaults//; type=boolean; label=Enable roundtrip: If true you can modify the source code of auto generated files and continue editing with the kickstarter 
+	# cat=module.tx_extbasekickstarter - defaults//; type=boolean; label=Enable roundtrip: If true you can modify the source code of auto generated files and continue editing with the kickstarter 
 	enableRoundtrip = 1
 	
-	# cat=plugin.tx_extbasekickstarter - defaults//; type=boolean; label=Extended forms: If true the relations hav some more fields in a separate form
+	# cat=module.tx_extbasekickstarter - defaults//; type=boolean; label=Extended forms: If true the relations hav some more fields in a separate form
 	extendedForms = 1
 	
 	classBuilder {

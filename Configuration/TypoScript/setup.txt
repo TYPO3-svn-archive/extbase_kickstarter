@@ -1,13 +1,7 @@
  # Module configuration
 module.tx_extbasekickstarter {
-
-	view {
-		# example: codeTemplateRootPath = fileadmin/templates/kickstarter/CodeTemplates/
-	}
 	
 	settings {
-		
-		
 		
 		classBuilder {
 				
@@ -73,6 +67,8 @@ module.tx_extbasekickstarter {
 			
 			backupDir =  {$module.tx_extbasekickstarter.settings.roundtrip.backupDir}
 		}
+		
+		#codeTemplateRootPath = fileadmin/templates/kickstarter/CodeTemplates/
 	}
 	
 	
