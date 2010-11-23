@@ -28,7 +28,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Utility_ClassParser {
+class Tx_ExtbaseKickstarter_Utility_ClassParser implements t3lib_singleton{
 	  
 	/**
 	 * 
