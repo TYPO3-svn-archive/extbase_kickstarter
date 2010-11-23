@@ -6,7 +6,7 @@
    "transport":"POST",
    
    "target": "../../../../../../../typo3/mod.php?M=tools_ExtbaseKickstarterKickstarter&tx_extbasekickstarter_tools_extbasekickstarterkickstarter[controller]=KickstarterModule&tx_extbasekickstarter_tools_extbasekickstarterkickstarter[action]=generateCode",
-   
+ 
    "services": {
       "saveWiring" : {
          "description": "Save the module",

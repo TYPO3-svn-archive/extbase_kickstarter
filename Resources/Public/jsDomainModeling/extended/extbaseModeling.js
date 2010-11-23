@@ -1,9 +1,10 @@
-Array.prototype.remove = function(from, to) {
-	  var rest = this.slice((to || from) + 1 || this.length);
-	  this.length = from < 0 ? this.length + from : from;
-	  return this.push.apply(this, rest);
+Array.prototype.remove = function(from, to){
+	  this.splice(from,
+	    !to ||
+	    1 + to - from + (!(to < 0 ^ from >= 0) && (to < 0 || -1) * this.length));
+	  return this.length;
 	};
-
+	
 var advancedFields = {
 		type: "group",
 		inputParams: {

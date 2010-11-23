@@ -72,6 +72,12 @@ var extbaseModeling_wiringEditorLanguage = {
 			}
 		},
 		{
+			inputParams: {
+				name: "originalExtensionKey", 
+				className:'hiddenField'
+			}
+		},
+		{
 			type: "text",
 			inputParams: {
 				name: "description", 
@@ -384,10 +390,11 @@ var extbaseModeling_wiringEditorLanguage = {
 													{
 														type: "string", 
 														inputParams: {
-															label: "Related Object", 
+															label: "", 
 															name: "relationWire", 
 															required: false, 
 															wirable: true,
+															className: 'terminalFieldWrap',
 															ddConfig: {
 														 		type: "input",
 														 		allowedTypes: ["output", "input"]

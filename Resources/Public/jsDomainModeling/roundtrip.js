@@ -15,7 +15,9 @@ var roundtrip = {
 												fieldset['inputs'][i].setValue('');
 											}
 											else if (fieldName == 'uid') {
+												//console.log('Old:' + fieldset['inputs'][i].getValue());
 												fieldset['inputs'][i].setValue(this.createUniqueId());
+												//console.log('New:' + fieldset['inputs'][i].getValue());
 											}
 										}
 									}

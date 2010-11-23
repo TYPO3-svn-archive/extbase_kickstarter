@@ -104,8 +104,18 @@ div.WireIt-InputExTerminal {
 	float: left;
 	width: 21px;
 	height: 21px;
-	position: relative;
+	position: absolute;
+	top:-20px;
 }
+
+div.terminalFieldWrap {
+	display:none;
+}
+
+input[disabled] {
+	display:none;
+}
+
 div.WireIt-InputExTerminal div.WireIt-Terminal {
 	top: -3px;
 	left: -7px;
