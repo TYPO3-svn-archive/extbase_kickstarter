@@ -59,6 +59,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 * @var string
 	 */
 	protected $description;
+	
+	/**
+	 * The original extension key (if an extension was renamed)
+	 * @var string
+	 */
+	protected $originalExtensionKey;
 
 	/**
 	 * The extension's state. One of the STATE_* constants.
@@ -106,6 +112,22 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 */
 	public function setExtensionKey($extensionKey) {
 		$this->extensionKey = $extensionKey;
+	}
+	
+/**
+	 *
+	 * @return string
+	 */
+	public function getOriginalExtensionKey() {
+		return $this->originalExtensionKey;
+	}
+
+	/**
+	 *
+	 * @param string $extensionKey
+	 */
+	public function setOriginalExtensionKey($extensionKey) {
+		$this->originalExtensionKey = $extensionKey;
 	}
 	
 	/**
