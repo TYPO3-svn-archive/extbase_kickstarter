@@ -133,6 +133,7 @@ extbaseModeling_wiringEditorLanguage.modules.push(
 														name: "propertyType", 
 														selectValues: [
 															"String",
+															"Text",
 															"Integer",
 															"Float",
 															"Boolean",
@@ -140,7 +141,8 @@ extbaseModeling_wiringEditorLanguage.modules.push(
 															"Select"
 														], 
 														selectOptions: [
-															"Text String",
+															"String",
+															"Text",
 															"Integer",
 															"Floating Point",
 															"Boolean",

@@ -95,13 +95,13 @@ WireIt.WiringEditor = function(options) {
     this.layout.render();
 
     	// collapse right
-    this.layout.getUnitById('right').collapse();
-    this.layout.getUnitById('right').set('animate', true, false);
+   // this.layout.getUnitById('right').collapse();
+   // this.layout.getUnitById('right').set('animate', true, false);
 
     	// collapse left
     this.layout.getUnitById('left').collapse();
     this.layout.getUnitById('left').set('animate', true, false);
-    
+   /** 
     	// register events to collapse the other one if this is expanded
     this.layout.getUnitById('right').subscribe(
     	'beforeExpand',
@@ -111,6 +111,7 @@ WireIt.WiringEditor = function(options) {
     	this,
     	this
     )
+    */
     this.layout.getUnitById('left').subscribe(
     	'beforeExpand',
     	function() {
