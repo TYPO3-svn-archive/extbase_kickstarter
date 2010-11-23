@@ -30,8 +30,9 @@
  *
  * @package ExtbaseKickstarter
  * @version $ID:$
+ * 
  */
-class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
+class Tx_ExtbaseKickstarter_ObjectSchemaBuilder  implements t3lib_singleton {
 	
 	/**
 	 * 
@@ -50,6 +51,11 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_Singleton {
 		$extension->setDescription($globalProperties['description']);
 			// extensionKey
 		$extension->setExtensionKey($globalProperties['extensionKey']);
+		if(!empty($globalProperties['originalExtensionKey'])){
+			// original extensionKey
+			$extension->setOriginalExtensionKey($globalProperties['originalExtensionKey']);	
+		}
+		
 			// version
 		$extension->setVersion($globalProperties['version']);
 		

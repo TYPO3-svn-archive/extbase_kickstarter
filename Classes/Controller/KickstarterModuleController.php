@@ -54,8 +54,26 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	protected $codeGenerator;
 
 	public function initializeAction() {
-		$this->objectSchemaBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ObjectSchemaBuilder');
-		$this->codeGenerator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_CodeGenerator');
+		if (Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
+			$this->objectSchemaBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ObjectSchemaBuilder');
+			$this->codeGenerator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_CodeGenerator');
+		}
+	}
+	
+	/**
+	 * @param Tx_ExtbaseKickstarter_ObjectSchemaBuilder $objectSchemaBuilder
+	 * @return void
+	 */
+	public function injectObjectSchemaBuilder(Tx_ExtbaseKickstarter_ObjectSchemaBuilder $objectSchemaBuilder) {
+		$this->objectSchemaBuilder = $objectSchemaBuilder;
+	}
+
+	/**
+	 * @param Tx_ExtbaseKickstarter_Service_CodeGenerator $codeGenerator
+	 * @return void
+	 */
+	public function injectCodeGenerator(Tx_ExtbaseKickstarter_Service_CodeGenerator $codeGenerator) {
+		$this->codeGenerator = $codeGenerator;
 	}
 
 	/**
@@ -75,7 +93,6 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	 * @todo rename this action
 	 */
 	public function generateCodeAction() {
-		$this->config = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
 		$jsonString = file_get_contents('php://input');
 		$request = json_decode($jsonString, true);
 		switch ($request['method']) {
@@ -121,11 +138,14 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 			}
 			$jsonFile =  PATH_typo3conf . 'ext/' . $singleExtensionDirectory . '/kickstarter.json';
 			if (file_exists($jsonFile)) {
-				if($this->config['settings']['enableRoundtrip']){
+				if($this->settings['enableRoundtrip']){
 					// generate unique IDs 
 					$extensionConfigurationFromJson = json_decode(file_get_contents($jsonFile),true);
 					$extensionConfigurationFromJson['modules'] = $this->generateUniqueIDs($extensionConfigurationFromJson['modules']);
 					$extensionConfigurationFromJson['modules'] = $this->mapAdvancedMode($extensionConfigurationFromJson['modules']);
+					if(empty($extensionConfigurationFromJson['properties']['originalExtensionKey'])){
+						$extensionConfigurationFromJson['properties']['originalExtensionKey'] = $singleExtensionDirectory;
+					}
 					t3lib_div::writeFile($jsonFile, json_encode($extensionConfigurationFromJson));
 				}
 				

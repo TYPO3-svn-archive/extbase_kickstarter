@@ -40,8 +40,14 @@ class Tx_ExtbaseKickstarter_ViewHelpers_RenderViewHelper extends Tx_Fluid_Core_V
 	protected $objectManager;
 
 	public function __construct() {
-		$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
-		$this->objectManager = new Tx_Fluid_Compatibility_ObjectManager();
+		
+		if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
+			$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
+			$this->objectManager = new Tx_Fluid_Compatibility_ObjectManager();
+		} else {
+			$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
+			$this->objectManager = t3lib_div::makeInstance('Tx_Extbase_Object_ObjectManager');
+		}
 	}
 	/**
 	 * Renders the content.
@@ -64,13 +70,12 @@ class Tx_ExtbaseKickstarter_ViewHelpers_RenderViewHelper extends Tx_Fluid_Core_V
 		$renderingContext = $this->objectManager->create('Tx_Fluid_Core_Rendering_RenderingContext');
 		$viewHelperVariableContainer = $this->objectManager->create('Tx_Fluid_Core_ViewHelper_ViewHelperVariableContainer');
 		
-		if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
-				// Compatibility with Fluid 1.2
-			$renderingContext->setTemplateVariableContainer($variableContainer);
-			$renderingContext->setViewHelperVariableContainer($viewHelperVariableContainer);
-		} else {
+		if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.2.0', '<')) {
 			$renderingContext->injectTemplateVariableContainer($variableContainer);
 			$renderingContext->injectViewHelperVariableContainer($viewHelperVariableContainer);
+		} else {
+			$renderingContext->setTemplateVariableContainer($variableContainer);
+			$renderingContext->setViewHelperVariableContainer($viewHelperVariableContainer);
 		}
 
 		return $renderingContext;

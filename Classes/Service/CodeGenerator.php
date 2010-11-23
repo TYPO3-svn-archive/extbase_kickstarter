@@ -28,7 +28,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
+class Tx_ExtbaseKickstarter_Service_CodeGenerator  implements t3lib_singleton {
 	
 	/**
 	 *
@@ -52,18 +52,24 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	 * 
 	 * @var Tx_ExtbaseKickstarter_ClassBuilder
 	 */
-	protected $classBuilder;
+	protected $classBuilder;	
 	
 	/**
 	 * @var boolean
 	 */
 	protected $roundTripEnabled = false;
 	
-
+	/**
+	 * 
+	 * @return void
+	 */
 	public function __construct() {
+		
 		if (Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
 			$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
-
+			$this->classBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ClassBuilder');
+			$this->settings = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
+	
 			if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.1.0', '<')) {
 				// Compatibility with Fluid 1.0
 				$this->objectManager = new Tx_Fluid_Compatibility_ObjectFactory();
@@ -71,8 +77,10 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 				$this->objectManager = new Tx_Fluid_Compatibility_ObjectManager();
 			}
 		}
+		
 	}
-
+	
+	
 	/**
 	 * @param Tx_Fluid_Core_Parser_TemplateParser $templateParser
 	 * @return void
@@ -90,6 +98,24 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	}
 	
 	/**
+	 * @param Tx_Extbase_Configuration_ConfigurationManager $configurationManager
+	 * @return void
+	 */
+	public function injectConfigurationManager(Tx_Extbase_Configuration_ConfigurationManager $configurationManager) {
+		$this->configurationManager = $configurationManager;
+		$this->settings = $this->configurationManager->getConfiguration(Tx_Extbase_Configuration_ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS);
+	}
+	
+	/**
+	 * @param Tx_ExtbaseKickstarter_ClassBuilder $classBuilder
+	 * @return void
+	 */
+	public function injectClassBuilder(Tx_ExtbaseKickstarter_ClassBuilder $classBuilder) {
+		$this->classBuilder = $classBuilder;
+	}
+	
+	
+	/**
 	 * The entry point to the class
 	 * 
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_Extension $extension
@@ -97,13 +123,12 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	 */
 	public function build(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		$this->extension = $extension;
-		$this->classBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ClassBuilder',$extension);
-		if($this->conf['settings']['enableRoundtrip']==1){
+		$this->classBuilder->initialize($extension);
+		if($this->settings['enableRoundtrip']==1){
 			$this->roundTripEnabled = true;
-			$this->roundTripService =  t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_RoundTrip',$extension);
-			//$this->roundTripService->injectExtension($extension);
 		}
 		else t3lib_div::devLog('roundtrip disabled', 'extbase_kickstarter');
+		t3lib_div::devLog('settings', 'extbase_kickstarter',0,$this->settings);
 		// Validate the extension
 		$extensionValidator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Validator_ExtensionValidator');
 		try {
@@ -283,19 +308,15 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 		$variableContainer = $this->objectManager->create('Tx_Fluid_Core_ViewHelper_TemplateVariableContainer', $templateVariables);
 
 		$renderingContext = $this->objectManager->create('Tx_Fluid_Core_Rendering_RenderingContext');
-		//$renderingContext->injectTemplateVariableContainer($variableContainer);
-		//$renderingContext->setControllerContext($this->controllerContext); 
 
 		$viewHelperVariableContainer = $this->objectManager->create('Tx_Fluid_Core_ViewHelper_ViewHelperVariableContainer');
-		//$renderingContext->injectViewHelperVariableContainer($viewHelperVariableContainer);
 				
-		if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
-				// Compatibility with Fluid 1.2
-			$renderingContext->setTemplateVariableContainer($variableContainer);
-			$renderingContext->setViewHelperVariableContainer($viewHelperVariableContainer);
-		} else {
+		if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.2.0', '<')) {
 			$renderingContext->injectTemplateVariableContainer($variableContainer);
 			$renderingContext->injectViewHelperVariableContainer($viewHelperVariableContainer);
+		} else {
+			$renderingContext->setTemplateVariableContainer($variableContainer);
+			$renderingContext->setViewHelperVariableContainer($viewHelperVariableContainer);
 		}
 		
 
@@ -303,8 +324,8 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	}
 
 	protected function renderTemplate($filePath, $variables) {
-		if(isset($this->conf['view']['codeTemplateRootPath'])){
-			$codeTemplateRootPath = PATH_site.$this->conf['view']['codeTemplateRootPath'];
+		if(isset($this->settings['codeTemplateRootPath'])){
+			$codeTemplateRootPath = PATH_site.$this->settings['codeTemplateRootPath'];
 		}
 		else {
 			$codeTemplateRootPath = t3lib_extMgm::extPath('extbase_kickstarter').'Resources/Private/CodeTemplates/';
@@ -420,7 +441,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	 * @param string $classType
 	 * @return string
 	 */	
-	public static function getFolderForClassFile($extensionDirectory,$classType){
+	public static function getFolderForClassFile($extensionDirectory,$classType,$createDirIfNotExist=true){
 		$classPath = '';
 		switch ($classType) {
 			case 'Model'		:	$classPath = 'Classes/Domain/Model/';
@@ -433,10 +454,10 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 									break;					
 		}
 		if(!empty($classPath)){
-			if(!is_dir($extensionDirectory . $classPath)){
+			if(!is_dir($extensionDirectory . $classPath) && $createDirIfNotExist){
 				t3lib_div::mkdir_deep($extensionDirectory, $classPath);
 			}
-			if(!is_dir($extensionDirectory . $classPath)){
+			if(!is_dir($extensionDirectory . $classPath) && $createDirIfNotExist){
 				throw new Exception('folder could not be created:'.$extensionDirectory . $classPath);
 			}
 			return $extensionDirectory . $classPath;
@@ -452,7 +473,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	 * @param string $fileContents
 	 */
 	protected function writeFile($targetFile,$fileContents){
-		if(!file_exists($targetFile) || ($this->roundTripEnabled && $this->roundTripService->getOverWriteSetting($targetFile) < 2)){
+		if(!file_exists($targetFile) || ($this->roundTripEnabled && Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSetting($targetFile,$this->settings) < 2)){
 			if(empty($fileContents)){
 				throw new Exception('No file content! File ' . $targetFile . 'could not be created');
 			}
@@ -471,10 +492,11 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	 * @param string $fileContents
 	 */
 	protected function upload_copy_move($sourceFile,$targetFile){
-		if(!file_exists($targetFile) || ($this->roundTripEnabled && $this->roundTripService->getOverWriteSetting($targetFile) < 2)){
+		if(!file_exists($targetFile) || ($this->roundTripEnabled && Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSetting($targetFile,$this->settings) < 2)){
 			t3lib_div::upload_copy_move($sourceFile,$targetFile);
 		}
 	}
+	
 	
 }
 
