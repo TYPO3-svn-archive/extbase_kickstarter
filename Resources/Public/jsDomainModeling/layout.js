@@ -1,32 +1,30 @@
 // Configuration of the whole layout. See documentation of YUI's widget.Layout()
 extbaseModeling_wiringEditorLanguage.layoutOptions =
 {
-	units: [
+	units:
+	[
 		{
-			position: 'left', 
-			width: 500, 
-			resize: true, 
-			body: 'left', 
-			gutter: '5px', 
+			position: 'left',
+			width: 350,
+			resize: true,
+			body: 'left',
+			gutter: '5px',
 			collapse: true,
-			collapseSize: 25, 
-			header: 'Extension Configuration', 
-			scroll: true, 
+			collapseSize: 20,
+			header: 'Extension Configuration',
+			scroll: true,
 			animate: false
 		},
 		{
-			position: 'center', 
-			header: 'Domain Modeling',
-			body: 'center', 
+			position: 'center',
+			body: 'center',
 			gutter: '5px',
-			collapse: true, 
-			collapseSize: 25
+			scroll: false
 		},
-		
 		{
 			position: 'bottom',
-			height: 40,
-			body: 'bottom',
+			height: 27,
+			body: 'bottom'
 		}
 	]
-}
+};
