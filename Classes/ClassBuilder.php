@@ -537,7 +537,7 @@ class Tx_ExtbaseKickstarter_ClassBuilder implements t3lib_Singleton {
 		
 		foreach($domainObject->getActions() as $action){
 			$actionMethodName = $action->getName().'Action';
-			if(!$this->classObject->methodExists($initializeMethodName)){
+			if(!$this->classObject->methodExists($actionMethodName)){
 				$actionMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($actionMethodName);
 				$actionMethod->setDescription('action '.$action->getName());
 				$actionMethod->setBody('');
