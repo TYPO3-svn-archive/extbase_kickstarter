@@ -1,12 +1,13 @@
 <?php
 if (!defined ('TYPO3_MODE')) die ('Access denied.');{namespace k=Tx_ExtbaseKickstarter_ViewHelpers}
 
+<f:for each="{extension.Plugins}" as="plugin">
 Tx_Extbase_Utility_Extension::registerPlugin(
 	$_EXTKEY,
-	'Pi1',
-	'{extension.name}'
+	'{plugin.key}',
+	'{plugin.name}'
 );
-
+</f:for>
 t3lib_extMgm::addStaticFile($_EXTKEY, 'Configuration/TypoScript', '{extension.name}');
 
 //$TCA['tt_content']['types']['list']['subtypes_addlist'][$_EXTKEY . '_pi1'] = 'pi_flexform';

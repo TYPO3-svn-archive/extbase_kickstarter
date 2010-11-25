@@ -102,7 +102,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 * plugins
 	 * @var array<Tx_ExtbaseKickstarter_Domain_Model_Plugin>
 	 */
-	private $plugin;
+	private $plugins;
 	
 	/**
 	 *
@@ -304,11 +304,11 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	/**
 	 * Setter for plugin
 	 *
-	 * @param Tx_Extbase_Persistence_ObjectStorage<Tx_ExtbaseKickstarter_Domain_Model_Plugin> $plugin
+	 * @param Tx_Extbase_Persistence_ObjectStorage<Tx_ExtbaseKickstarter_Domain_Model_Plugin> $plugins
 	 * @return void
 	 */
-	public function setPlugin(Tx_Extbase_Persistence_ObjectStorage $plugin) {
-		$this->plugin = $plugin;
+	public function setPlugins(Tx_Extbase_Persistence_ObjectStorage $plugins) {
+		$this->plugins = $plugins;
 	}
 
 	/**
@@ -316,8 +316,8 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 *
 	 * @return Tx_Extbase_Persistence_ObjectStorage<Tx_ExtbaseKickstarter_Domain_Model_Plugin>
 	 */
-	public function getPlugin() {
-		return $this->plugin;
+	public function getPlugins() {
+		return $this->plugins;
 	}
 
 	/**
@@ -327,7 +327,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 * @return void
 	 */
 	public function addPlugin(Tx_ExtbaseKickstarter_Domain_Model_Plugin $plugin) {
-		$this->plugin[] = $plugin;
+		$this->plugins[] = $plugin;
 	}
 
 	/**
@@ -337,9 +337,9 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 * @return void
 	 */
 	public function removePlugins(Tx_ExtbaseKickstarter_Domain_Model_Plugin $plugin) {
-		foreach ($this->plugin as $key => $value) {
+		foreach ($this->plugins as $key => $value) {
 			if ($value === $plugin) {
-				unset($this->plugin[$key]);
+				unset($this->plugins[$key]);
 			}
 		}
 	}
