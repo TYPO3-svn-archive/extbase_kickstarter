@@ -327,7 +327,10 @@ WireIt.WiringEditor.prototype = {
   * @method saveModuleSuccess
   */
  saveModuleSuccess: function(o) {
-    alert("Saved !");
+	if(o[0] != 'success'){
+		alert("Extension could not be saved:\n " + o[0]);
+	} 
+	else alert("Saved!");
  },
 
  /**
