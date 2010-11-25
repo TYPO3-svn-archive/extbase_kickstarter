@@ -68,7 +68,8 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator  implements t3lib_singleton {
 		if (Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
 			$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
 			$this->classBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ClassBuilder');
-			$this->settings = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
+			$frameworkConfiguration = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
+			$this->settings = $frameworkConfiguration['settings'];
 	
 			if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.1.0', '<')) {
 				// Compatibility with Fluid 1.0

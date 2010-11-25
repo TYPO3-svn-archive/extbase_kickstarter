@@ -67,7 +67,8 @@ class Tx_ExtbaseKickstarter_ClassBuilder implements t3lib_Singleton {
 		if (Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
 			$this->roundTripService = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_RoundTrip');
 			$this->classParser = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_ClassParser');
-			$this->settings = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
+			$frameworkConfiguration = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
+			$this->settings = $frameworkConfiguration['settings'];
 		}
 		$this->roundTripService->initialize($this->extension);
 	}
