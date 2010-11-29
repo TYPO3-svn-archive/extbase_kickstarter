@@ -15,7 +15,7 @@ Tx_Extbase_Utility_Extension::registerModule(
 	'',
 	array(
 		'KickstarterModule' => 'domainmodelling,index,generateCode',
-		'WriteScaffolding' => 'index,generateFiles'
+		'WriteScaffolding' => 'index,generateFiles',
 	),
 	array(
 		'access' => 'user,group',
@@ -25,4 +25,5 @@ Tx_Extbase_Utility_Extension::registerModule(
 );
 
 t3lib_extMgm::addStaticFile($_EXTKEY, 'Configuration/TypoScript', $_EXTKEY);
+
 ?>
