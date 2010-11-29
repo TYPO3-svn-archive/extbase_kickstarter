@@ -82,6 +82,7 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_Extension $extension
 	 */
 	public function initialize(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
+		
 		$this->extension = $extension;
 		$this->extensionDirectory =  $this->extension->getExtensionDir();
 		$this->extClassPrefix = 'Tx_' . Tx_Extbase_Utility_Extension::convertLowerUnderscoreToUpperCamelCase($this->extension->getExtensionKey());
@@ -91,7 +92,7 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 			$frameworkConfiguration = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
 			$this->settings = $frameworkConfiguration['settings'];
 		}
-		
+		$this->settings = array_merge($this->settings,$this->getExtConfiguration());
 		// defaults
 		$this->previousExtensionDirectory = $this->extensionDirectory;
 		$this->previousExtensionKey = $this->extension->getExtensionKey();
@@ -439,7 +440,6 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 			return true;
 		}
 		if($newProperty->getTypeForComment() != $this->updateExtensionKey($oldProperty->getTypeForComment())){
-			//TODO: 
 			t3lib_div::devlog('property type changed from '.$this->updateExtensionKey($oldProperty->getTypeForComment()).' to '.$newProperty->getTypeForComment(),'extbase_kickstarter',0);
 			return true;
 		}
@@ -484,8 +484,8 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 		}
 		if($newProperty->getTypeForComment() != $this->updateExtensionKey($oldProperty->getTypeForComment())){
 			if($oldProperty->isBoolean() && !$newProperty->isBoolean()){
-				$this->classObject->removeMethod(Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($oldProperty,'is'));
-				t3lib_div::devlog('Method removed:'.Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($oldProperty,'is'),'extbase_kickstarter',1,$this->classObject->getMethods());
+				$this->classObject->removeMethod(Tx_ExtbaseKickstarter_Service_ClassBuilder::getMethodName($oldProperty,'is'));
+				t3lib_div::devlog('Method removed:'.Tx_ExtbaseKickstarter_Service_ClassBuilder::getMethodName($oldProperty,'is'),'extbase_kickstarter',1,$this->classObject->getMethods());
 			}
 		}
 	}
@@ -499,20 +499,20 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 	 */
 	protected function updateMethod($oldProperty,$newProperty,$methodType){
 		
-		$oldMethodName = Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($oldProperty,$methodType);
+		$oldMethodName = Tx_ExtbaseKickstarter_Service_ClassBuilder::getMethodName($oldProperty,$methodType);
 		$mergedMethod = $this->classObject->getMethod($oldMethodName);
 		if(!$mergedMethod){
 			// no previous version of the method exists
 			return;
 		}
-		$newMethodName = Tx_ExtbaseKickstarter_ClassBuilder::getMethodName($newProperty,$methodType);
+		$newMethodName = Tx_ExtbaseKickstarter_Service_ClassBuilder::getMethodName($newProperty,$methodType);
 		t3lib_div::devlog('updateMethod:'.$oldMethodName.'=>'.$newMethodName,'extbase_kickstarter');
 		
 		if($oldProperty->getName() != $newProperty->getName()){
 			$mergedMethod->setName($newMethodName);
 			$oldMethodBody = $mergedMethod->getBody();
 			
-			if(trim($oldMethodBody) ==  trim(Tx_ExtbaseKickstarter_ClassBuilder::getDefaultMethodBody($oldProperty, $methodType))){
+			if(trim($oldMethodBody) ==  trim(Tx_ExtbaseKickstarter_Service_ClassBuilder::getDefaultMethodBody($oldProperty, $methodType))){
 				// this means the method was not modified so we can remove it and it will be regenerated from ClassBuilder
 				$this->classObject->removeMethod($oldMethodName);
 				return;
@@ -659,31 +659,16 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 			t3lib_div::devLog('cleanUp File not found: '.$path.$fileName, 'extbase_kickstarter',1);
 			return;
 		}
-		if($this->settings['roundtrip']['backupFiles']){
-			if(empty($this->settings['roundtrip']['backupDir'])){
-				$this->settings['roundtrip']['backupDir'] = '_bak';
-			}
-			t3lib_div::mkdir($this->extensionDirectory.$this->settings['roundtrip']['backupDir']);
-			$backupDir = $this->extensionDirectory.$this->settings['roundtrip']['backupDir'].'/';
-			if(t3lib_div::validPathStr($backupDir)){
-				if(!is_dir($backupDir)){
-					t3lib_div::mkdir($backupDir);
-				}
-				
-				if(copy($path.$fileName,$backupDir.$fileName)){
-					t3lib_div::fixPermissions($backupDir.$fileName);
-					t3lib_div::devLog('File moved to backup: '.$backupDir.$fileName, 'extbase_kickstarter');
-				}
-				else {
-					t3lib_div::devLog('File could not be copied to backup: '.$backupDir.$fileName, 'extbase_kickstarter',0,$this->settings);
-					throw new Exception('File could not be copied to backup: '.$backupDir.$fileName);
-				}
-			}
-			else {
-				throw new Exception('Backup dir not allowed: '.$backupDir);
-			}
-		}
 		unlink($path.$fileName);
+	}
+	
+	/**
+	 * 
+	 * @return array
+	 */
+	public static function getExtConfiguration(){
+		$extConfiguration = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['extbase_kickstarter']); 
+		return $extConfiguration;
 	}
 	
 	/**
@@ -693,12 +678,15 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 	 * 1 for merge (if possible)
 	 * 2 for keep existing file
 	 * 
-	 * @param string $path Example: Configuration/TpoScript/setup.txt
+	 * @param string $path of the file to get the settings for
 	 * @return int overWriteSetting
 	 */
-	public static function getOverWriteSetting($path,$settings){
+	public static function getOverWriteSettingForPath($path,$settings){
+		if(!is_array($settings)){
+			throw new Exception('overWrite settings could not be parsed');
+		}
 		$pathParts = explode('/',$path);
-		$overWriteSettings = $settings['roundtrip']['overWriteSettings'];
+		$overWriteSettings =  $settings;
 		if($pathParts[0] == 'Classes'){
 			if($pathParts[1] == 'Controller' && isset($overWriteSettings['Classes']['Controller'])){
 				//t3lib_div::devLog('Overwrite setting for File: '.$path.'->'.$settings['Classes']['Controller'], 'extbase_kickstarter',0,$settings);
@@ -730,5 +718,84 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 		
 		return 0;
 	}
+	
+	/**
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Extension $extension
+	 * @param string $backupDir
+	 */
+	static function backupExtension($extension,$backupDir){
+		if(empty($backupDir)){
+			throw new Exception('Please define a backup directory in extension configuration!');
+		}
+		else if (!t3lib_div::validPathStr($backupDir)){
+			throw new Exception('Backup directory is not a valid path: '.$backupDir);
+		}
+		else if(t3lib_div::isAbsPath($backupDir)){
+			if(!t3lib_div::isAllowedAbsPath($backupDir)){
+				throw new Exception('Backup directory is not an allowed absolute path: '.$backupDir);
+			}
+		}
+		else {
+			$backupDir = PATH_site.$backupDir;
+		}
+		if(strrpos($backupDir,'/') < strlen($backupDir)-1){
+			$backupDir .= '/';
+		}
+		if(!is_dir($backupDir)){
+			throw new Exception('Backup directory does not exist: '.$backupDir);
+		}
+		else if(!is_writable($backupDir)){
+			throw new Exception('Backup directory is not writable: '.$backupDir);
+		}
+		
+		
+		$backupDir .= $extension->getExtensionKey();
+		// create a subdirectory for this extension
+		if(!is_dir($backupDir)){
+			t3lib_div::mkdir($backupDir);
+		}
+		if(strrpos($backupDir,'/') < strlen($backupDir)-1){
+			$backupDir .= '/';
+		}
+		$backupDir .= date('Y-m-d-').time();
+		if(!is_dir($backupDir)){
+			t3lib_div::mkdir($backupDir);
+		}
+		$extensionDir = substr($extension->getExtensionDir(),0,strlen($extension->getExtensionDir())-1);
+		try{
+			self::recurse_copy($extensionDir,$backupDir);
+		}
+		catch(Exception $e){
+			throw new Exception('Code generation aborted:'. $e->getMessage());
+		}
+		t3lib_div::devlog('Backup created in ' . $backupDir,'extbase_kickstarter',0);
+		return true;
+	}
+	
+	/**
+	 * 
+	 * @param string $src path to copy
+	 * @param string $dst destination
+	 */
+	static public function recurse_copy($src,$dst) {
+	    $dir = opendir($src);
+	    @mkdir($dst);
+	    while(false !== ( $file = readdir($dir)) ) {
+	        if (( $file != '.' ) && ( $file != '..' )) {
+	            if ( is_dir($src . '/' . $file) ) {
+	            	self::recurse_copy($src . '/' . $file,$dst . '/' . $file);
+	            }
+	            else {
+	                $success = copy($src . '/' . $file,$dst . '/' . $file);
+	                if(!$success){
+	                	throw new Exception('Could not copy '. $src . '/' . $file . ' to '. $dst . '/' . $file);
+	                }
+	            }
+	        }
+	    }
+	    closedir($dir);
+	} 
 }
+
 ?>

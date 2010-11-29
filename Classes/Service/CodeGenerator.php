@@ -28,7 +28,7 @@
  * @package ExtbaseKickstarter
  * @version $ID:$
  */
-class Tx_ExtbaseKickstarter_Service_CodeGenerator  implements t3lib_singleton {
+class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 	
 	/**
 	 *
@@ -50,7 +50,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator  implements t3lib_singleton {
 	
 	/**
 	 * 
-	 * @var Tx_ExtbaseKickstarter_ClassBuilder
+	 * @var Tx_ExtbaseKickstarter_Service_ClassBuilder
 	 */
 	protected $classBuilder;	
 	
@@ -61,16 +61,22 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator  implements t3lib_singleton {
 	
 	/**
 	 * 
+	 * @var array
+	 */
+	protected $overWriteSettings;
+	
+	/**
+	 * 
 	 * @return void
 	 */
 	public function __construct() {
 		
 		if (Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.3.0', '<')) {
 			$this->templateParser = Tx_Fluid_Compatibility_TemplateParserBuilder::build();
-			$this->classBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_ClassBuilder');
+			$this->classBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_ClassBuilder');
 			$frameworkConfiguration = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
 			$this->settings = $frameworkConfiguration['settings'];
-	
+			$this->settings = array_merge($this->settings,Tx_ExtbaseKickstarter_Service_RoundTrip::getExtConfiguration());
 			if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.1.0', '<')) {
 				// Compatibility with Fluid 1.0
 				$this->objectManager = new Tx_Fluid_Compatibility_ObjectFactory();
@@ -105,13 +111,14 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator  implements t3lib_singleton {
 	public function injectConfigurationManager(Tx_Extbase_Configuration_ConfigurationManager $configurationManager) {
 		$this->configurationManager = $configurationManager;
 		$this->settings = $this->configurationManager->getConfiguration(Tx_Extbase_Configuration_ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS);
+		$this->settings = array_merge($this->settings,Tx_ExtbaseKickstarter_Service_RoundTrip::getExtConfiguration());
 	}
 	
 	/**
-	 * @param Tx_ExtbaseKickstarter_ClassBuilder $classBuilder
+	 * @param Tx_ExtbaseKickstarter_Service_ClassBuilder $classBuilder
 	 * @return void
 	 */
-	public function injectClassBuilder(Tx_ExtbaseKickstarter_ClassBuilder $classBuilder) {
+	public function injectClassBuilder(Tx_ExtbaseKickstarter_Service_ClassBuilder $classBuilder) {
 		$this->classBuilder = $classBuilder;
 	}
 	
@@ -124,12 +131,13 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator  implements t3lib_singleton {
 	 */
 	public function build(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		$this->extension = $extension;
+		$this->overWriteSettings = $this->extension->getOverwriteSettings();
+		
 		$this->classBuilder->initialize($extension);
 		if($this->settings['enableRoundtrip']==1){
 			$this->roundTripEnabled = true;
 		}
 		else t3lib_div::devLog('roundtrip disabled', 'extbase_kickstarter');
-		t3lib_div::devLog('settings', 'extbase_kickstarter',0,$this->settings);
 		// Validate the extension
 		$extensionValidator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Validator_ExtensionValidator');
 		try {
@@ -474,7 +482,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator  implements t3lib_singleton {
 	 * @param string $fileContents
 	 */
 	protected function writeFile($targetFile,$fileContents){
-		if(!file_exists($targetFile) || ($this->roundTripEnabled && Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSetting($targetFile,$this->settings) < 2)){
+		if(!file_exists($targetFile) || ($this->roundTripEnabled && Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSettingForPath($targetFile,$this->extension->getOverWriteSettings()) < 2)){
 			if(empty($fileContents)){
 				throw new Exception('No file content! File ' . $targetFile . 'could not be created');
 			}
@@ -493,13 +501,12 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator  implements t3lib_singleton {
 	 * @param string $fileContents
 	 */
 	protected function upload_copy_move($sourceFile,$targetFile){
-		if(!file_exists($targetFile) || ($this->roundTripEnabled && Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSetting($targetFile,$this->settings) < 2)){
+		if(!file_exists($targetFile) || ($this->roundTripEnabled && Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSettingForPath($targetFile,$this->extension->getOverWriteSettings()) < 2)){
 			t3lib_div::upload_copy_move($sourceFile,$targetFile);
 		}
 	}
 	
 	
 }
-
 
 ?>

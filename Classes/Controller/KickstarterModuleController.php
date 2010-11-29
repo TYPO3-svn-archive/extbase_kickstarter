@@ -66,6 +66,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 			$this->codeGenerator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_CodeGenerator');
 			$frameworkConfiguration = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
 			$this->settings = $frameworkConfiguration['settings'];
+			$this->settings = array_merge($this->settings,Tx_ExtbaseKickstarter_Service_RoundTrip::getExtConfiguration());
 		}
 	}
 	
@@ -92,6 +93,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	public function injectConfigurationManager(Tx_Extbase_Configuration_ConfigurationManager $configurationManager) {
 		$this->configurationManager = $configurationManager;
 		$this->settings = $this->configurationManager->getConfiguration(Tx_Extbase_Configuration_ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS);
+		$this->settings = array_merge($this->settings,Tx_ExtbaseKickstarter_Service_RoundTrip::getExtConfiguration());
 	}
 
 	/**
@@ -118,21 +120,37 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 			case 'saveWiring':
 				$extensionConfigurationFromJson = json_decode($request['params']['working'], true);
 				$extensionConfigurationFromJson['modules'] = $this->mapAdvancedMode($extensionConfigurationFromJson['modules']);
+				
+				t3lib_div::devlog('JSON:','extbase_kickstarter',0,$extensionConfigurationFromJson);
+				
 				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
 
 				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
 				if(!is_dir($extensionDirectory)){
 					t3lib_div::mkdir($extensionDirectory);
 				}
+				if($this->settings['backupExtension'] == 1){
+					try {
+						Tx_ExtbaseKickstarter_Service_RoundTrip::backupExtension($extensionSchema,$this->settings['backupDir']);
+					}
+					catch(Exception $e){
+						return json_encode(array($e->getMessage()));
+					}
+				}
 				
-				$build = $this->codeGenerator->build($extensionSchema);
+				$buildResult = $this->codeGenerator->build($extensionSchema);
 				
+				$extensionConfigurationFromJson['log'] = array(
+					'last_modified'=>date('Y-m-d h:i'),
+					'kickstarter_version'=>t3lib_extMgm::getExtensionVersion('extbase_kickstarter'),
+					'be_user'=>$GLOBALS['BE_USER']->user['realName'].' ('.$GLOBALS['BE_USER']->user['uid'].')'
+				);
 				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', json_encode($extensionConfigurationFromJson));
 
-				if ($build === true) {
+				if ($buildResult === true) {
 					return json_encode(array('saved'));
 				} else {
-					return json_encode(array($build));
+					return json_encode(array($buildResult));
 				}
 				
 			break;
@@ -194,7 +212,10 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	}
 	
 	/**
-	 * enable unique IDs to track modifications of properties and relations
+	 * enable unique IDs to track modifications of models, properties and relations
+	 * this method sets unique IDs to the JSON array, if it was created 
+	 * with an older version of the kickstarter
+	 * 
 	 * @param $jsonConfig
 	 * @return array $jsonConfig with unique IDs
 	 */
@@ -231,7 +252,10 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	
 	
 	/**
-	 * copy values from advanced fieldset to simbple mode filedset and vice versa
+	 * copy values from advanced fieldset to simple mode fieldset and vice versa
+	 * 
+	 * enables compatibility with JSON from older versions of the kickstarter
+	 * 
 	 * @param array $jsonConfig
 	 */
 	protected function mapAdvancedMode($jsonConfig){
@@ -254,4 +278,5 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	}
 
 }
+
 ?>

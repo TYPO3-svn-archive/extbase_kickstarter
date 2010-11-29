@@ -55,4 +55,5 @@ class Tx_ExtbaseKickstarter_Utility_ClassLoader {
 	}
 	
 }
+
 ?>

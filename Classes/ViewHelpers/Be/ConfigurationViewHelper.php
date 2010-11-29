@@ -1,10 +1,9 @@
 <?php
 
 class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fluid_ViewHelpers_Be_AbstractBackendViewHelper {
+	
 	public function render() {
 		
-		$this->conf = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
-				
 		$doc = $this->getDocInstance();
 		$doc->bodyTagAdditions .= 'class="yui-skin-sam"';
 
@@ -29,14 +28,12 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		// InputEx with wirable options
 		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/wireit/lib/inputex/js/inputex.js');
 		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/wireit/lib/inputex/js/Field.js');
-		if($this->conf['settings']['enableRoundtrip']){
-			$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/extended/ListField.js');
-			$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/extended/Group.js');
-		}
-		else  {
-			$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/ListField.js');
-			$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/wireit/lib/inputex/js/Group.js');
-		}
+		
+		// extended fields for enabling unique ids
+		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/extended/ListField.js');
+		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/extended/Group.js');
+		
+		
 		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/wireit/js/util/inputex/WirableField-beta.js');
 		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/wireit/lib/inputex/js/Visus.js');
 		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/wireit/lib/inputex/js/fields/StringField.js');
@@ -69,9 +66,8 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		
 		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/wireit/js/WiringEditor.js');
 		
-		if($this->conf['settings']['enableRoundtrip']){
-			$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/roundtrip.js');
-		}
+		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/roundtrip.js');
+		
 		
 		// Extbase Modelling definition
 		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/extbaseModeling.js');
@@ -79,9 +75,8 @@ class Tx_ExtbaseKickstarter_ViewHelpers_Be_ConfigurationViewHelper extends Tx_Fl
 		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/extensionProperties.js');
 		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/modules/modelObject.js');
 		
-		if($this->conf['settings']['extendedForms']){
-			$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/extended/extbaseModeling.js');
-		}
+		// collapsible forms in relations
+		$pageRenderer->addJsFile($baseUrl . 'Resources/Public/jsDomainModeling/modules/extendedModelObject.js');
 
 		// SECTION: CSS Files
 		// YUI CSS

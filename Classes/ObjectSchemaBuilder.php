@@ -54,6 +54,12 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_singleton {
 			$extension->setOriginalExtensionKey($globalProperties['originalExtensionKey']);	
 		}
 		
+		// Convert Typoscript to array
+		$TSparserObject = t3lib_div::makeInstance('t3lib_tsparser');
+		$TSparserObject->parse($globalProperties['advancedSettings']['overwriteSettings']);
+		$overWriteSettings = Tx_Extbase_Utility_TypoScript::convertTypoScriptArrayToPlainArray($TSparserObject->setup);
+		$extension->setOverWriteSettings($overWriteSettings);
+		t3lib_div::devlog('ow settings','extbase_kickstarter',0,$overWriteSettings);
 			// version
 		$extension->setVersion($globalProperties['version']);
 		
@@ -123,6 +129,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_singleton {
 				if (!class_exists($relationSchemaClassName)) throw new Exception('Relation of type ' . $relationSchemaClassName . ' not found');
 				$relation = new $relationSchemaClassName;
 				$relation->setName($relationJsonConfiguration['relationName']);
+				$relation->setInlineEditing((bool)$relationJsonConfiguration['inlineEditing']);
 				$relation->setDescription($relationJsonConfiguration['relationDescription']);
 				$relation->setUniqueIdentifier($relationJsonConfiguration['uid']);
 				$relation->setForeignClass($extension->getDomainObjectByName($foreignClassName));
@@ -243,4 +250,5 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_singleton {
 		}
 	}
 }
+
 ?>

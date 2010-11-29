@@ -106,4 +106,5 @@ class Tx_ExtbaseKickstarter_ViewHelpers_MethodViewHelper extends Tx_Fluid_Core_V
 	
 
 }
+
 ?>
