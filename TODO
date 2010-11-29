@@ -1,11 +1,9 @@
-Enable sorting of methods: Currently the sort order of the properties is only reflected the first time a class is created.
+Enable multiple tags with the same name. We need for example multiple @param tags, which is not possible right now.
 
-Enable multiple tags with the same name. Wen need for example multiple @param tags, which is not possible right now.
+Implement a solution to append content to certain files: ext_tables.sql, TCA, ext_tables.php etc.
 
 Unit Tests!!
 
-Save the Kickstarter Version in the JSON file, to enable easy compatibility handling for future changes
+Implement some functionality to preserve comments in a class file (non docComments)
 
-Implement a IncludeViewHelper: Should be possible to do something like <k:include file="{domain.name}_customTCA.php" /> and make that configurable via typoscript
-
-Implement some functionality to preserve comments in a class file (non docComments) 
+Make sorting of methods configurable (wether or not to sort them)
