@@ -247,7 +247,6 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class extends Tx_ExtbaseKickstarter_Dom
 	 * @return boolean true (if successfull removed)
 	 */
 	public function removeMethod($methodName){
-		//TODO: not yet tested
 		if($this->methodExists($methodName)){
 			unset($this->methods[$methodName]);
 			return true;
@@ -349,7 +348,6 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class extends Tx_ExtbaseKickstarter_Dom
 	 * @return boolean true (if successfull removed)
 	 */
 	public function removeProperty($propertyName){
-		//TODO: not yet tested
 		if($this->propertyExists($propertyName)){
 			unset($this->properties[$propertyName]);
 			return true;

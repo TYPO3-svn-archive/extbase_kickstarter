@@ -38,6 +38,12 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRela
 	 * @var Tx_ExtbaseKickstarter_Domain_Model_DomainObject
 	 */
 	protected $foreignClass;
+	
+	/**
+	 * If this flag is set to TRUE the relation is rendered as IRRE field (Inline Relational Record Editing). Default is FALSE.
+	 * @var boolean
+	 */
+	protected $inlineEditing = FALSE;
 
 	/**
 	 *
@@ -53,6 +59,25 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRela
 	 */
 	public function setForeignClass(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $foreignClass) {
 		$this->foreignClass = $foreignClass;
+	}
+	
+	/**
+	 * Sets the flag, if the relation should be rendered as IRRE field.
+	 *
+	 * @param bool $inlineEditing
+	 * @return void
+	 **/
+	public function setInlineEditing($inlineEditing) {
+		$this->inlineEditing = (bool) $inlineEditing;
+	}
+	
+	/**
+	 * Returns the state of the flag, if the relation should be rendered as IRRE field.
+	 *
+	 * @return bool TRUE if the field shopuld be rendered as IRRE field; FALSE otherwise
+	 **/
+	public function getInlineEditing() {
+		return (bool) $this->inlineEditing;
 	}
 	
 	public function getSqlDefinition() {

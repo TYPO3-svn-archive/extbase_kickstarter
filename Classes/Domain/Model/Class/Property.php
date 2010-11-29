@@ -144,4 +144,5 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_Property extends Tx_ExtbaseKickst
 	}
 	
 }
-	
+
+?>

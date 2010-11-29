@@ -213,3 +213,5 @@ class Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter {
         $this->typeHint = $typeHint;
     }
 }
+
+?>

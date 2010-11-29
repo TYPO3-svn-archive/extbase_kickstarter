@@ -65,6 +65,12 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 * @var string
 	 */
 	protected $originalExtensionKey;
+	
+	/**
+	 * 
+	 * @var array
+	 */
+	protected $overWriteSettings;
 
 	/**
 	 * The extension's state. One of the STATE_* constants.
@@ -134,6 +140,21 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 */
 	public function setOriginalExtensionKey($extensionKey) {
 		$this->originalExtensionKey = $extensionKey;
+	}
+	
+	/**
+	 * 
+	 * @param array $overWriteSettings
+	 */
+	public function setOverWriteSettings($overWriteSettings){
+		$this->overWriteSettings = $overWriteSettings;
+	}
+	
+	/**
+	 * @return array 
+	 */
+	public function getOverWriteSettings(){
+		return $this->overWriteSettings;
 	}
 	
 	/**
