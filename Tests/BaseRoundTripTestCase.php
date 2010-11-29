@@ -30,7 +30,7 @@ abstract class Tx_ExtbaseKickstarter_BaseRoundTripTestCase extends Tx_ExtbaseKic
 	
 	function setUp(){
 		
-		$this->extension = $this->getMock('Tx_ExtbaseKickstarter_Domain_Model_Extension',array('getExtensionDir'));
+		$this->extension = $this->getMock('Tx_ExtbaseKickstarter_Domain_Model_Extension',array('getExtensionDir','getOverWriteSettings'));
 		$extensionKey = 'dummy';
 		$dummyExtensionDir = PATH_typo3conf.'ext/extbase_kickstarter/Tests/Examples/'.$extensionKey.'/';
 		if(!is_dir($dummyExtensionDir)){
@@ -40,6 +40,10 @@ abstract class Tx_ExtbaseKickstarter_BaseRoundTripTestCase extends Tx_ExtbaseKic
 		$this->extension->expects($this->any())
              ->method('getExtensionDir')
              ->will($this->returnValue($dummyExtensionDir));
+             
+        $this->extension->expects($this->any())
+             ->method('getOverWriteSettings')
+             ->will($this->returnValue(array()));
         
         $this->classParser = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Utility_ClassParser');
         $this->roundTripService =  $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_Service_RoundTrip'),array('dummy'));

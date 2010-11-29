@@ -70,7 +70,7 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	 * 
 	 * @var array
 	 */
-	protected $overWriteSettings;
+	protected $overWriteSettings = array();
 
 	/**
 	 * The extension's state. One of the STATE_* constants.

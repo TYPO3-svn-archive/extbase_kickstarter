@@ -41,7 +41,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_singleton {
 	public function build(array $jsonArray) {
 		$extension = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Extension');
 		$globalProperties = $jsonArray['properties'];
-		if (!is_array($globalProperties)) throw new Exception('Wrong 1');
+		if (!is_array($globalProperties)) throw new Exception('Extension properties not submitted!');
 
 			// name
 		$extension->setName($globalProperties['name']);
@@ -53,13 +53,18 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_singleton {
 			// original extensionKey
 			$extension->setOriginalExtensionKey($globalProperties['originalExtensionKey']);	
 		}
+		if(!empty($globalProperties['advancedSettings']['overwriteSettings'])){
+			// Convert Typoscript to array
+			$TSparserObject = t3lib_div::makeInstance('t3lib_tsparser');
+			$TSparserObject->parse($globalProperties['advancedSettings']['overwriteSettings']);
+			if(count($TSparserObject->errors)>0){
+				t3lib_div::devlog('overwrite settings could not be parsed','extbase_kickstarter',0,$TSparserObject->setup);
+				throw new Exception('Could not parse overwrite settings:'.$TSparserObject->error[0][0]);
+			}
+			$overWriteSettings = Tx_Extbase_Utility_TypoScript::convertTypoScriptArrayToPlainArray($TSparserObject->setup);
+			$extension->setOverWriteSettings($overWriteSettings);
+		}
 		
-		// Convert Typoscript to array
-		$TSparserObject = t3lib_div::makeInstance('t3lib_tsparser');
-		$TSparserObject->parse($globalProperties['advancedSettings']['overwriteSettings']);
-		$overWriteSettings = Tx_Extbase_Utility_TypoScript::convertTypoScriptArrayToPlainArray($TSparserObject->setup);
-		$extension->setOverWriteSettings($overWriteSettings);
-		t3lib_div::devlog('ow settings','extbase_kickstarter',0,$overWriteSettings);
 			// version
 		$extension->setVersion($globalProperties['version']);
 		

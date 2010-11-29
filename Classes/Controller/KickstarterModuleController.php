@@ -123,9 +123,16 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 				
 				t3lib_div::devlog('JSON:','extbase_kickstarter',0,$extensionConfigurationFromJson);
 				
-				$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
+				
+				try {
+					$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
+				}
+				catch(Exception $e){
+					return json_encode(array($e->getMessage()));
+				}
 
 				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
+				
 				if(!is_dir($extensionDirectory)){
 					t3lib_div::mkdir($extensionDirectory);
 				}
