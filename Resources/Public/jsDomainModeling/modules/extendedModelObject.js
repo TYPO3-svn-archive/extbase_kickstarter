@@ -1,10 +1,3 @@
-Array.prototype.remove = function(from, to){
-	  this.splice(from,
-	    !to ||
-	    1 + to - from + (!(to < 0 ^ from >= 0) && (to < 0 || -1) * this.length));
-	  return this.length;
-	};
-	
 var advancedFields = {
 		type: "group",
 		inputParams: {
@@ -14,12 +7,12 @@ var advancedFields = {
 			name: "advancedSettings",
 			fields: [
 					{
-						type: "select", 
+						type: "select",
 						inputParams: {
-							label: "Type", 
+							label: "Type",
 							name: "relationType",
 							selectValues: ["zeroToOne", "zeroToMany", "manyToMany"],
-							selectOptions: ["0 .. 1","0 .. * (foreign Key)", "0 .. * (association table)"]
+							selectOptions: ["1:1","1:n", "m:n"]
 						}
 					},
 					{
@@ -38,6 +31,14 @@ var advancedFields = {
 							name: "propertyIsExcludeField",
 							value: false
 						}
+					},
+					{
+						type: "boolean",
+						inputParams: {
+							label: "Edit inline?",
+							name: "inlineEditing",
+							value: true
+						}
 					}
 			]
 		}
@@ -45,6 +46,12 @@ var advancedFields = {
 
 var relationFieldSet = extbaseModeling_wiringEditorLanguage.modules[0].container.fields[4].inputParams.fields[0].inputParams.elementType.inputParams.fields;
 relationFieldSet[5] = advancedFields;
+Array.prototype.remove = function(from, to){
+	  this.splice(from,
+	    !to ||
+	    1 + to - from + (!(to < 0 ^ from >= 0) && (to < 0 || -1) * this.length));
+	  return this.length;
+	};
 // remove excludeField in first level form
 relationFieldSet.remove(2);
 // remove Description in first level form

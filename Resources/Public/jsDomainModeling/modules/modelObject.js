@@ -252,12 +252,12 @@ extbaseModeling_wiringEditorLanguage.modules.push(
 													}
 												},
 												{
-													type: "select", 
+													type: "select",
 													inputParams: {
-														label: "Type", 
+														label: "Type",
 														name: "relationType",
 														selectValues: ["zeroToOne", "zeroToMany", "manyToMany"],
-														selectOptions: ["0 .. 1","0 .. * (foreign Key)", "0 .. * (association table)"]
+														selectOptions: ["1:1","1:n", "m:n"]
 													}
 												}
 											]

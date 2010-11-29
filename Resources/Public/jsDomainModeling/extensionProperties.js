@@ -132,5 +132,28 @@ extbaseModeling_wiringEditorLanguage.propertiesFields =
 				}
 			}
 		}
+	},
+	{
+		type: "group",
+		inputParams: {
+			collapsible: true,
+			collapsed: true,
+			legend: "Overwrite settings",
+			name: "advancedSettings",
+			className:'overwriteSettings',
+			fields: [
+					{
+						type: "text", 
+						inputParams: {
+							label: "You can configure the settings for each file separately: 0 => always overwrite, 1 => merge (if possible), 2 => never overwrite", 
+							name: "overwriteSettings", 
+							value: "Classes {\n\tController = 1\n\tModel = 1\n\tRepository = 1\n}\nConfiguration{\n\tTypoScript{\n\t\tconstants.txt = 2\n\t\tsetup.txt \t  = 2\n\t}\n}\nResources {\n\tPrivate {\n\t\tLanguage {\n\t\t\tlocallang.xml = 2\n\t\t}\n\t\tLayouts {\n\t\t\tlist.html = 0\n\t\t\tindex.html = 1\n\t\t}\n\t}\n}\next_localconf.php = 1\next_icon.gif = 2",
+							cols:35,
+							rows:22
+						}
+					},
+			]
+		}
 	}
+	
 ];

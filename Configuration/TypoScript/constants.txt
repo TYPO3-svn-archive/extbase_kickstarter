@@ -1,11 +1,5 @@
 module.tx_extbasekickstarter.settings {
-	
-	# cat=module.tx_extbasekickstarter - defaults//; type=boolean; label=Enable roundtrip: If true you can modify the source code of auto generated files and continue editing with the kickstarter 
-	enableRoundtrip = 1
-	
-	# cat=module.tx_extbasekickstarter - defaults//; type=boolean; label=Extended forms: If true the relations hav some more fields in a separate form
-	extendedForms = 1
-	
+		
 	classBuilder {
 				
 		Controller {
@@ -23,15 +17,6 @@ module.tx_extbasekickstarter.settings {
 				valueObjectParentClass = Tx_Extbase_DomainObject_AbstractValueObject
 				
 		}
-	}
-	
-	roundtrip {
-	
-			# cat=module.tx_extbasekickstarter - roundTrip //; type=string; label=Keep backup of files: In case a file needs to be deleted or renamed, keep an old version of the file
-			backupFiles = 1
-			
-			# cat=module.tx_extbasekickstarter - roundTrip //; type=string; label=Backup dir: The directory for backups (in the extension directory)
-			backupDir =  _bak
 	}
 		
 }

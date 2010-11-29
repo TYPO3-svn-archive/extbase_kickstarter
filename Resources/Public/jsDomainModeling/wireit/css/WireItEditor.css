@@ -144,6 +144,11 @@ div.savedStatus {
 	width: 50px;
 }
 
+#propertiesForm div.inputEx-Group div.overwriteSettings div.inputEx-label{
+	width:300px;
+	text-align:left;
+}
+
 
 /**
  * Dialogs
