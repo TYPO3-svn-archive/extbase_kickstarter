@@ -219,6 +219,23 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 				return 'Could not generate domain model, error: ' . $e->getMessage();
 			}
 
+			// Generate basic UnitTests
+			try {
+				t3lib_div::mkdir_deep($extensionDirectory, 'Tests/Domain/Model');
+				$domainModelTestsDirectory = $extensionDirectory . 'Tests/Domain/Model/';
+
+				t3lib_div::mkdir_deep($extensionDirectory, 'Tests/Controller');
+				$crudEnabledControllerTestsDirectory = $extensionDirectory . 'Tests/Controller/';
+
+				foreach($this->extension->getDomainObjects() as $domainObject) {
+					t3lib_div::devlog('forloop'.$domainObject->getName(), 'tx_extbasekickstarter', 0);
+					$fileContents = $this->generateDomainModelTests($extension, $domainObject);
+					t3lib_div::writeFile($domainModelTestsDirectory . $domainObject->getName() . 'Test.php', $fileContents);
+				}
+			} catch (Exception $e) {
+				return 'Could not generate basic unittests, error: ' . $e->getMessage();
+			}
+
 			// Generate Action Controller
 			try {
 				t3lib_div::mkdir_deep($extensionDirectory, 'Classes/Controller');
@@ -372,6 +389,30 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_Singleton {
 	public function generateTyposcriptSetup(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		return $this->renderTemplate('Configuration/TypoScript/setup.txt', array('extension' => $extension));
 	}
-}
 
+	/**
+	 * Generate the tests for a model
+	 *
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Extension $extension
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
+	 *
+	 * @return string
+	 */
+	public function generateDomainModelTests(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension, Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {
+		return $this->renderTemplate('Tests/DomainModelTest.phpt', array('extension' => $extension, 'domainObject' => $domainObject));
+	}
+
+	/**
+	 * Generate the tests for a CRUD-enabled controller
+	 *
+	 * @param array $extensionProperties
+	 * @param string $controllerName
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
+	 *
+	 * @return string
+	 */
+	public function generateScaffoldingControllerTests($extensionProperties, $controllerName, Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {
+		return $this->renderTemplate('Tests/ScaffoldingControllerTest.phpt', array('extensionProperties' => $extensionProperties, 'controllerName' => $controllerName, 'domainObject' => $domainObject));
+	}
+}
 ?>

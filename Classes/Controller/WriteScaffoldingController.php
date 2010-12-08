@@ -124,6 +124,7 @@ class Tx_ExtbaseKickstarter_Controller_WriteScaffoldingController extends Tx_Ext
 
 
 		$this->rewriteScaffoldingController($extensionKey, $controllerName, $domainObject);
+		$this->addUnitTestsForScaffoldingController($this->getExtensionProperties($extensionKey), $controllerName, $domainObject);
 
 		$this->flashMessageContainer->add('The controller ' . $controllerName . ' was converted to static scaffolding.');
 		$this->redirect('index');
@@ -153,6 +154,35 @@ class Tx_ExtbaseKickstarter_Controller_WriteScaffoldingController extends Tx_Ext
 
 		$output = preg_replace('/##TOKEN FOR SCAFFOLDING(.*)##/s', $this->codeGenerator->generateActionControllerCrudActions($domainObject), $output);
 		file_put_contents($pathAndFileName, $output);
+	}
+
+	/**
+	 * Main entry to writing unit tests for each scaffolding controller
+	 *
+	 * @param array $extensionProperties
+	 * @param string $controller
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject
+	 */
+	protected function addUnitTestsForScaffoldingController($extensionProperties, $controllerName, Tx_ExtbaseKickstarter_Domain_Model_DomainObject $domainObject) {
+		$output = $this->codeGenerator->generateScaffoldingControllerTests($extensionProperties, $controllerName, $domainObject); 
+		$pathAndFileName = t3lib_extmgm::extPath($extensionKey) . 'Tests/Controller/' . $controllerName . 'Test.php';
+		file_put_contents($pathAndFileName, $output);
+	}
+
+	/**
+	 * Read in the configuration to get necessary values like name of authors
+	 * and extension etc. and return the properties section as array
+	 *
+	 * @param string $extensionKey
+	 * @return array
+	 */
+	public function getExtensionProperties($extensionKey) {
+		$pathAndFileName = t3lib_extmgm::extPath($extensionKey) . 'kickstarter.json';
+		if (is_file($pathAndFileName)) {
+			$jsonString = file_get_contents($pathAndFileName);
+			$configuration = json_decode($jsonString, TRUE);
+			return $configuration['properties'];
+		}
 	}
 }
 ?>
