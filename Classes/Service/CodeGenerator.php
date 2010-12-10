@@ -158,6 +158,20 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 		foreach($extensionFiles as  $extensionFile){
 			try {
 				$fileContents = $this->renderTemplate( Tx_Extbase_Utility_Extension::convertUnderscoredToLowerCamelCase($extensionFile).'t', array('extension' => $extension));
+				if(file_exists($extensionDirectory . 'custom_' . $extensionFile)){
+					
+					$customFileContent = file_get_contents($extensionDirectory . 'custom_' . $extensionFile);
+					
+					if(strpos($extensionFile,'php')>-1){
+						$fileContents = str_replace('?>',"\n",$fileContents);
+						$customFileContent = str_replace('?>',"\n",$customFileContent);
+						$customFileContent = str_replace('<?php',"\n",$customFileContent);
+						$fileContents .=  $customFileContent . "\n?>";
+					}
+					else $fileContents = $fileContents . "\n" . $customFileContent;
+					
+					t3lib_div::devlog('Content from custom file included: custom_' . $extensionFile,'extbase_kickstarter',0);
+				}
 				$this->writeFile($extensionDirectory . $extensionFile, $fileContents);
 			} 
 			catch (Exception $e) {

@@ -250,15 +250,13 @@ class Tx_ExtbaseKickstarter_Service_ClassBuilder implements t3lib_Singleton {
 			$this->classObject->setMethod($addMethod);
 			$this->classObject->setMethod($removeMethod);
 		}
-		else {
-			$getMethod = $this->buildGetterMethod($domainProperty);
-			$setMethod = $this->buildSetterMethod($domainProperty);
-			$this->classObject->setMethod($getMethod);
-			$this->classObject->setMethod($setMethod);
-			if ($domainProperty->getTypeForComment() == 'boolean'){
-				$isMethod = $this->buildIsMethod($domainProperty);
-				$this->classObject->setMethod($isMethod);
-			}
+		$getMethod = $this->buildGetterMethod($domainProperty);
+		$setMethod = $this->buildSetterMethod($domainProperty);
+		$this->classObject->setMethod($getMethod);
+		$this->classObject->setMethod($setMethod);
+		if ($domainProperty->getTypeForComment() == 'boolean'){
+			$isMethod = $this->buildIsMethod($domainProperty);
+			$this->classObject->setMethod($isMethod);
 		}
 	}
 	
@@ -280,7 +278,7 @@ class Tx_ExtbaseKickstarter_Service_ClassBuilder implements t3lib_Singleton {
 			$getterMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($getterMethodName);
 			// default method body
 			$getterMethod->setBody($this->getDefaultMethodBody($domainProperty,'get'));
-			$getterMethod->setTag('return',strtolower($domainProperty->getTypeForComment()).' $'.$domainProperty->getName());
+			$getterMethod->setTag('return',$domainProperty->getTypeForComment().' $'.$domainProperty->getName());
 			$getterMethod->addModifier('public');
 		}
 		if(!$getterMethod->hasDescription()){
@@ -307,7 +305,7 @@ class Tx_ExtbaseKickstarter_Service_ClassBuilder implements t3lib_Singleton {
 			$setterMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($setterMethodName);
 			// default method body
 			$setterMethod->setBody($this->getDefaultMethodBody($domainProperty,'set'));
-			$setterMethod->setTag('param',strtolower($domainProperty->getTypeForComment()).' $'.$propertyName);
+			$setterMethod->setTag('param',$domainProperty->getTypeForComment().' $'.$propertyName);
 			$setterMethod->setTag('return','void');
 			$setterMethod->addModifier('public');
 		}

@@ -642,6 +642,20 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 		if(count($domainObject->getActions()) > 0){
 			$this->cleanUp(Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->previousExtensionDirectory,'Controller',false),$domainObject->getName().'Controller.php');
 		}
+		// other files
+		$iconsDirectory = $this->extensionDirectory . 'Resources/Public/Icons/';
+		$languageDirectory = $this->extensionDirectory . 'Resources/Private/Language/';
+		$locallang_cshFile = $languageDirectory . 'locallang_csh_' . $domainObject->getDatabaseTableName() . '.xml';
+		$iconFile = $iconsDirectory . $domainObject->getDatabaseTableName() . '.gif';
+		if(file_exists($locallang_cshFile)){
+			// no overwrite settings check here...
+			unlink($locallang_cshFile);
+			t3lib_div::devLog('locallang_csh file removed: '.$locallang_cshFile, 'extbase_kickstarter',1);
+		}
+		if(file_exists($iconFile)){
+			unlink($iconFile);
+			t3lib_div::devLog('icon file removed: '.$iconFile, 'extbase_kickstarter',1);
+		}
 	}
 	
 	/**
