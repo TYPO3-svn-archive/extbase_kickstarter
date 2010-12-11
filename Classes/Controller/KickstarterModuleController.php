@@ -66,7 +66,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 			$this->codeGenerator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_CodeGenerator');
 			$frameworkConfiguration = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
 			$this->settings = $frameworkConfiguration['settings'];
-			$this->settings = array_merge($this->settings,Tx_ExtbaseKickstarter_Service_RoundTrip::getExtConfiguration());
+			$this->settings['extConf'] = Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getKickstarterSettings();
 		}
 	}
 	
@@ -93,8 +93,12 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 	public function injectConfigurationManager(Tx_Extbase_Configuration_ConfigurationManager $configurationManager) {
 		$this->configurationManager = $configurationManager;
 		$this->settings = $this->configurationManager->getConfiguration(Tx_Extbase_Configuration_ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS);
-		$this->settings = array_merge($this->settings,Tx_ExtbaseKickstarter_Service_RoundTrip::getExtConfiguration());
+		$this->settings['extConf'] = Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getKickstarterSettings();
 	}
+	
+
+	
+	
 
 	/**
 	 * Index action for this controller.
@@ -136,9 +140,9 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 				if(!is_dir($extensionDirectory)){
 					t3lib_div::mkdir($extensionDirectory);
 				}
-				if($this->settings['backupExtension'] == 1){
+				if($this->settings['extConf']['backupExtension'] == 1){
 					try {
-						Tx_ExtbaseKickstarter_Service_RoundTrip::backupExtension($extensionSchema,$this->settings['backupDir']);
+						Tx_ExtbaseKickstarter_Service_RoundTrip::backupExtension($extensionSchema,$this->settings['extConf']['backupDir']);
 					}
 					catch(Exception $e){
 						return json_encode(array($e->getMessage()));
@@ -181,7 +185,8 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 			}
 			$jsonFile =  PATH_typo3conf . 'ext/' . $singleExtensionDirectory . '/kickstarter.json';
 			if (file_exists($jsonFile)) {
-				if($this->settings['enableRoundtrip']){
+				
+				if($this->settings['extConf']['enableRoundtrip']){
 					// generate unique IDs 
 					$extensionConfigurationFromJson = json_decode(file_get_contents($jsonFile),true);
 					$extensionConfigurationFromJson['modules'] = $this->generateUniqueIDs($extensionConfigurationFromJson['modules']);

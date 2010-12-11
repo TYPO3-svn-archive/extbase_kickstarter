@@ -76,7 +76,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 			$this->classBuilder = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Service_ClassBuilder');
 			$frameworkConfiguration = Tx_Extbase_Dispatcher::getExtbaseFrameworkConfiguration();
 			$this->settings = $frameworkConfiguration['settings'];
-			$this->settings = array_merge($this->settings,Tx_ExtbaseKickstarter_Service_RoundTrip::getExtConfiguration());
+			$this->settings['extConf'] = Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getKickstarterSettings();
 			if(Tx_ExtbaseKickstarter_Utility_Compatibility::compareFluidVersion('1.1.0', '<')) {
 				// Compatibility with Fluid 1.0
 				$this->objectManager = new Tx_Fluid_Compatibility_ObjectFactory();
@@ -111,7 +111,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 	public function injectConfigurationManager(Tx_Extbase_Configuration_ConfigurationManager $configurationManager) {
 		$this->configurationManager = $configurationManager;
 		$this->settings = $this->configurationManager->getConfiguration(Tx_Extbase_Configuration_ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS);
-		$this->settings = array_merge($this->settings,Tx_ExtbaseKickstarter_Service_RoundTrip::getExtConfiguration());
+		$this->settings['extConf'] = Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getKickstarterSettings();
 	}
 	
 	/**
@@ -131,13 +131,12 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 	 */
 	public function build(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		$this->extension = $extension;
-		$this->overWriteSettings = $this->extension->getOverwriteSettings();
 		
 		$this->classBuilder->initialize($extension);
-		if($this->settings['enableRoundtrip']==1){
+		if($this->settings['extConf']['enableRoundtrip']==1){
 			$this->roundTripEnabled = true;
 		}
-		else t3lib_div::devLog('roundtrip disabled', 'extbase_kickstarter');
+		else t3lib_div::devLog('roundtrip disabled', 'extbase_kickstarter',0,$this->settings);
 		// Validate the extension
 		$extensionValidator = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Validator_ExtensionValidator');
 		try {
@@ -152,26 +151,26 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 		if(!is_dir($extensionDirectory)){
 			t3lib_div::mkdir($extensionDirectory);
 		}
+		
+		
 
 		// Generate ext_emconf.php, ext_tables.* and TCA definition
 		$extensionFiles = array('ext_emconf.php','ext_tables.php','ext_tables.sql','ext_localconf.php');
 		foreach($extensionFiles as  $extensionFile){
 			try {
 				$fileContents = $this->renderTemplate( Tx_Extbase_Utility_Extension::convertUnderscoredToLowerCamelCase($extensionFile).'t', array('extension' => $extension));
-				if(file_exists($extensionDirectory . 'custom_' . $extensionFile)){
-					
-					$customFileContent = file_get_contents($extensionDirectory . 'custom_' . $extensionFile);
-					
-					if(strpos($extensionFile,'php')>-1){
-						$fileContents = str_replace('?>',"\n",$fileContents);
-						$customFileContent = str_replace('?>',"\n",$customFileContent);
-						$customFileContent = str_replace('<?php',"\n",$customFileContent);
-						$fileContents .=  $customFileContent . "\n?>";
-					}
-					else $fileContents = $fileContents . "\n" . $customFileContent;
-					
-					t3lib_div::devlog('Content from custom file included: custom_' . $extensionFile,'extbase_kickstarter',0);
-				}
+				$this->writeFile($extensionDirectory . $extensionFile, $fileContents);
+			} 
+			catch (Exception $e) {
+				return 'Could not write '.$extensionFile.', error: ' . $e->getMessage();
+			}
+		}
+		
+		// Generate ext_emconf.php, ext_tables.* and TCA definition
+		$extensionFiles = array('ext_emconf.php','ext_tables.php','ext_tables.sql','ext_localconf.php');
+		foreach($extensionFiles as  $extensionFile){
+			try {
+				$fileContents = $this->renderTemplate( Tx_Extbase_Utility_Extension::convertUnderscoredToLowerCamelCase($extensionFile).'t', array('extension' => $extension));
 				$this->writeFile($extensionDirectory . $extensionFile, $fileContents);
 			} 
 			catch (Exception $e) {
@@ -199,13 +198,20 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 		} catch (Exception $e) {
 			return 'Could not generate Tca.php, error: ' . $e->getMessage();
 		}
+		
+		if($this->roundTripEnabled && !file_exists($tcaDirectory.'Kickstarter/settings.yaml')){
+			t3lib_div::mkdir($tcaDirectory.'Kickstarter');
+			$fileContents = $this->generateYamlSettings($extension);
+			$targetFile = $tcaDirectory.'Kickstarter/settings.yaml';
+			$this->writeFile($targetFile, $fileContents);
+			
+		}
 
 		// Generate TypoScript setup
 		try {
 			t3lib_div::mkdir_deep($extensionDirectory, 'Configuration/TypoScript');
 			$typoscriptDirectory = $extensionDirectory . 'Configuration/TypoScript/';
 			$fileContents = $this->generateTyposcriptSetup($extension);
-			$targetFile = $typoscriptDirectory . 'setup.txt';
 			$this->writeFile($typoscriptDirectory . 'setup.txt', $fileContents);
 		} catch (Exception $e) {
 			return 'Could not generate typoscript setup, error: ' . $e->getMessage();
@@ -300,7 +306,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 					$domainTemplateDirectory = $privateResourcesDirectory . 'Templates/' . $domainObject->getName() . '/';
 					foreach($domainObject->getActions() as $action) {
 						$fileContents = $this->generateDomainTemplate($domainObject, $action);
-						$this->writeFile($domainTemplateDirectory . $action->getName() . '.html', $fileContents);
+						$this->writeFile($domainTemplateDirectory . ucfirst($action->getName()) . '.html', $fileContents);
 					}
 				}
 			} catch (Exception $e) {
@@ -453,6 +459,11 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 	#public function generateTCA(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		#return $this->renderTemplate('Configuration/Tca.phpt', array('extension' => $extension));
 	}
+	
+	public function generateYamlSettings(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
+		return $this->renderTemplate('Configuration/Kickstarter/settings.yamlt', array('extension' => $extension));
+	}
+	
 
 	public function generateTyposcriptSetup(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension) {
 		return $this->renderTemplate('Configuration/TypoScript/setup.txt', array('extension' => $extension));
@@ -496,14 +507,40 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 	 * @param string $fileContents
 	 */
 	protected function writeFile($targetFile,$fileContents){
-		if(!file_exists($targetFile) || ($this->roundTripEnabled && Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSettingForPath($targetFile,$this->extension->getOverWriteSettings()) < 2)){
-			if(empty($fileContents)){
-				throw new Exception('No file content! File ' . $targetFile . 'could not be created');
+		if($this->roundTripEnabled){
+			$overWriteMode = Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSettingForPath($targetFile,$this->extension);
+			if(file_exists($targetFile)){
+				if($overWriteMode == 2){
+					// keep the existing file
+					return;
+				}
+				else if($overWriteMode == 1 && strpos($targetFile,'Classes')===false){
+					// merge the files means append everything behind the split token
+					$existingFileContent = file_get_contents($targetFile);
+					$fileParts = explode(Tx_ExtbaseKickstarter_Service_RoundTrip::SPLIT_TOKEN,$existingFileContent);
+					if(count($fileParts) == 2){
+						$customFileContent .= $fileParts[1];
+					}
+					if(strtolower(pathinfo($targetFile, PATHINFO_EXTENSION)) == 'php'){
+						$fileContents = str_replace('?>','',$fileContents);
+						$customFileContent =  str_replace('?>','',$customFileContent);
+						$fileContents .= Tx_ExtbaseKickstarter_Service_RoundTrip::SPLIT_TOKEN;
+						$fileContents .=  $customFileContent . '?>';
+					}
+					else {
+						$fileContents .= "\n".Tx_ExtbaseKickstarter_Service_RoundTrip::SPLIT_TOKEN;
+						$fileContents .= $customFileContent;
+					}
+				}
 			}
-			$success = t3lib_div::writeFile($targetFile, $fileContents);
-			if(!$success){
-				throw new Exception('File ' . $targetFile . 'could not be created!');
-			}
+		}
+		
+		if(empty($fileContents)){
+			throw new Exception('No file content! File ' . $targetFile . 'could not be created');
+		}
+		$success = t3lib_div::writeFile($targetFile, $fileContents);
+		if(!$success){
+			throw new Exception('File ' . $targetFile . 'could not be created!');
 		}
 	}
 	
@@ -515,7 +552,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 	 * @param string $fileContents
 	 */
 	protected function upload_copy_move($sourceFile,$targetFile){
-		if(!file_exists($targetFile) || ($this->roundTripEnabled && Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSettingForPath($targetFile,$this->extension->getOverWriteSettings()) < 2)){
+		if(!file_exists($targetFile) || ($this->roundTripEnabled && Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSettingForPath($targetFile,$this->extension) < 2)){
 			t3lib_div::upload_copy_move($sourceFile,$targetFile);
 		}
 	}

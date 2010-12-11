@@ -31,8 +31,11 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilderTest extends Tx_ExtbaseKickstarte
 	protected $objectSchemaBuilder;
 
 	public function setUp() {
-		parent::setUp();
+		//parent::setUp();
+		$this->extension = $this->getMock('Tx_ExtbaseKickstarter_Domain_Model_Extension',array('getOverWriteSettings'));
 		$this->objectSchemaBuilder = $this->getMock($this->buildAccessibleProxy('Tx_ExtbaseKickstarter_ObjectSchemaBuilder'), array('dummy'));
+		$this->extensionKey = 'dummy';
+		$this->dummyExtensionDir = PATH_typo3conf.'ext/'.$this->extensionKey.'/';
 	}
 	/**
 	 * @test
@@ -41,7 +44,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilderTest extends Tx_ExtbaseKickstarte
 
 		$description = 'My cool fancy description';
 		$name = 'ExtName';
-		$extensionKey = 'EXTKEY';
+		$extensionKey = $this->extensionKey;
 		$state = 0;
 
 		$input = array(
@@ -58,6 +61,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilderTest extends Tx_ExtbaseKickstarte
 		$extension->setName($name);
 		$extension->setExtensionKey($extensionKey);
 		$extension->setState($state);
+		$extension->setExtensionDir($this->dummyExtensionDir);
 
 		$actual = $this->objectSchemaBuilder->build($input);
 		$this->assertEquals($actual, $extension, 'Extension properties were not extracted.');
@@ -245,7 +249,7 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilderTest extends Tx_ExtbaseKickstarte
 			),
 			'properties' => array(
 				'description' => 'Some description',
-				'extensionKey' => 'my_extension_key',
+				'extensionKey' => $this->extensionKey,
 				'name' => 'My ext name',
 				'state' => 'beta',
 			),
@@ -276,8 +280,9 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilderTest extends Tx_ExtbaseKickstarte
 		$extension = new Tx_ExtbaseKickstarter_Domain_Model_Extension();
 		$extension->setName('My ext name');
 		$extension->setState(Tx_ExtbaseKickstarter_Domain_Model_Extension::STATE_BETA);
-		$extension->setExtensionKey('my_extension_key');
+		$extension->setExtensionKey($this->extensionKey);
 		$extension->setDescription('Some description');
+		$extension->setExtensionDir($this->dummyExtensionDir);
 
 		$blog = new Tx_ExtbaseKickstarter_Domain_Model_DomainObject();
 		$blog->setName('Blog');

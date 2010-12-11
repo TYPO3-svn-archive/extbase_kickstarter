@@ -85,7 +85,7 @@ class Tx_ExtbaseKickstarter_Reflection_MethodReflection extends Tx_Extbase_Refle
 		if(!preg_match($paramRegex, $paramAsString)){
 			// since the approach to cast the reflection parameter as a string is not part of the official PHP API
 			// this might not work anymore in future versions
-			t3lib_div::devLog('ReflectionParameter casted as string has no the expected format: '.$paramAsString,'extbase_kickstarter');
+			t3lib_div::devLog('ReflectionParameter in method '.$this->getName().' casted as string has not the expected format: '.$paramAsString,'extbase_kickstarter',2);
 			return '';
 		}
 		$typeHintRegex = '/>\s*([a-zA-Z0-9_&\s]*)\s*\$/';

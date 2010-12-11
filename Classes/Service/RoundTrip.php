@@ -30,6 +30,7 @@
  */
 class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 	
+	const SPLIT_TOKEN = '## KICKSTARTER DEFAULTS END TOKEN - Everything BEFORE this line is overwritten with the defaults of the kickstarter';
 	
 	protected $previousExtension = NULL;
 	
@@ -217,11 +218,11 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 				return $this->classObject;
 			}
 			else {
-				t3lib_div::devLog('class file didn\'t exist:'.$fileName, 'extbase_kickstarter',2);
+				t3lib_div::devLog('class file didn\'t exist:'.$fileName, 'extbase_kickstarter',0);
 			}
 		}
 		else {
-			t3lib_div::devlog('domainObject not identified:'.$currentDomainObject->getName() . '(' . $currentDomainObject->getUniqueIdentifier() . ')','extbase_kickstarter',2,$this->oldDomainObjects);
+			t3lib_div::devlog('domainObject not identified:'.$currentDomainObject->getName(),'extbase_kickstarter',0,$this->oldDomainObjects);
 		}
 		return NULL;
 	}
@@ -642,20 +643,6 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 		if(count($domainObject->getActions()) > 0){
 			$this->cleanUp(Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->previousExtensionDirectory,'Controller',false),$domainObject->getName().'Controller.php');
 		}
-		// other files
-		$iconsDirectory = $this->extensionDirectory . 'Resources/Public/Icons/';
-		$languageDirectory = $this->extensionDirectory . 'Resources/Private/Language/';
-		$locallang_cshFile = $languageDirectory . 'locallang_csh_' . $domainObject->getDatabaseTableName() . '.xml';
-		$iconFile = $iconsDirectory . $domainObject->getDatabaseTableName() . '.gif';
-		if(file_exists($locallang_cshFile)){
-			// no overwrite settings check here...
-			unlink($locallang_cshFile);
-			t3lib_div::devLog('locallang_csh file removed: '.$locallang_cshFile, 'extbase_kickstarter',1);
-		}
-		if(file_exists($iconFile)){
-			unlink($iconFile);
-			t3lib_div::devLog('icon file removed: '.$iconFile, 'extbase_kickstarter',1);
-		}
 	}
 	
 	/**
@@ -693,42 +680,35 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 	 * 2 for keep existing file
 	 * 
 	 * @param string $path of the file to get the settings for
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_Extension $extension
 	 * @return int overWriteSetting
 	 */
-	public static function getOverWriteSettingForPath($path,$settings){
+	public static function getOverWriteSettingForPath($path,$extension){
+		$map = array(
+			'merge' => 1,
+			'keep' => 2
+		);
+		$settings = $extension->getSettings();
 		if(!is_array($settings)){
 			throw new Exception('overWrite settings could not be parsed');
 		}
+		if(strpos($path,$extension->getExtensionDir())=== 0){
+			$path = str_replace($extension->getExtensionDir(),'',$path);
+		}
 		$pathParts = explode('/',$path);
-		$overWriteSettings =  $settings;
-		if($pathParts[0] == 'Classes'){
-			if($pathParts[1] == 'Controller' && isset($overWriteSettings['Classes']['Controller'])){
-				//t3lib_div::devLog('Overwrite setting for File: '.$path.'->'.$settings['Classes']['Controller'], 'extbase_kickstarter',0,$settings);
-				return $overWriteSettings['Classes']['Controller'];
+		$overWriteSettings =  $settings['overwriteSettings'];
+		
+		foreach($pathParts as $pathPart){
+
+			if(isset($overWriteSettings[$pathPart]) && is_array($overWriteSettings[$pathPart])){
+				// step one level deeper
+				$overWriteSettings = $overWriteSettings[$pathPart];
 			}
-			else if($pathParts[2] == 'Model' && isset($overWriteSettings['Classes']['Model'])){
-				//t3lib_div::devLog('Overwrite setting for File: '.$path.'->'.$settings['Classes']['Model'], 'extbase_kickstarter',0,$settings);
-				return $overWriteSettings['Classes']['Model'];
-			}
-			else if($pathParts[2] == 'Repository' && isset($overWriteSettings['Classes']['Repository'])){
-				//t3lib_div::devLog('Overwrite setting for File: '.$path.'->'.$settings['Classes']['Repository'], 'extbase_kickstarter',0,$settings);
-				return $overWriteSettings['Classes']['Repository'];
+			else {
+				return $map[$overWriteSettings[$pathPart]];
 			}
 		}
-		else {
-			foreach($pathParts as $pathPart){
-				if(strpos($pathPart,'.')>-1){
-					$fileNameParts = explode('.',$pathPart);
-					if(isset($overWriteSettings[$fileNameParts[0]][$fileNameParts[1]])){
-						//t3lib_div::devLog('Overwrite setting for File: '.$path.'->'.$settings[$fileNameParts[0]][$fileNameParts[1]], 'extbase_kickstarter',0,$settings);
-						return $overWriteSettings[$fileNameParts[0]][$fileNameParts[1]];
-					}
-				}
-				if(isset($overWriteSettings[$pathPart])){
-					$overWriteSettings = $overWriteSettings[$pathPart];
-				}
-			}
-		}
+		
 		
 		return 0;
 	}

@@ -53,16 +53,9 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_singleton {
 			// original extensionKey
 			$extension->setOriginalExtensionKey($globalProperties['originalExtensionKey']);	
 		}
-		if(!empty($globalProperties['advancedSettings']['overwriteSettings'])){
-			// Convert Typoscript to array
-			$TSparserObject = t3lib_div::makeInstance('t3lib_tsparser');
-			$TSparserObject->parse($globalProperties['advancedSettings']['overwriteSettings']);
-			if(count($TSparserObject->errors)>0){
-				t3lib_div::devlog('overwrite settings could not be parsed','extbase_kickstarter',0,$TSparserObject->setup);
-				throw new Exception('Could not parse overwrite settings:'.$TSparserObject->error[0][0]);
-			}
-			$overWriteSettings = Tx_Extbase_Utility_TypoScript::convertTypoScriptArrayToPlainArray($TSparserObject->setup);
-			$extension->setOverWriteSettings($overWriteSettings);
+		$settings = Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getExtensionSettings($extension);
+		if(!empty($settings)){
+			$extension->setSettings($settings);
 		}
 		
 			// version
