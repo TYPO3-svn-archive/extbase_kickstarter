@@ -362,12 +362,10 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 						$this->classObject->removeMethod('add'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
 						$this->classObject->removeMethod('remove'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
 					}
-					else{
-						$this->classObject->removeMethod('get'.ucfirst($oldProperty->getName()));
-						$this->classObject->removeMethod('set'.ucfirst($oldProperty->getName()));
-						if ($oldProperty->isBoolean()){
-							$this->classObject->removeMethod('is'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
-						}
+					$this->classObject->removeMethod('get'.ucfirst($oldProperty->getName()));
+					$this->classObject->removeMethod('set'.ucfirst($oldProperty->getName()));
+					if ($oldProperty->isBoolean()){
+						$this->classObject->removeMethod('is'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName())));
 					}
 					$this->classObject->removeProperty($oldProperty->getName());
 					t3lib_div::devlog('property type changed => removed old property:'.$oldProperty->getName(),'extbase_kickstarter',1);
@@ -390,14 +388,12 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 			$this->classObject->removeMethod( 'remove'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName)));
 			t3lib_div::devLog('Methods removed: '.'add'.ucfirst(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName)), 'extbase_kickstarter');
 		}
-		else {
-			$this->classObject->removeMethod('get'.ucfirst($propertyName));
-			$this->classObject->removeMethod('set'.ucfirst($propertyName));
-			if ($propertyToRemove->isBoolean()){
-				$this->classObject->removeMethod('is'.ucfirst($propertyName));
-			}
-			t3lib_div::devLog('Methods removed: '.'get'.ucfirst($propertyName), 'extbase_kickstarter');
+		$this->classObject->removeMethod('get'.ucfirst($propertyName));
+		$this->classObject->removeMethod('set'.ucfirst($propertyName));
+		if ($propertyToRemove->isBoolean()){
+			$this->classObject->removeMethod('is'.ucfirst($propertyName));
 		}
+		t3lib_div::devLog('Methods removed: '.'get'.ucfirst($propertyName), 'extbase_kickstarter');
 	}
 	
 	/**

@@ -43,8 +43,12 @@ overwriteSettings:
 			Languages:
 				locallang.xml:		keep
 				
+			Templates:		keep
 	
-	ext_icon.gif:	keep
+	ext_icon.gif:			keep
+#	ext_localconf.php		merge
+#	ext_tables.php			merge
+#	ext_tables.sql			merge
 
 
 ######### settings for classBuilder ##############
