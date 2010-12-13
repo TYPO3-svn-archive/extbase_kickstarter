@@ -534,9 +534,9 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 				}
 			}
 		}
-		
+
 		if(empty($fileContents)){
-			throw new Exception('No file content! File ' . $targetFile . 'could not be created');
+			t3lib_div::devLog('No file content! File ' . $targetFile . 'could not be created', 'extbase_kickstarter',0,$this->settings);
 		}
 		$success = t3lib_div::writeFile($targetFile, $fileContents);
 		if(!$success){
