@@ -50,7 +50,11 @@ class Tx_ExtbaseKickstarter_ViewHelpers_ListObjectsByPropertyCSVViewHelper exten
 		$values = array();
 		foreach($objects as $object) {
 			if(method_exists($object, 'get' . ucfirst($property))) {
-				eval('$values[] = $object->get' . ucfirst($property). '();');
+				$getterMethod = 'get' . ucfirst($property);
+				$val = $object->$getterMethod();
+				if (!empty($val)) {
+					$values[] = $val;
+				}
 			}
 		}
 		return join(',', $values);
