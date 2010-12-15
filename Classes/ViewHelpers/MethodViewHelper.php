@@ -97,7 +97,10 @@ class Tx_ExtbaseKickstarter_ViewHelpers_MethodViewHelper extends Tx_Fluid_Core_V
 			if($parameter->isPassedByReference()){
 				$parameterName = '&'.$parameterName;
 			}
-			$parameters[] = $typeHint.' '.$parameterName;
+			if(!empty($typeHint)){
+				$parameterName = $typeHint.' '.$parameterName;
+			}
+			$parameters[] = $parameterName;
 			//t3lib_div::devLog($methodSchemaObject->getName().':'.$parameter->getName(), 'parameter debug');			
 		}
 		
