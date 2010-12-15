@@ -186,7 +186,6 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 			$extensionDir = $this->previousExtensionDirectory;
 			$fileName = Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($extensionDir,'Model',false).$oldDomainObject->getName().'.php';
 			if(file_exists($fileName)){
-				t3lib_div::devLog('Filename of existing class:'.$fileName, 'extbase_kickstarter',0);
 				// import the classObject from the existing file
 				include_once($fileName);
 				$className = $oldDomainObject->getClassName();
@@ -433,7 +432,7 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 			return true;
 		}
 		if($newProperty->getName() != $this->updateExtensionKey($oldProperty->getName())){
-			t3lib_div::devlog('property renamed:'.$this->updateExtensionKey($oldProperty->getName()).' '.$newProperty->getName(),'extbase_kickstarter',0,$this->classObject->getProperties());
+			t3lib_div::devlog('property renamed:'.$this->updateExtensionKey($oldProperty->getName()).' '.$newProperty->getName(),'extbase_kickstarter',0);
 			return true;
 		}
 		if($newProperty->getTypeForComment() != $this->updateExtensionKey($oldProperty->getTypeForComment())){
@@ -472,12 +471,10 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 			$this->updateMethod($oldProperty,$newProperty,'add');
 			$this->updateMethod($oldProperty,$newProperty,'remove');
 		}
-		else {
-			$this->updateMethod($oldProperty,$newProperty,'get');
-			$this->updateMethod($oldProperty,$newProperty,'set');
-			if ($newProperty->isBoolean()){
-				$this->updateMethod($oldProperty,$newProperty,'is');
-			}
+		$this->updateMethod($oldProperty,$newProperty,'get');
+		$this->updateMethod($oldProperty,$newProperty,'set');
+		if ($newProperty->isBoolean()){
+			$this->updateMethod($oldProperty,$newProperty,'is');
 		}
 		if($newProperty->getTypeForComment() != $this->updateExtensionKey($oldProperty->getTypeForComment())){
 			if($oldProperty->isBoolean() && !$newProperty->isBoolean()){
@@ -497,7 +494,9 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 	protected function updateMethod($oldProperty,$newProperty,$methodType){
 		
 		$oldMethodName = Tx_ExtbaseKickstarter_Service_ClassBuilder::getMethodName($oldProperty,$methodType);
+		// the method to be merged
 		$mergedMethod = $this->classObject->getMethod($oldMethodName);
+		
 		if(!$mergedMethod){
 			// no previous version of the method exists
 			return;
@@ -506,33 +505,30 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 		t3lib_div::devlog('updateMethod:'.$oldMethodName.'=>'.$newMethodName,'extbase_kickstarter');
 		
 		if($oldProperty->getName() != $newProperty->getName()){
+			// rename the method
 			$mergedMethod->setName($newMethodName);
+			
 			$oldMethodBody = $mergedMethod->getBody();
+			$oldComment =  $mergedMethod->getDocComment();
 			
 			if(trim($oldMethodBody) ==  trim(Tx_ExtbaseKickstarter_Service_ClassBuilder::getDefaultMethodBody($oldProperty, $methodType))){
 				// this means the method was not modified so we can remove it and it will be regenerated from ClassBuilder
 				$this->classObject->removeMethod($oldMethodName);
 				return;
 			}
-			$newMethodBody = $this->replacePropertyNameInString($oldMethodBody,$oldProperty->getName(),$newProperty->getName());
+			$newMethodBody = $this->replacePropertyNameInMethodBody($oldProperty->getName(),$newProperty->getName(),$oldMethodBody);
 			$mergedMethod->setBody($newMethodBody);
 		}
-		
 		// update the method parameters
 		$methodParameters = $mergedMethod->getParameters();
+		
 		if(!empty($methodParameters)){
 			foreach($methodParameters as $methodParameter){
 				$oldParameterName = $methodParameter->getName();
-				if($oldParameterName == $oldProperty->getName()){
-					$methodParameter->setName(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($newProperty->getName()));
-				}
-				else {
-					$newParameterName = str_replace(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName()),Tx_ExtbaseKickstarter_Utility_Inflector::singularize($newProperty->getName()),$oldParameterName); // TODO: str_replace is insufficient in certain cases 
-					// if the extension was renamed
-					$newParameterName = $this->updateExtensionKey($newParameterName);
+				if($oldParameterName == Tx_ExtbaseKickstarter_Service_ClassBuilder::getParameterName($oldProperty,$methodType)){
+					$newParameterName =  Tx_ExtbaseKickstarter_Service_ClassBuilder::getParameterName($newProperty,$methodType);
 					$methodParameter->setName($newParameterName);
-					//  we have to replace the old parameter name with the new one in method body 
-					$newMethodBody = $this->replacePropertyNameInString($mergedMethod->getBody(),$oldParameterName,$newParameterName);
+					$newMethodBody = $this->replacePropertyNameInMethodBody($oldParameterName,$newParameterName,$mergedMethod->getBody());
 					$mergedMethod->setBody($newMethodBody);
 				}
 				$typeHint = $methodParameter->getTypeHint();
@@ -540,7 +536,6 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 					if($oldProperty->isRelation() && $typeHint == $oldProperty->getForeignClass()->getClassName()){
 						$methodParameter->setTypeHint($this->updateExtensionKey($this->getForeignClass($newProperty)->getClassName()));
 					}
-					t3lib_div::devlog('new typeHint:'.$this->getForeignClass($newProperty)->getClassName(),'extbase_kickstarter');
 				}
 				$mergedMethod->replaceParameter($methodParameter);
 			}
@@ -549,6 +544,7 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 		$tags = $mergedMethod->getTags();
 		foreach($tags as $tagKey => $tagValue){
 			//  we need to update the param tag
+			// TODO: multiple param tags are not yet supported since the extbase reflection tag does not support multiple tag with same key!!
 			if($tagKey == 'param'){
 				$mergedMethod->removeTag('param');
 				if(is_array($tagValue)){
@@ -557,60 +553,72 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 						if(method_exists($oldProperty,'getForeignClass')){
 							$v = str_replace($oldProperty->getForeignClass()->getClassName(),$this->getForeignClass($newProperty)->getClassName(),$v);
 						}
-						$v = str_replace(ucfirst($oldProperty->getName()),ucfirst($newProperty->getName()),$v);
-						$v = str_replace(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName()),Tx_ExtbaseKickstarter_Utility_Inflector::singularize($newProperty->getName()),$v);
-						$v = str_replace($oldProperty->getTypeForComment(),$newProperty->getTypeForComment(),$v);
-						// replace old extensionKey in ClassNames
-						$v = $this->updateExtensionKey($v);
+						$v = $this->replacePropertyNameInTagValue($oldProperty,$newProperty,$v);
 						// replace old extensionKey in propertyNames
 						$v = str_replace($this->previousExtensionKey,$this->extension->getExtensionKey(),$v);
 						$newValues[] = $v;
 					}
-					$mergedMethod->setTag('param',$newValues);
+					$mergedMethod->setTag('param',implode(' ',$newValues));
 				}
 				else {
 					// TODO: str_replace is insufficient in certain cases 
 					if(method_exists($oldProperty,'getForeignClass')){
-						$v = str_replace($oldProperty->getForeignClass()->getClassName(),$this->getForeignClass($newProperty)->getClassName(),$v);
+						$tagValue = str_replace($oldProperty->getForeignClass()->getClassName(),$this->getForeignClass($newProperty)->getClassName(),$tagValue);
 					}
-					$tagValue = str_replace($oldProperty->getName(),$newProperty->getName(),$tagValue);
-					$tagValue = str_replace(ucfirst($oldProperty->getName()),ucfirst($newProperty->getName()),$tagValue);  
-					$tagValue = str_replace($oldProperty->getTypeForComment(),$newProperty->getTypeForComment(),$tagValue);
-					$tagValue = $this->updateExtensionKey($tagValue);
+					$tagValue = $this->replacePropertyNameInTagValue($oldProperty,$newProperty,$tagValue);
 					$mergedMethod->setTag('param',$tagValue);
 				}
 			}
 			if($tagKey == 'return'){
 				$mergedMethod->removeTag('return');
-				$tagValue = str_replace($oldProperty->getName(),$newProperty->getName(),$tagValue);
-				$tagValue = str_replace($oldProperty->getTypeForComment(),$newProperty->getTypeForComment(),$tagValue);
-				// replace old extensionKey in ClassNames
-				$tagValue = $this->updateExtensionKey($tagValue);
+				$tagValue = $this->replacePropertyNameInTagValue($oldProperty,$newProperty,$tagValue);
+				
 				// replace old extensionKey in propertyNames
 				$tagValue = str_replace($this->previousExtensionKey,$this->extension->getExtensionKey(),$tagValue);
 				$mergedMethod->setTag('return',$tagValue);
 			}
 		}
+		// replace property names in description
 		$mergedMethod->setDescription(str_replace($oldProperty->getName(),$newProperty->getName(),$mergedMethod->getDescription()));
+		if(method_exists($oldProperty,'getForeignClass') && method_exists($newProperty,'getForeignClass')){
+			$mergedMethod->setDescription(str_replace($oldProperty->getForeignClass()->getName(),$newProperty->getForeignClass()->getName(),$mergedMethod->getDescription()));
+		}		
 		$this->classObject->removeMethod($oldMethodName);
 		$this->classObject->addMethod($mergedMethod);
 	}
 	
-	
 	/**
-	 * Replace all occurences of the old property name with the new name
-	 * 
+	 * Replace all variants:
+	 * 	posts, Post, post etc.
 	 * @param string $string
 	 * @param string $oldName
 	 * @param string $newName
 	 */
-	protected function replacePropertyNameInString($string,$oldName,$newName){
+	protected function replacePropertyNameInTagValue($oldProperty,$newProperty,$tagValue){
+		$tagValue = str_replace($oldProperty->getName(),$newProperty->getName(),$tagValue);
+		$tagValue = str_replace(ucfirst($oldProperty->getName()),ucfirst($newProperty->getName()),$tagValue);  
+		$tagValue = str_replace($oldProperty->getTypeForComment(),$newProperty->getTypeForComment(),$tagValue);
+		$tagValue = str_replace(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($oldProperty->getName()),Tx_ExtbaseKickstarter_Utility_Inflector::singularize($newProperty->getName()),$tagValue);
+		$tagValue = $this->updateExtensionKey($tagValue);
+		return $tagValue;
+	}
+	
+	/**
+	 * Replace all occurences of the old property name with the new name
+	 * 
+	 * @param string $oldName
+	 * @param string $newName
+	 * @param string $string
+	 */
+	protected function replacePropertyNameInMethodBody($oldName,$newName,$string){
 		$regex = '/([\$|>])'.$oldName.'([^a-zA-Z0-9_])/';
 		$result = preg_replace($regex, '$1'.$newName.'$2', $string);
 		return $result;
 	}
 	
-	/**
+	
+	
+	/**comments
 	 * if the foreign DomainObject was renamed, the relation has to be updated also
 	 * 
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRelation $relation
@@ -638,6 +646,20 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 		}
 		if(count($domainObject->getActions()) > 0){
 			$this->cleanUp(Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->previousExtensionDirectory,'Controller',false),$domainObject->getName().'Controller.php');
+		}
+		// other files
+		$iconsDirectory = $this->extensionDirectory . 'Resources/Public/Icons/';
+		$languageDirectory = $this->extensionDirectory . 'Resources/Private/Language/';
+		$locallang_cshFile = $languageDirectory . 'locallang_csh_' . $domainObject->getDatabaseTableName() . '.xml';
+		$iconFile = $iconsDirectory . $domainObject->getDatabaseTableName() . '.gif';
+		if(file_exists($locallang_cshFile)){
+			// no overwrite settings check here...
+			unlink($locallang_cshFile);
+			t3lib_div::devLog('locallang_csh file removed: '.$locallang_cshFile, 'extbase_kickstarter',1);
+		}
+		if(file_exists($iconFile)){
+			unlink($iconFile);
+			t3lib_div::devLog('icon file removed: '.$iconFile, 'extbase_kickstarter',1);
 		}
 	}
 	
@@ -669,7 +691,7 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 	}
 	
 	/**
-	 * finds a related typoscript setting to a path
+	 * finds a related overwrite setting to a path
 	 * and returns the overWrite setting
 	 * 0 for overwrite
 	 * 1 for merge (if possible)
@@ -785,7 +807,43 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 	        }
 	    }
 	    closedir($dir);
-	} 
+	}
+	
+	
+	static public function mergeLocallangXml($locallangFile,$newXmlString){
+		$existingXml = t3lib_div::xml2array(t3lib_div::getUrl($locallangFile));
+		$newXml = t3lib_div::xml2array($newXmlString);
+		$mergedXml = t3lib_div::array_merge_recursive_overrule($newXml,$existingXml);
+		$xml = self::createXML($mergedXml);
+		return $xml;
+	}
+
+	/**
+	 *
+	 * @param $outputArray
+	 * @return string xml
+	 */
+	function createXML($outputArray)	{
+
+			// Options:
+		$options = array(
+			#'useIndexTagForAssoc'=>'key',
+			'parentTagMap' => array(
+				'data' => 'languageKey',
+				'orig_hash' => 'languageKey',
+				'orig_text' => 'languageKey',
+				'labelContext' => 'label',
+				'languageKey' => 'label'
+			)
+		);
+
+			// Creating XML file from $outputArray:
+		$XML = '<?xml version="1.0" encoding="utf-8" standalone="yes" ?>'.chr(10);
+		$XML.= t3lib_div::array2xml($outputArray,'',0,'T3locallang',0,$options);
+
+		return $XML;
+	}
+
 }
 
 ?>
