@@ -37,6 +37,8 @@
  */
 class Tx_ExtbaseKickstarter_Utility_ConfigurationManager {
 	
+	public static $settingsDir = 'Configuration/Kickstarter/';
+	
 	public static function getKickstarterSettings(){
 		$settings = array();
 		if(!empty($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['extbase_kickstarter'])){
@@ -47,13 +49,22 @@ class Tx_ExtbaseKickstarter_Utility_ConfigurationManager {
 	
 	public static function getExtensionSettings(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension){
 		$settings = array();
-		$settingsFile =  $extension->getExtensionDir() . '/Configuration/Kickstarter/settings.yaml';
+		$settingsFile =  $extension->getExtensionDir() .self::$settingsDir . 'settings.yaml';
 		if (file_exists($settingsFile)) {
 			$yamlParser = new Tx_ExtbaseKickstarter_Utility_SpycYAMLParser();
 			$settings = $yamlParser->YAMLLoadString(file_get_contents($settingsFile));
 		}
 		else t3lib_div::devlog('No settings found: '.$settingsFile,'extbase_kickstarter',2);
 		return $settings;
+	}
+	
+	
+	static public function createInitialSettingsFile($extension){
+		t3lib_div::mkdir_deep($extension->getExtensionDir(),self::$settingsDir);
+		$settings = file_get_contents(t3lib_extMgm::extPath('extbase_kickstarter').'Resources/Private/CodeTemplates/Configuration/Kickstarter/settings.yamlt');
+		$settings = str_replace('{extension.extensionKey}',$extension->getExtensionKey(),$settings);
+		$settings = str_replace('<f:format.date>now</f:format.date>',date('Y-m-d H:i'),$settings);
+		t3lib_div::writeFile($extension->getExtensionDir().self::$settingsDir.'settings.yaml', $settings);
 	}
 
 	
