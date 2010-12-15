@@ -20,6 +20,10 @@
 # means for classes: All properties ,methods and method bodies
 # of the existing class will be modified according to the new settings
 # but not overwritten 
+# 
+# for locallang xml files: Existing keys and labels are always
+# preserved (renaming in the GUI has only influence on the property and method names)
+#
 # for other files: You will find a Split token at the end of the file
 # After this token you can write whatever you want and it will be appended
 # everytime the code is generated
@@ -40,14 +44,17 @@ overwriteSettings:
 		
 	Resources:
 		Private: 
-			Languages:
+			Language:
 				locallang.xml:		keep
 				
 			Templates:		keep
 	
 	ext_icon.gif:			keep
+	
 #	ext_localconf.php		merge
+
 #	ext_tables.php			merge
+
 #	ext_tables.sql			merge
 
 
