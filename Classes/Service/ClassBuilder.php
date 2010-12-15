@@ -157,7 +157,7 @@ class Tx_ExtbaseKickstarter_Service_ClassBuilder implements t3lib_Singleton {
 				else $parentClass = 'Tx_Extbase_DomainObject_AbstractValueObject';
 				$this->classObject->setParentClass($parentClass);
 			}
-			t3lib_div::devLog('DomainObject '. $domainObject->getName().' new created', 'extbase_kickstarter',1,array($domainObject));
+			t3lib_div::devLog('DomainObject '. $domainObject->getName().' new created', 'extbase_kickstarter',1,(array)$domainObject);
 		}
 		if(!$this->classObject){
 			throw new Exception('Class object could not be created');
@@ -291,7 +291,7 @@ class Tx_ExtbaseKickstarter_Service_ClassBuilder implements t3lib_Singleton {
 	 */
 	protected function buildSetterMethod($domainProperty){
 		
-		$propertyName = $domainProperty->getName();
+		$propertyName = self::getParameterName($domainProperty, 'set');
 		// add (or update) a setter method
 		$setterMethodName = $this->getMethodName($domainProperty,'set');
 		if($this->classObject->methodExists($setterMethodName)){
@@ -337,14 +337,14 @@ class Tx_ExtbaseKickstarter_Service_ClassBuilder implements t3lib_Singleton {
 			$addMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($addMethodName);
 			// default method body
 			$addMethod->setBody($this->getDefaultMethodBody($domainProperty,'add'));
-			$addMethod->setTag('param',$domainProperty->getForeignClass()->getClassName().' $'.Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName));
+			$addMethod->setTag('param',$domainProperty->getForeignClass()->getClassName().' $'.self::getParameterName($domainProperty,'add'));
 			$addMethod->setTag('return','void');
 			$addMethod->addModifier('public');
 		}
 		$addParameters = $addMethod->getParameterNames();
 	
 		if(!in_array(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName),$addParameters)){
-			$addParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName));
+			$addParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter(self::getParameterName($domainProperty,'add'));
 			$addParameter->setVarType($domainProperty->getForeignClass()->getClassName());
 			$addParameter->setTypeHint($domainProperty->getForeignClass()->getClassName());
 			$addMethod->setParameter($addParameter);
@@ -373,15 +373,15 @@ class Tx_ExtbaseKickstarter_Service_ClassBuilder implements t3lib_Singleton {
 			$removeMethod = new Tx_ExtbaseKickstarter_Domain_Model_Class_Method($removeMethodName);
 			// default method body
 			$removeMethod->setBody($this->getDefaultMethodBody($domainProperty,'remove'));
-			$removeMethod->setTag('param',$domainProperty->getForeignClass()->getClassName().' $'.Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName).'ToRemove The '.$domainProperty->getForeignClass()->getName().' to be removed');
+			$removeMethod->setTag('param',$domainProperty->getForeignClass()->getClassName().' $'.self::getParameterName($domainProperty, 'remove').' The '.$domainProperty->getForeignClass()->getName().' to be removed');
 			$removeMethod->setTag('return','void');
 			$removeMethod->addModifier('public');
 		}
 		
 		$removeParameters = $removeMethod->getParameterNames();
 		
-		if(!in_array(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName),$removeParameters)){
-			$removeParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter(Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName).'ToRemove');
+		if(!in_array(self::getParameterName($domainProperty, 'remove'),$removeParameters)){
+			$removeParameter = new Tx_ExtbaseKickstarter_Domain_Model_Class_MethodParameter(self::getParameterName($domainProperty, 'remove'));
 			$removeParameter->setVarType($domainProperty->getForeignClass()->getClassName());
 			$removeParameter->setTypeHint($domainProperty->getForeignClass()->getClassName());
 			$removeMethod->setParameter($removeParameter);
@@ -453,16 +453,36 @@ class Tx_ExtbaseKickstarter_Service_ClassBuilder implements t3lib_Singleton {
 		
 		switch($methodType){
 			
-			case 'set'			: return "\$this->".$propertyName." = \$".$propertyName.";\n";
+			case 'set'			: return "\$this->".$propertyName." = \$".self::getParameterName($domainProperty, $methodType).";\n";
 			
 			case 'get'			: return "return \$this->".$propertyName.";\n";
 			
-			case 'add'			: return "\$this->".$propertyName."->attach(\$".Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName).");\n";
+			case 'add'			: return "\$this->".$propertyName."->attach(\$".self::getParameterName($domainProperty, $methodType).");\n";
 			
-			case 'remove'		: return "\$this->".$propertyName."->detach(\$".Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName)."ToRemove);";
+			case 'remove'		: return "\$this->".$propertyName."->detach(\$".self::getParameterName($domainProperty, $methodType).");";
 			
 			case 'is'			: return "return \$this->get".ucfirst($propertyName)."();\n";
 			
+		}
+	}
+	
+	/**
+	 * 
+	 * @param Tx_ExtbaseKickstarter_Domain_Model_AbstractDomainObjectProperty $property
+	 * @param string $methodType (set,add,remove)
+	 * @return string method body
+	 */
+	public static function getParameterName($domainProperty, $methodType){
+		
+		$propertyName = $domainProperty->getName();
+		
+		switch($methodType){
+			
+			case 'set'			: return $propertyName;
+			
+			case 'add'			: return Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName);
+			
+			case 'remove'		: return Tx_ExtbaseKickstarter_Utility_Inflector::singularize($propertyName).'ToRemove';
 		}
 	}
 	
