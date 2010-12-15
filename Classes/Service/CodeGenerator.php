@@ -509,6 +509,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 	protected function writeFile($targetFile,$fileContents){
 		if($this->roundTripEnabled){
 			$overWriteMode = Tx_ExtbaseKickstarter_Service_RoundTrip::getOverWriteSettingForPath($targetFile,$this->extension);
+			t3lib_div::devlog($targetFile.'-'.$overWriteMode,'extbase_kickstarter');
 			if(file_exists($targetFile)){
 				if($overWriteMode == 2){
 					// keep the existing file
@@ -525,7 +526,11 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 						$fileContents = str_replace('?>','',$fileContents);
 						$customFileContent =  str_replace('?>','',$customFileContent);
 						$fileContents .= Tx_ExtbaseKickstarter_Service_RoundTrip::SPLIT_TOKEN;
-						$fileContents .=  $customFileContent . '?>';
+						$fileContents .=  $customFileContent . "\n?>";
+					}
+					else if(strtolower(pathinfo($targetFile, PATHINFO_EXTENSION)) == 'xml'){
+						t3lib_div::devlog($targetFile,'extbase_kickstarter');
+						$fileContents = Tx_ExtbaseKickstarter_Service_RoundTrip::mergeLocallangXml($targetFile,$fileContents);
 					}
 					else {
 						$fileContents .= "\n".Tx_ExtbaseKickstarter_Service_RoundTrip::SPLIT_TOKEN;
