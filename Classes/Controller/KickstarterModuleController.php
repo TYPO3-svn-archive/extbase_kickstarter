@@ -135,19 +135,30 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 					return json_encode(array($e->getMessage()));
 				}
 
-				$extensionDirectory = PATH_typo3conf . 'ext/' . $extensionSchema->getExtensionKey().'/';
+				$extensionDirectory = $extensionSchema->getExtensionDir();
 				
 				if(!is_dir($extensionDirectory)){
 					t3lib_div::mkdir($extensionDirectory);
 				}
-				if($this->settings['extConf']['backupExtension'] == 1){
-					try {
-						Tx_ExtbaseKickstarter_Service_RoundTrip::backupExtension($extensionSchema,$this->settings['extConf']['backupDir']);
+				else {
+					if($this->settings['extConf']['backupExtension'] == 1){
+						try {
+							Tx_ExtbaseKickstarter_Service_RoundTrip::backupExtension($extensionSchema,$this->settings['extConf']['backupDir']);
+						}
+						catch(Exception $e){
+							return json_encode(array($e->getMessage()));
+						}
 					}
-					catch(Exception $e){
-						return json_encode(array($e->getMessage()));
+					$extensionSettings =  Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getExtensionSettings($extensionSchema);
+					t3lib_div::devlog('YAML settings:','extbase_kickstarter',0,$extensionSettings);
+					if($this->settings['extConf']['enableRoundtrip'] == 1 && empty($extensionSettings)){
+						// no config file in an existing extension!
+						// this would result in a total overwrite so we create one and give a warning
+						Tx_ExtbaseKickstarter_Utility_ConfigurationManager::createInitialSettingsFile($extensionSchema);
+						return json_encode(array("Roundtrip is enabled but no configuration file found.\nThis might happen if you use the kickstarter the first time for this extension. \nHave a look at typo3conf/ext/".$extensionSchema->getExtensionKey()."/Configuration/Kickstarter/settings.yaml to configure the overwrite settings, then save again."));
 					}
 				}
+				
 				
 				$buildResult = $this->codeGenerator->build($extensionSchema);
 				
@@ -222,6 +233,8 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 		);
 		$this->scBase->menuConfig();
 	}
+	
+	
 	
 	/**
 	 * enable unique IDs to track modifications of models, properties and relations
