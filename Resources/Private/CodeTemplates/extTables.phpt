@@ -4,7 +4,7 @@ if (!defined ('TYPO3_MODE')) die ('Access denied.');
 <f:for each="{extension.Plugins}" as="plugin">
 Tx_Extbase_Utility_Extension::registerPlugin(
 	$_EXTKEY,
-	'{plugin.key}',
+	'<k:uppercaseFirst>{plugin.key}</k:uppercaseFirst>',
 	'{plugin.name}'
 );
 
