@@ -35,6 +35,12 @@
 #
 #
 
+############  extension settings  ##############
+
+emConf:
+
+	dependencies:			cms,extbase,fluid
+	
 overwriteSettings:
 	Classes:
 		Controller: 		merge
@@ -58,7 +64,8 @@ overwriteSettings:
 #	ext_tables.sql			merge
 
 
-######### settings for classBuilder ##############
+
+######### settings for classBuilder #############################
 #
 # here you may define default parent classes for your classes
 # these settings only apply for new generated classes
@@ -67,6 +74,7 @@ overwriteSettings:
 # are configured to merge it
 #
 #	Experimental!!
+#################################################################
 
 classBuilder:
 				

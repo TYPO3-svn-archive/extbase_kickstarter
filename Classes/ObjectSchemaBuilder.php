@@ -41,21 +41,33 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_singleton {
 	public function build(array $jsonArray) {
 		$extension = t3lib_div::makeInstance('Tx_ExtbaseKickstarter_Domain_Model_Extension');
 		$globalProperties = $jsonArray['properties'];
-		if (!is_array($globalProperties)) throw new Exception('Extension properties not submitted!');
+		if (!is_array($globalProperties)){
+			throw new Exception('Extension properties not submitted!');
+		}
 
-			// name
+		// name
 		$extension->setName($globalProperties['name']);
-			// description
+		// description
 		$extension->setDescription($globalProperties['description']);
-			// extensionKey
+		// extensionKey
 		$extension->setExtensionKey($globalProperties['extensionKey']);
+
 		if(!empty($globalProperties['originalExtensionKey'])){
 			// original extensionKey
-			$extension->setOriginalExtensionKey($globalProperties['originalExtensionKey']);	
+			$extension->setOriginalExtensionKey($globalProperties['originalExtensionKey']);
 		}
-		$settings = Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getExtensionSettings($extension);
+
+		if(!empty($globalProperties['originalExtensionKey']) && $extension->getOriginalExtensionKey() != $extension->getExtensionKey()){
+			$settings = Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getExtensionSettings($extension->getOriginalExtensionKey());
+			copy(Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getSettingsFile($extension->getOriginalExtensionKey()),Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getSettingsFile($extension->getExtensionKey()));
+		}
+		else {
+			$settings = Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getExtensionSettings($extension->getExtensionKey());	
+		}
+
 		if(!empty($settings)){
 			$extension->setSettings($settings);
+			t3lib_div::devlog('settings','extbase',0,$extension->getSettings());
 		}
 		
 			// version
@@ -116,7 +128,6 @@ class Tx_ExtbaseKickstarter_ObjectSchemaBuilder implements t3lib_singleton {
 					t3lib_div::devlog('jsonArray:','extbase_kickstarter',3,$jsonArray);
 					throw new Exception('Error. Relation JSON config was not found','extbase_kickstarter');
 				}
-
 				if ($wire['tgt']['terminal'] !== 'SOURCES') throw new Exception('Connections to other places than SOURCES not supported.');
 
 				$foreignClassName = $jsonArray['modules'][$wire['tgt']['moduleId']]['value']['name'];

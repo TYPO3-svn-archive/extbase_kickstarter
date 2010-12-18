@@ -158,6 +158,17 @@ class Tx_ExtbaseKickstarter_Domain_Model_Extension {
 	}
 	
 	/**
+	 * 
+	 * @return array settings for Extension Manager
+	 */
+	public function getEmConf(){
+		if(isset($this->settings['emConf'])){
+			return $this->settings['emConf'];
+		}
+		else return array();
+	}
+
+	/**
 	 *
 	 * @return string
 	 */

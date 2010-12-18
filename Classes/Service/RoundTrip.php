@@ -222,6 +222,15 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 		}
 		else {
 			t3lib_div::devlog('domainObject not identified:'.$currentDomainObject->getName(),'extbase_kickstarter',0,$this->oldDomainObjects);
+			$fileName = Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Model',false).$currentDomainObject->getName().'.php';
+			if(file_exists($fileName)){
+				// import the classObject from the existing file
+				include_once($fileName);
+				$className = $currentDomainObject->getClassName();
+				$this->classObject  = $this->classParser->parse($className);
+				t3lib_div::devLog('class file found:'.$currentDomainObject->getName().'.php', 'extbase_kickstarter',0,(array)$this->classObject->getAnnotations());
+				return $this->classObject;
+			}
 		}
 		return NULL;
 	}
@@ -296,6 +305,16 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 				t3lib_div::devLog('class file didn\'t exist:'.$fileName, 'extbase_kickstarter',2);
 			}
 		}
+		else {
+			$fileName =  Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDir ,'Controller',false).$currentDomainObject->getName().'Controller.php';
+			if(file_exists($fileName)){
+				include_once($fileName);
+				$className = $currentDomainObject->getControllerName();
+				$this->classObject  = $this->classParser->parse($className);
+				t3lib_div::devlog('existing controller class:'.$fileName,'extbase_kickstarter',0,$this->classObject->getAnnotations());
+				return $this->classObject;
+			}
+		}
 		t3lib_div::devlog('No existing controller class:'.$currentDomainObject->getName(),'extbase_kickstarter',2);
 		return NULL;
 	}
@@ -310,11 +329,10 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 			$extensionDir = $this->previousExtensionDirectory;
 			$fileName =  Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($extensionDir ,'Repository',false).$oldDomainObject->getName().'Repository.php';
 			if(file_exists($fileName)){
-				t3lib_div::devlog('existing Repository class:'.$fileName,'extbase_kickstarter',0);
 				include_once($fileName);
 				$className = $oldDomainObject->getDomainRepositoryClassName();
 				$this->classObject  = $this->classParser->parse($className);
-				//t3lib_div::devlog('Repository class methods','extbase_kickstarter',0,$this->classObject->getMethods());
+				t3lib_div::devlog('existing Repository class:'.$fileName,'extbase_kickstarter',0,(array)$this->classObject);
 				if($oldDomainObject->getName() != $currentDomainObject->getName() || $this->extensionRenamed){
 					$newClassName = $currentDomainObject->getDomainRepositoryClassName();
 					$this->classObject->setName($newClassName);
@@ -326,6 +344,18 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 			else {
 				t3lib_div::devLog('class file didn\'t exist:'.$fileName, 'extbase_kickstarter',2);
 			}
+		}
+		else {
+			$fileName =  Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDir ,'Repository',false).$currentDomainObject->getName().'Repository.php';
+			if(file_exists($fileName)){
+				
+				include_once($fileName);
+				$className = $currentDomainObject->getDomainRepositoryClassName();
+				$this->classObject  = $this->classParser->parse($className);
+				t3lib_div::devlog('existing Repository class:'.$fileName,'extbase_kickstarter',0,(array)$this->classObject);
+				return $this->classObject;
+			}
+			
 		}
 		t3lib_div::devlog('No existing Repository class:'.$currentDomainObject->getName(),'extbase_kickstarter',2);
 		return NULL;
@@ -726,7 +756,6 @@ class Tx_ExtbaseKickstarter_Service_RoundTrip implements t3lib_singleton {
 				return $map[$overWriteSettings[$pathPart]];
 			}
 		}
-		
 		
 		return 0;
 	}
