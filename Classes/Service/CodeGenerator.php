@@ -203,7 +203,7 @@ class Tx_ExtbaseKickstarter_Service_CodeGenerator implements t3lib_singleton {
 			t3lib_div::mkdir($tcaDirectory.'Kickstarter');
 			$fileContents = $this->generateYamlSettings($extension);
 			$targetFile = $tcaDirectory.'Kickstarter/settings.yaml';
-			$this->writeFile($targetFile, $fileContents);
+			t3lib_div::writeFile($targetFile, $fileContents);
 			
 		}
 
