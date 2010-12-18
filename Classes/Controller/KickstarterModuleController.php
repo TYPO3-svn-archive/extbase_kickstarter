@@ -96,10 +96,6 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 		$this->settings['extConf'] = Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getKickstarterSettings();
 	}
 	
-
-	
-	
-
 	/**
 	 * Index action for this controller.
 	 *
@@ -149,8 +145,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 							return json_encode(array($e->getMessage()));
 						}
 					}
-					$extensionSettings =  Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getExtensionSettings($extensionSchema);
-					t3lib_div::devlog('YAML settings:','extbase_kickstarter',0,$extensionSettings);
+					$extensionSettings =  Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getExtensionSettings($extensionSchema->getExtensionKey());
 					if($this->settings['extConf']['enableRoundtrip'] == 1 && empty($extensionSettings)){
 						// no config file in an existing extension!
 						// this would result in a total overwrite so we create one and give a warning

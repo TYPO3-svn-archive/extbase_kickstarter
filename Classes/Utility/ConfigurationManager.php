@@ -2,11 +2,9 @@
 /***************************************************************
 *  Copyright notice
 *
-*  (c) 2009 Jochen Rau <jochen.rau@typoplanet.de>
+*  (c) 2010 Nico de Haen
 *  All rights reserved
 *
-*  This class is a backport of the corresponding class of FLOW3.
-*  All credits go to the v5 team.
 *
 *  This script is part of the TYPO3 project. The TYPO3 project is
 *  free software; you can redistribute it and/or modify
@@ -26,14 +24,10 @@
 ***************************************************************/
 
 /**
- * Autoloader of ExtbaseKickstarter
- * 
- * Needed to avoid errors when loading classes that have references or parent classes
- * to other classes in a not installed extension
+ * Load settings from yaml file and from TYPO3_CONF_VARS extConf
  *
  * @package Extbase
  * @subpackage Utility
- * @version $Id: ClassLoader.php 1729 2009-11-25 21:37:20Z stucki $
  */
 class Tx_ExtbaseKickstarter_Utility_ConfigurationManager {
 	
@@ -47,17 +41,34 @@ class Tx_ExtbaseKickstarter_Utility_ConfigurationManager {
 		return $settings;
 	}
 	
-	public static function getExtensionSettings(Tx_ExtbaseKickstarter_Domain_Model_Extension $extension){
+	/**
+	 *
+	 * @param string $extensionKey
+	 * @return array settings
+	 */
+	public static function getExtensionSettings($extensionKey){
 		$settings = array();
-		$settingsFile =  $extension->getExtensionDir() .self::$settingsDir . 'settings.yaml';
+		$settingsFile = self::getSettingsFile($extensionKey);
 		if (file_exists($settingsFile)) {
 			$yamlParser = new Tx_ExtbaseKickstarter_Utility_SpycYAMLParser();
 			$settings = $yamlParser->YAMLLoadString(file_get_contents($settingsFile));
 		}
 		else t3lib_div::devlog('No settings found: '.$settingsFile,'extbase_kickstarter',2);
+
 		return $settings;
 	}
 	
+	/**
+	 * get the file name and path of the settings file
+	 * @param string $extensionKey
+	 * @return string path
+	 */
+	public static function getSettingsFile($extensionKey){
+		$extensionDir = PATH_typo3conf.'ext/'.$extensionKey.'/';
+		$settingsFile =  $extensionDir.self::$settingsDir . 'settings.yaml';
+		return $settingsFile;
+	}
+
 	
 	static public function createInitialSettingsFile($extension){
 		t3lib_div::mkdir_deep($extension->getExtensionDir(),self::$settingsDir);
