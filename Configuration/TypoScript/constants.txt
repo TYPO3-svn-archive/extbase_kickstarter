@@ -4,7 +4,7 @@ module.tx_extbasekickstarter.settings {
 				
 		Controller {
 				# cat=module.tx_extbasekickstarter - roundTrip //; type=string; label=Parent Controller Class: The class, that all controller in an extension extend. If the class name does not start with Tx_ it will be prefixed with the current Extension key and Controller directory. 
-				parentClass = Tx_Extbase_MVC_Controller_ActionController
+				parentClass = Tx_ExtbaseKickstarter_Scaffolding_AbstractScaffoldingController
 				
 		}
 		
