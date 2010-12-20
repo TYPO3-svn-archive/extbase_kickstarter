@@ -499,7 +499,7 @@ class Tx_ExtbaseKickstarter_Service_ClassBuilder implements t3lib_Singleton {
 	 */
 	public function generateControllerClassObject($domainObject){
 		t3lib_div::devlog('------------------------------------- generateControllerClassObject('.$domainObject->getName().') ---------------------------------','extbase_kickstarter',1);
-		
+
 		$this->classObject = NULL;
 		
 		$controllerClassFile = Tx_ExtbaseKickstarter_Service_CodeGenerator::getFolderForClassFile($this->extensionDirectory,'Controller')  . $domainObject->getName() . 'Controller.php';

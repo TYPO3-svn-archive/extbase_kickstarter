@@ -52,7 +52,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRela
 	public function getForeignClass() {
 		return $this->foreignClass;
 	}
-	
+
 	/**
 	 *
 	 * @param Tx_ExtbaseKickstarter_Domain_Model_DomainObject $foreignClass Set the foreign class of the relation
@@ -60,7 +60,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRela
 	public function setForeignClass(Tx_ExtbaseKickstarter_Domain_Model_DomainObject $foreignClass) {
 		$this->foreignClass = $foreignClass;
 	}
-	
+
 	/**
 	 * Sets the flag, if the relation should be rendered as IRRE field.
 	 *
@@ -70,7 +70,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRela
 	public function setInlineEditing($inlineEditing) {
 		$this->inlineEditing = (bool) $inlineEditing;
 	}
-	
+
 	/**
 	 * Returns the state of the flag, if the relation should be rendered as IRRE field.
 	 *
@@ -79,7 +79,7 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRela
 	public function getInlineEditing() {
 		return (bool) $this->inlineEditing;
 	}
-	
+
 	public function getSqlDefinition() {
 		return $this->getFieldName() . " int(11) unsigned DEFAULT '0' NOT NULL,";
 	}
@@ -87,7 +87,6 @@ abstract class Tx_ExtbaseKickstarter_Domain_Model_Property_Relation_AbstractRela
 	public function getIsDisplayable() {
 		return FALSE;
 	}
-	
-	
 }
+
 ?>
