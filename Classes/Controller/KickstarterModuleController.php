@@ -128,7 +128,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 					$extensionSchema = $this->objectSchemaBuilder->build($extensionConfigurationFromJson);
 				}
 				catch(Exception $e){
-					return json_encode(array($e->getMessage()));
+					return json_encode(array('error' => $e->getMessage()));
 				}
 
 				$extensionDirectory = $extensionSchema->getExtensionDir();
@@ -142,7 +142,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 							Tx_ExtbaseKickstarter_Service_RoundTrip::backupExtension($extensionSchema,$this->settings['extConf']['backupDir']);
 						}
 						catch(Exception $e){
-							return json_encode(array($e->getMessage()));
+							return json_encode(array('error' => $e->getMessage()));
 						}
 					}
 					$extensionSettings =  Tx_ExtbaseKickstarter_Utility_ConfigurationManager::getExtensionSettings($extensionSchema->getExtensionKey());
@@ -150,7 +150,7 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 						// no config file in an existing extension!
 						// this would result in a total overwrite so we create one and give a warning
 						Tx_ExtbaseKickstarter_Utility_ConfigurationManager::createInitialSettingsFile($extensionSchema);
-						return json_encode(array("Roundtrip is enabled but no configuration file found.\nThis might happen if you use the kickstarter the first time for this extension. \nHave a look at typo3conf/ext/".$extensionSchema->getExtensionKey()."/Configuration/Kickstarter/settings.yaml to configure the overwrite settings, then save again."));
+						return json_encode(array('warning' => "<span class='error'>Roundtrip is enabled but no configuration file was found.</span><br />This might happen if you use the kickstarter the first time for this extension. <br />A settings file was generated in <br /><b>typo3conf/ext/".$extensionSchema->getExtensionKey()."/Configuration/Kickstarter/settings.yaml.</b><br />Configure the overwrite settings, then save again."));
 					}
 				}
 				
@@ -164,10 +164,14 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 				);
 				t3lib_div::writeFile($extensionDirectory . 'kickstarter.json', json_encode($extensionConfigurationFromJson));
 
-				if ($buildResult === true) {
-					return json_encode(array('saved'));
+				if ($buildResult === 'success') {
+					$message = 'The Extension was saved';
+					if($this->dbUpdateNeeded($extensionSchema->getExtensionKey())){
+						$message .= '<br /><br />Please update the database in the Extension Manager!';
+					}
+					return json_encode(array('success' => $message));
 				} else {
-					return json_encode(array($buildResult));
+					return json_encode(array('error' => $buildResult));
 				}
 				
 			break;
@@ -295,6 +299,22 @@ class Tx_ExtbaseKickstarter_Controller_KickstarterModuleController extends Tx_Ex
 			}
 		}
 		return $jsonConfig;
+	}
+	
+	/**
+	 * TODO: Is there a real API for this?
+	 * TODO: SHould better be moved to where??
+	 * @param string $extKey
+	 * @return boolean
+	 */
+	protected function dbUpdateNeeded($extKey){
+		$installTool = t3lib_div::makeInstance('tx_em_Install');
+		$updateNeeded = $installTool->checkDBupdates($extKey, array('type'=>'L','files'=>array('ext_tables.sql')),1);
+		t3lib_div::devlog('Check update:'.$extKey,'kickstarter',0,$updateNeeded['structure']['diff']);
+		if(!empty($updateNeeded['structure']['diff']['extra'])){
+			return true;
+		}
+		else return false;
 	}
 
 }

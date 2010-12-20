@@ -185,4 +185,14 @@ div.propertyGroup,div.relationGroup  {
 	padding:6px;
 }
 
+div#wireEditorMessageBox {
+	padding:0 15px 15px;
+	min-width:200px;
+}
+
+div#wireEditorMessageBox .error {
+	color:red;
+	font-weight:bold;
+}
+
 /*********** End of CSS code for inplaceEdit as container title ************/

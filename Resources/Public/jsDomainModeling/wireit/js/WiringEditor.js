@@ -86,6 +86,31 @@ WireIt.WiringEditor = function(options) {
         modal: true
      });
      this.helpPanel.render();
+     
+     this.alertPanel = new widget.Panel('alertPanel', {
+         fixedcenter: true,
+         draggable: true,
+         visible: false,
+         modal: true
+      });
+     this.alertPanel.setBody("<div id='wireEditorMessageBox'></div>");
+     this.alertPanel.render(document.body);
+     
+     this.showSpinnerPanel = new YAHOO.widget.Panel("wait",  
+ 			{ width:"240px", 
+ 			  fixedcenter:true, 
+ 			  close:false, 
+ 			  draggable:false, 
+ 			  zindex:4,
+ 			  modal:true,
+ 			  visible:false
+ 			} 
+ 		);
+
+     this.showSpinnerPanel.setHeader("Saving, please wait...");
+     this.showSpinnerPanel.setBody('<img src="'+ TYPO3.settings.kickstarter.baseUrl + 'Resources/Public/jsDomainModeling/wireit/images/loading.gif" />');
+     this.showSpinnerPanel.render(document.body);
+
     
     /**
      * @property layout
@@ -313,7 +338,7 @@ WireIt.WiringEditor.prototype = {
        alert("Please choose a name");
        return;
     }
-                
+    this.showSpinnerPanel.show();
     this.service.saveWiring({name: value.name, working: JSON.stringify(value.working), language: this.options.languageName }, {
        success: this.saveModuleSuccess,
        failure: this.saveModuleFailure,
@@ -327,10 +352,29 @@ WireIt.WiringEditor.prototype = {
   * @method saveModuleSuccess
   */
  saveModuleSuccess: function(o) {
-	if(o[0] != 'success'){
-		alert("Extension could not be saved:\n " + o[0]);
-	} 
-	else alert("Saved!");
+	 this.showSpinnerPanel.hide();
+	 if(typeof o.success != 'undefined'){
+		 title = 'Success';
+		 message = o.success;
+	 } 
+	 else if(typeof o.error != 'undefined'){
+		title = 'Error';
+		message = "Extension could not be saved:\n " + o.error;
+	 } 
+	 else if(typeof o.warning != 'undefined'){
+		 title = 'Warning';
+		 message = o.warning;
+	 } 
+	
+	 this.alert(title,message);
+    
+
+ },
+ 
+ alert: function(title,message){
+	 this.alertPanel.setHeader(title);
+	 this.alertPanel.setBody("<div id='wireEditorMessageBox'>" + message + "</div>");
+	 this.alertPanel.show();
  },
 
  /**
@@ -338,7 +382,8 @@ WireIt.WiringEditor.prototype = {
   * @method saveModuleFailure
   */
  saveModuleFailure: function(o) {
-    alert("error while saving! ");
+	 this.showSpinnerPanel.hide()
+	 this.alert('Error',"Error while saving! ");
  },
 
 
