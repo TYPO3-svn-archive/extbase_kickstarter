@@ -1,0 +1,16 @@
+*******************************************
+*    The Extbase Kickstarter has moved    *
+*                                         *
+*            New address: GIT             *
+*                                         *
+*******************************************
+
+The Extbase Kickstarter is moved to git.
+You can checkout the current state using:
+
+git clone git://git.typo3.org/TYPO3v4/Extensions/extbase_kickstarter.git extbase_kickstarter
+
+If you are a developer of the Extbase Kickstarter, 
+please read the wiki page about working with git 
+and gerrit on Forge
+http://forge.typo3.org/projects/extension-extbase_kickstarter/wiki/Working_with_git
