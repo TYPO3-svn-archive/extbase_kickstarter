@@ -1,9 +1,0 @@
-Enable multiple tags with the same name. We need for example multiple @param tags, which is not possible right now.
-
-Implement a solution to append content to certain files: ext_tables.sql, TCA, ext_tables.php etc.
-
-Unit Tests!!
-
-Implement some functionality to preserve comments in a class file (non docComments)
-
-Make sorting of methods configurable (wether or not to sort them)
