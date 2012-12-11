@@ -1,16 +1,20 @@
 *******************************************
-*    The Extbase Kickstarter has moved    *
+*    The Extbase Kickstarter was renamed  *
 *                                         *
-*            New address: GIT             *
+*       New name: Extension Builder       *
+*                                         *
+*   Also the Source code repository was   *
+*          moved from svn to git          *
 *                                         *
 *******************************************
 
-The Extbase Kickstarter is moved to git.
+THIS FILE IS NOT MAINTAINED ANYMORE AND SUSPECT TO BE OUTDATED!
+
 You can checkout the current state using:
 
-git clone git://git.typo3.org/TYPO3v4/Extensions/extbase_kickstarter.git extbase_kickstarter
+$ git clone git://git.typo3.org/TYPO3v4/Extensions/extension_builder.git 
 
-If you are a developer of the Extbase Kickstarter, 
-please read the wiki page about working with git 
-and gerrit on Forge
-http://forge.typo3.org/projects/extension-extbase_kickstarter/wiki/Working_with_git
+If you are a developer of the Extension Builder,
+please read the wiki page about working with git
+and gerrit on Forge:
+http://forge.typo3.org/projects/extension-extension_builder/wiki
